@@ -3,7 +3,7 @@ package requestdata;
 /**
  * Created by jiaweizhang on 1/19/2016.
  */
-public class AuthData {
+public class AuthRequest {
     private String email;
     private String password;
 
