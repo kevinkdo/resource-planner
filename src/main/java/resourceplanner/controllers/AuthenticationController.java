@@ -6,7 +6,7 @@ package resourceplanner.controllers;
 
 import databases.JDBC;
 import org.springframework.web.bind.annotation.*;
-import requestdata.AuthData;
+import requestdata.AuthRequest;
 import responses.StandardResponse;
 import responses.data.Token;
 import utilities.PasswordHash;
@@ -24,7 +24,7 @@ public class AuthenticationController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse register(@RequestBody final AuthData rd) {
+    public StandardResponse register(@RequestBody final AuthRequest rd) {
         return registerDB(rd.getEmail(), rd.getPassword().toCharArray());
     }
 
@@ -32,7 +32,7 @@ public class AuthenticationController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse login(@RequestBody final AuthData rd) {
+    public StandardResponse login(@RequestBody final AuthRequest rd) {
         return loginDB(rd.getEmail(), rd.getPassword().toCharArray());
     }
 
