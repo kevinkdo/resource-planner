@@ -1,7 +1,6 @@
-package rowcord;
+package resourceplanner.filters;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -16,7 +15,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureException;
 
 /**
- * Created by jiawe on 1/17/2016.
+ * Created by jiaweizhang on 1/17/2016.
  */
 public class JwtFilter extends GenericFilterBean {
 
@@ -27,8 +26,11 @@ public class JwtFilter extends GenericFilterBean {
         final HttpServletRequest request = (HttpServletRequest) req;
 
         final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new ServletException("Missing or invalid Authorization header.");
+        if (authHeader == null) {
+            throw new ServletException("Missing Authorization header.");
+        }
+        if (!authHeader.startsWith("Bearer ")) {
+            throw new ServletException("Invalid Authorization header.");
         }
 
         final String token = authHeader.substring(7); // The part after "Bearer "

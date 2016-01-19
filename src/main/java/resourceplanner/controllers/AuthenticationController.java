@@ -1,15 +1,14 @@
-package rowcord.controllers;
+package resourceplanner.controllers;
 
 /**
- * Created by jiawe on 1/16/2016.
+ * Created by jiaweizhang on 1/16/2016.
  */
 
 import databases.JDBC;
 import org.springframework.web.bind.annotation.*;
-import requestdata.auth.LoginData;
-import requestdata.auth.RegisterData;
+import requestdata.AuthData;
 import responses.StandardResponse;
-import responses.subresponses.Token;
+import responses.data.Token;
 import utilities.PasswordHash;
 import utilities.TokenCreator;
 
@@ -25,7 +24,7 @@ public class AuthenticationController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse register(@RequestBody final RegisterData rd) {
+    public StandardResponse register(@RequestBody final AuthData rd) {
         return registerDB(rd.getEmail(), rd.getPassword().toCharArray());
     }
 
@@ -33,7 +32,7 @@ public class AuthenticationController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse login(@RequestBody final LoginData rd) {
+    public StandardResponse login(@RequestBody final AuthData rd) {
         return loginDB(rd.getEmail(), rd.getPassword().toCharArray());
     }
 
@@ -48,7 +47,7 @@ public class AuthenticationController {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
-            st = c.prepareStatement("INSERT INTO accounts (email, passhash) VALUES (?, ?);");
+            st = c.prepareStatement("INSERT INTO users (email, passhash, should_email) VALUES (?, ?, true);");
             st.setString(1, email);
             st.setString(2, passwordHash);
             st.executeUpdate();
@@ -63,19 +62,16 @@ public class AuthenticationController {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
-            st = c.prepareStatement("SELECT passhash FROM accounts WHERE email = ?;");
-        } catch (Exception e) {
-            return new StandardResponse(true, "Failed during hashing in register");
-        }
-        try {
+            st = c.prepareStatement("SELECT user_id, passhash FROM users WHERE email = ?;");
             st.setString(1, email);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
+                int userId = rs.getInt("user_id");
                 String passhash = rs.getString("passhash");
                 st.close();
                 rs.close();
                 if (PasswordHash.validatePassword(password, passhash)) {
-                    String jwt = TokenCreator.generateToken(email);
+                    String jwt = TokenCreator.generateToken(userId, email);
                     Token token = new Token(jwt);
                     return new StandardResponse(false, "Successfully logged in", null, token);
                 } else {
