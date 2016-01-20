@@ -1,46 +1,18 @@
-# PostgreSQL Instructions (linux instructions)
+# Setup Instructions (linux/vagrant instructions)
+## The directory containing Vagrantfile will now be shared from your computer and the vm
+## You can access it in the vm by going to the folder 'Vagrant'
+cd into directory with Vagrantfile
+# Setup vagrant
+$ vagrant up
+$ vagrant ssh
 
-## Install PostgreSQL 9.5 
+# Setup VM 
+$ chmod 755 setupvm.sh
+$ ./setupvm.sh
 
-$ sudo apt-get update
-$ sudo apt-get install postgresql postgresql-contrib
 
-## Login to postgres account
-
-$ sudo -i -u postgres
-
-## Create test database with name rp
-
-$ createdb rp
-
-## Connect to test database rp
-
-$ psql rp
-
-## Create necessary tables using setup.sql found in this directory
-
-Instructions to follow
-
-# Gradle Instructions
-
-## Install Java 8
-
-Figure it out
-
-## Install homebrew
-
-$ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-## Install gradle
-
-brew install gradle
-
-# Build and run instructions
-
-Navigate to directory containing build.gradle
-
-$ gradle build
-$ gradle wrapper
-$ ./gradlew bootRun
+# Run
+$ chmod 755 run.sh
+$ ./run.sh
 
 App should now be running on localhost:8080
