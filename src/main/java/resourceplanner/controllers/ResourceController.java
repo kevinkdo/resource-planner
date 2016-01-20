@@ -7,18 +7,16 @@ package resourceplanner.controllers;
 import databases.JDBC;
 import io.jsonwebtoken.Claims;
 import org.springframework.web.bind.annotation.*;
-import requestdata.AuthRequest;
 import requestdata.ResourceRequest;
 import responses.StandardResponse;
 import responses.data.Resource;
-import responses.data.Token;
-import utilities.PasswordHash;
-import utilities.TokenCreator;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/resources")
@@ -45,6 +43,21 @@ public class ResourceController {
     @ResponseBody
     public StandardResponse getResourceById(@PathVariable final int resourceId) {
         return getResourceByIdDB(resourceId);
+    }
+
+    @RequestMapping(value = "/{resourceId}",
+            method = RequestMethod.PUT,
+            headers = {"Content-type=application/json"})
+    @ResponseBody
+    public StandardResponse updateResource(@PathVariable final int resourceId, @RequestBody final ResourceRequest req, final HttpServletRequest request) {
+        final Claims claims = (Claims) request.getAttribute("claims");
+        String email = claims.get("email").toString();
+        int userId = Integer.parseInt(claims.get("user_id").toString());
+        System.out.println("userId: "+userId);
+        if (userId != 1) {
+            return new StandardResponse(true, "Not authorized", req);
+        }
+        return updateResourceDB(resourceId, req);
     }
 
     private StandardResponse createResourceDB(ResourceRequest req) {
@@ -128,6 +141,89 @@ public class ResourceController {
             return new StandardResponse(true, "failed to fetch resource tags");
         }
         return new StandardResponse(false, "success", null, new Resource(resourceId, name, description, tags));
+    }
+
+    private StandardResponse updateResourceDB(int resourceId, ResourceRequest req) {
+        StandardResponse sr = getResourceById(resourceId);
+        if (sr.getIs_error()) {
+            return new StandardResponse(true, "resource either does not exist or is broken", req);
+        }
+        Resource res = (Resource) sr.getData();
+        if (res == null) {
+            // not likely unnecessary
+            return new StandardResponse(true, "resource either does not exist or is broken", req);
+        }
+        String name = req.getName();
+        String description = req.getDescription();
+        List<String> tags = req.getTags();
+        Set<String> tagsSet = new HashSet<String>(tags);
+        Set<String> existingTagsSet = new HashSet<String>(res.getTags());
+        if (res.getName().equals(name) && res.getDescription().equals(description) && tagsSet.equals(existingTagsSet)) {
+            return new StandardResponse(false, "no change was requested", req); // maybe this should be valid TODO
+        }
+        if (name == null) {
+            name = res.getName();
+        }
+        if (description == null) {
+            description = res.getDescription();
+        }
+        if (tags == null) {
+            tags = res.getTags();
+        }
+        Connection c = JDBC.connect();
+        try {
+            c.setAutoCommit(false);
+        } catch (Exception e) {
+            return new StandardResponse(true, "database error", req);
+        }
+        PreparedStatement st = null;
+        String updateResourcesQuery = "UPDATE resources SET name = ?, description = ? WHERE resource_id = ?;";
+        // check if either name or description are different
+        if (!res.getName().equals(name) || !res.getDescription().equals(description)) {
+            try {
+                st = c.prepareStatement(updateResourcesQuery);
+                st.setString(1, name);
+                st.setString(2, description);
+                st.setInt(3, resourceId);
+                int modified = st.executeUpdate();
+                System.out.println("modified: " + modified);
+            } catch (Exception f) {
+                return new StandardResponse(true, "failed to update resource", req);
+            }
+        }
+
+        String deleteResourceTagsQuery = "DELETE FROM resourcetags WHERE resource_id = ?";
+        String insertResourceTagsQuery = "INSERT INTO resourcetags (resource_id, tag) VALUES (?, ?);";
+        if (!tagsSet.equals(existingTagsSet)) {
+            // if tags not equal update tags
+            try {
+                st = c.prepareStatement(deleteResourceTagsQuery);
+                st.setInt(1, resourceId);
+                int modifiedRows = st.executeUpdate();
+                System.out.println("tags deleted: " + modifiedRows);
+            } catch (Exception f) {
+                return new StandardResponse(true, "failed to delete tags", req);
+            }
+            try {
+                PreparedStatement ps = c.prepareStatement(insertResourceTagsQuery);
+                for (String tag : tags) {
+                    ps.setInt(1, resourceId);
+                    ps.setString(2, tag);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                c.commit();
+                return new StandardResponse(false, "successful resource and resourcetag update", req);
+            } catch (Exception e) {
+                return new StandardResponse(true, "insert resourcetags failed in update", req);
+            }
+        }
+        try {
+            c.commit();
+        } catch (Exception e) {
+            return new StandardResponse(true, "failed to commit", req);
+        }
+        return new StandardResponse(false, "successful resource update", req);
     }
 }
 
