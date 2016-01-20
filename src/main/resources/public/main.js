@@ -75,9 +75,9 @@ const Overview = React.createClass({
       reservations: [
         {id: 0, resource_id: 0, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
         {id: 1, resource_id: 1, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 1, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 1, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 1, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
+        {id: 2, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        {id: 3, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        {id: 4, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
       ],
       resources: {
         0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
@@ -107,7 +107,7 @@ const Overview = React.createClass({
     var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
       <ul className="list-group">
         {this.state.tags.map(x =>
-          <a href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+          <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
         )}
       </ul>
     );
@@ -123,7 +123,7 @@ const Overview = React.createClass({
         </thead>
         <tbody>
           {this.state.reservations.map(x =>
-            <tr><td>{this.state.resources[x.resource_id].name}</td><td>{this.state.users[x.user_id].username}</td><td>{x.start_timestamp.toLocaleString()}</td><td>{x.end_timestamp.toLocaleString()}</td></tr>
+            <tr key={"reservation " + x.id}><td>{this.state.resources[x.resource_id].name}</td><td>{this.state.users[x.user_id].username}</td><td>{x.start_timestamp.toLocaleString()}</td><td>{x.end_timestamp.toLocaleString()}</td></tr>
           )}
         </tbody>
       </table>
@@ -235,7 +235,7 @@ const ResourceCreator = React.createClass({
                   <div className="row">
                     <div className="col-md-4">
                       {this.state.tags.slice(0, -1).map((x,i) =>
-                        <TagInput addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                        <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
                       )}
                       <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
                     </div>
