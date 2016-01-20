@@ -156,6 +156,22 @@ const Overview = React.createClass({
   }
 });
 
+const TagInput = React.createClass({
+  render() {
+    var add_on = !this.props.hasAddon ? null :
+      <span className="input-group-btn">
+        <button className="btn btn-default" type="button" onClick={this.props.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+      </span>;
+
+    return (
+      <div className="input-group">
+        <input type="text" className="form-control" id="resource_creator_tags" placeholder="" onChange={(evt) => this.props.setTag(evt, this.props.index)} value={this.props.value}/>
+        {add_on}
+      </div>
+    );
+  }
+});
+
 const ResourceCreator = React.createClass({
   createResource() {
     console.log("resource created!");
@@ -171,10 +187,33 @@ const ResourceCreator = React.createClass({
   },
 
   addTag() {
-    console.log("add tag");
+    this.state.tags.push("");
+    this.setState({tags: this.state.tags});
+  },
+
+  setName(evt) {
+    this.setState({name: evt.target.value});
+  },
+
+  setDescription(evt) {
+    this.setState({description: evt.target.value});
+  },
+
+  setTag(evt, i) {
+    this.state.tags[i] = evt.target.value;
+    this.setState({tags: this.state.tags});
+  },
+
+  getInitialState() {
+    return {
+      name: "",
+      description: "",
+      tags: [""]
+    };
   },
 
   render() {
+    var last_tag = this.state.tags[this.state.tags.length-1];
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
@@ -185,28 +224,20 @@ const ResourceCreator = React.createClass({
               <form>
                 <div className="form-group">
                   <label htmlFor="resource_creator_name">Name</label>
-                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" />
+                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_description">Description</label>
-                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" />
+                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_tags">Tags</label>
                   <div className="row">
                     <div className="col-md-4">
-                      <div className="input-group">
-                        <input type="text" className="form-control" id="resource_creator_tags" placeholder="" />
-                        <span className="input-group-btn">
-                          <button className="btn btn-default" type="button" onClick={this.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
-                        </span>
-                      </div>
-                      <div className="input-group">
-                        <input type="text" className="form-control" id="resource_creator_tags" placeholder="" />
-                        <span className="input-group-btn">
-                          <button className="btn btn-default" type="button" onClick={this.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
-                        </span>
-                      </div>
+                      {this.state.tags.slice(0, -1).map((x,i) =>
+                        <TagInput addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                      )}
+                      <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
                     </div>
                   </div>
                 </div>
