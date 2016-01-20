@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import requestdata.AuthRequest;
 import requestdata.ResourceRequest;
 import responses.StandardResponse;
+import responses.data.Resource;
 import responses.data.Token;
 import utilities.PasswordHash;
 import utilities.TokenCreator;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,24 +28,31 @@ public class ResourceController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse createResource(@RequestBody final ResourceRequest data, final HttpServletRequest request) {
+    public StandardResponse createResource(@RequestBody final ResourceRequest req, final HttpServletRequest request) {
         final Claims claims = (Claims) request.getAttribute("claims");
         String email = claims.get("email").toString();
         int userId = Integer.parseInt(claims.get("user_id").toString());
         System.out.println("userId: "+userId);
         if (userId != 1) {
-            return new StandardResponse(true, "Not authorized", data);
+            return new StandardResponse(true, "Not authorized", req);
         }
 
-        return createResourceDB(data);
+        return createResourceDB(req);
     }
 
-    private StandardResponse createResourceDB(ResourceRequest data) {
+    @RequestMapping(value = "/{resourceId}",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getResourceById(@PathVariable final int resourceId) {
+        return getResourceByIdDB(resourceId);
+    }
+
+    private StandardResponse createResourceDB(ResourceRequest req) {
         Connection c = JDBC.connect();
         try {
             c.setAutoCommit(false);
         } catch (SQLException e) {
-            return new StandardResponse(true, "failed to disable autocommit");
+            return new StandardResponse(true, "failed to disable autocommit", req);
         }
         PreparedStatement st = null;
         String resourcesInsert = "INSERT INTO resources (name, description) VALUES (?, ?);";
@@ -51,8 +60,8 @@ public class ResourceController {
         int resourceId;
         try {
             st = c.prepareStatement(resourcesInsert, Statement.RETURN_GENERATED_KEYS);
-            st.setString(1, data.getName());
-            st.setString(2, data.getDescription());
+            st.setString(1, req.getName());
+            st.setString(2, req.getDescription());
             int affectedRows = st.executeUpdate();
             if (affectedRows == 0) {
                 return new StandardResponse(true, "no new record created");
@@ -72,7 +81,7 @@ public class ResourceController {
         }
         try {
             PreparedStatement ps = c.prepareStatement(resourceTagsInsert);
-            for (String tag : data.getTags()) {
+            for (String tag : req.getTags()) {
                 ps.setInt(1, resourceId);
                 ps.setString(2, tag);
                 ps.addBatch();
@@ -85,35 +94,40 @@ public class ResourceController {
         }
     }
 
-
-
-
-
-
-    public StandardResponse loginDB(String email, char[] password) {
+    private StandardResponse getResourceByIdDB(int resourceId) {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
+        String selectResourcesQuery = "SELECT name, description FROM resources WHERE resource_id = ?";
+        String selectResourceTagsQuery = "SELECT tag FROM resourcetags WHERE resource_id = ?";
+        String name;
+        String description;
+        List<String> tags = new ArrayList<String>();
         try {
-            st = c.prepareStatement("SELECT user_id, passhash FROM users WHERE email = ?;");
-            st.setString(1, email);
+            st = c.prepareStatement(selectResourcesQuery);
+            st.setInt(1, resourceId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                name = rs.getString("name");
+                description = rs.getString("description");
+            } else {
+                return new StandardResponse(true, "No resource found with given id");
+            }
+        } catch (Exception f) {
+            return new StandardResponse(true, "No resource found with given id 2");
+        }
+
+        try {
+            st = c.prepareStatement(selectResourceTagsQuery);
+            st.setInt(1, resourceId);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                int userId = rs.getInt("user_id");
-                String passhash = rs.getString("passhash");
-                st.close();
-                rs.close();
-                if (PasswordHash.validatePassword(password, passhash)) {
-                    String jwt = TokenCreator.generateToken(userId, email);
-                    Token token = new Token(jwt);
-                    return new StandardResponse(false, "Successfully logged in", null, token);
-                } else {
-                    return new StandardResponse(true, "Invalid username or password");
-                }
+                String tag = rs.getString("tag");
+                tags.add(tag);
             }
-            return new StandardResponse(true, "Invalid username or password");
         } catch (Exception f) {
-            return new StandardResponse(true, "Invalid username or password");
+            return new StandardResponse(true, "No resource found with given id 2");
         }
+        return new StandardResponse(false, "success", null, new Resource(resourceId, name, description, tags));
     }
 }
 
