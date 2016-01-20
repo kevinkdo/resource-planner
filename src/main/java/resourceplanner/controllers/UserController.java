@@ -11,6 +11,7 @@ import requestdata.ResourceRequest;
 import requestdata.UserRequest;
 import responses.StandardResponse;
 import responses.data.Resource;
+import responses.data.User;
 import utilities.PasswordHash;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,13 +47,13 @@ public class UserController {
         try {
             c.setAutoCommit(false);
         } catch (SQLException e) {
-            return new StandardResponse(true, "failed to disable autocommit", req);
+            return new StandardResponse(true, "failed to disable autocommit", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
-            return new StandardResponse(true, "Failed during hashing in register");
+            return new StandardResponse(true, "Failed during hashing in register", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         PreparedStatement st = null;
         String resourcesInsert = "INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, ?);";
@@ -64,12 +65,12 @@ public class UserController {
             st.setBoolean(4, req.isShould_email());
             int affectedRows = st.executeUpdate();
             if (affectedRows == 0) {
-                return new StandardResponse(true, "no new user created");
+                return new StandardResponse(true, "no new user created", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
             }
             c.commit();
-            return new StandardResponse(false, "user successfully created");
+            return new StandardResponse(false, "user successfully created", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         } catch (Exception e) {
-            return new StandardResponse(true, "failed to add user - duplicate");
+            return new StandardResponse(true, "failed to add user - duplicate", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
             // figure out how to determine if user already exists without actually querying
         }
     }
