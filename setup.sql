@@ -7,8 +7,8 @@ drop table users;
 create table users (
 	user_id serial primary key not null,
 	email varchar(255) unique not null,
-	username varchar(255),
 	passhash varchar(255) not null,
+	username varchar(255),
 	should_email boolean not null
 );
 
