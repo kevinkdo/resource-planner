@@ -4,22 +4,20 @@
 cd into directory with Vagrantfile
 
 # Setup vagrant
-
+```
 $ vagrant up
-
 $ vagrant ssh
+```
 
 # Setup VM 
-
+```
 $ chmod 755 setupvm.sh
-
 $ ./setupvm.sh
-
+```
 
 # Run
-
+```
 $ chmod 755 run.sh
-
 $ ./run.sh
-
+```
 App should now be running on localhost:8080
