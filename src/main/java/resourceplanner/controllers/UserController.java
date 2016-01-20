@@ -7,19 +7,13 @@ package resourceplanner.controllers;
 import databases.JDBC;
 import io.jsonwebtoken.Claims;
 import org.springframework.web.bind.annotation.*;
-import requestdata.ResourceRequest;
 import requestdata.UserRequest;
 import responses.StandardResponse;
-import responses.data.Resource;
 import responses.data.User;
 import utilities.PasswordHash;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,12 +27,24 @@ public class UserController {
         final Claims claims = (Claims) request.getAttribute("claims");
         String email = claims.get("email").toString();
         int userId = Integer.parseInt(claims.get("user_id").toString());
-        System.out.println("userId: "+userId);
         if (userId != 1) {
-            return new StandardResponse(true, "Not authorized", req);
+            return new StandardResponse(true, "Not authorized", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
 
         return createUserDB(req);
+    }
+
+    @RequestMapping(value = "/{userId}",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getUserById(@PathVariable final int userId, final HttpServletRequest request) {
+        final Claims claims = (Claims) request.getAttribute("claims");
+        String email = claims.get("email").toString();
+        int adminUserId = Integer.parseInt(claims.get("user_id").toString());
+        if (adminUserId != 1) {
+            return new StandardResponse(true, "Not authorized");
+        }
+        return getUserByIdDB(userId);
     }
 
 
@@ -56,9 +62,9 @@ public class UserController {
             return new StandardResponse(true, "Failed during hashing in register", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         PreparedStatement st = null;
-        String resourcesInsert = "INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, ?);";
+        String usersInsert = "INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, ?);";
         try {
-            st = c.prepareStatement(resourcesInsert, Statement.RETURN_GENERATED_KEYS);
+            st = c.prepareStatement(usersInsert, Statement.RETURN_GENERATED_KEYS);
             st.setString(1, req.getEmail());
             st.setString(2, passwordHash);
             st.setString(3, req.getUsername());
@@ -75,5 +81,29 @@ public class UserController {
         }
     }
 
+    private StandardResponse getUserByIdDB(int userId) {
+        Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String selectUsersQuery = "SELECT email, username, should_email FROM users WHERE user_id = ?;";
+        String email;
+        String username;
+        boolean should_email;
+        try {
+            st = c.prepareStatement(selectUsersQuery);
+            st.setInt(1, userId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                email = rs.getString("email");
+                username = rs.getString("username");
+                should_email = rs.getBoolean("should_email");
+            } else {
+                return new StandardResponse(true, "No user found with given id");
+            }
+        } catch (Exception f) {
+            return new StandardResponse(true, "No user found with given id 2");
+        }
+
+        return new StandardResponse(false, "success", null, new User(email, username, should_email));
+    }
 }
 
