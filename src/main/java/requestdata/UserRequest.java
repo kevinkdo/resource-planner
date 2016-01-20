@@ -7,7 +7,7 @@ public class UserRequest {
     private String email;
     private char[] password;
     private String username;
-    private boolean should_email;
+    private Boolean should_email;
 
     public String getEmail() {
         return email;
@@ -21,7 +21,7 @@ public class UserRequest {
         return username;
     }
 
-    public boolean isShould_email() {
+    public Boolean isShould_email() {
         return should_email;
     }
 }
