@@ -262,6 +262,21 @@ const Login = React.createClass({
     });
   },
 
+  setEmail(evt) {
+    this.setState({email: evt.target.value});
+  },
+
+  setPassword(evt) {
+    this.setState({password: evt.target.value});
+  },
+
+  getInitialState() {
+    return {
+      email: "",
+      password: ""
+    }
+  },
+
   render() {
     return (
       <div className="vertical-center">
@@ -273,11 +288,11 @@ const Login = React.createClass({
               <form onSubmit={this.handleSubmit} >
                 <div className="form-group">
                   <label htmlFor="exampleInputEmail1">Email address</label>
-                  <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email" />
+                  <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email" onChange={this.setEmail} value={this.state.email}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="exampleInputPassword1">Password</label>
-                  <input type="email" className="form-control" id="exampleInputPassword1" placeholder="Password" />
+                  <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" onChange={this.setPassword} value={this.state.password}/>
                 </div>
                 <button type="submit" className="btn btn-primary">Log In</button>
               </form>
