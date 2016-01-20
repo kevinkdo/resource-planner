@@ -4,19 +4,14 @@ package resourceplanner.controllers;
  * Created by jiaweizhang on 1/20/2016.
  */
 import databases.JDBC;
-import io.jsonwebtoken.Claims;
 import org.springframework.web.bind.annotation.*;
-import requestdata.ResourceRequest;
 import responses.StandardResponse;
-import responses.data.Resource;
 import responses.data.Tags;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/tags")

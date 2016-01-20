@@ -19,18 +19,13 @@ public class JDBC {
         Connection c = null;
         try {
             Class.forName(driver);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        try {
             c = DriverManager.getConnection(url + dbName, username, password);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
         System.out.println("Connected to database successfully");
+        // TODO throw exception instead of try-catch
         return c;
     }
 }
