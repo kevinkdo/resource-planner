@@ -1,7 +1,7 @@
 package responses;
 
 /**
- * Created by jiawe on 1/18/2016.
+ * Created by jiaweizhang on 1/18/2016.
  */
 public class StandardResponse {
     private Boolean is_error;

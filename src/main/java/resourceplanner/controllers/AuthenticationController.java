@@ -58,7 +58,7 @@ public class AuthenticationController {
         }
     }
 
-    public StandardResponse loginDB(String email, char[] password) {
+    private StandardResponse loginDB(String email, char[] password) {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
