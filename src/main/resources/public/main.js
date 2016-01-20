@@ -66,8 +66,8 @@ const Overview = React.createClass({
       loading_tags: false,
       loading_table: false,
       tags: [
-        {name: "laptop", state: "Included"},
-        {name: "classroom", state: "Included"},
+        {name: "laptop", state: "Required"},
+        {name: "classroom", state: "Required"},
         {name: "server", state: "Excluded"},
         {name: "projector", state: ""},
         {name: "other", state: ""}
@@ -94,9 +94,9 @@ const Overview = React.createClass({
     var tags = this.state.tags;
     tags.forEach(function(x) {
       if (x.name == tag_name) {
-        if (x.state == "Included") x.state = "Excluded";
+        if (x.state == "Required") x.state = "Excluded";
         else if (x.state == "Excluded") x.state = "";
-        else x.state = "Included";
+        else x.state = "Required";
       }
     });
     this.setState({tags: tags});
