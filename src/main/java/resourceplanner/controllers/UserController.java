@@ -40,7 +40,7 @@ public class UserController {
         return createUserDB(req);
     }
 
-  
+
     private StandardResponse createUserDB(UserRequest req) {
         Connection c = JDBC.connect();
         try {
@@ -50,7 +50,7 @@ public class UserController {
         }
         String passwordHash = null;
         try {
-            passwordHash = PasswordHash.createHash(req.getPassword().toCharArray());
+            passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
             return new StandardResponse(true, "Failed during hashing in register");
         }
@@ -69,7 +69,8 @@ public class UserController {
             c.commit();
             return new StandardResponse(false, "user successfully created");
         } catch (Exception e) {
-            return new StandardResponse(true, "failed to add user");
+            return new StandardResponse(true, "failed to add user - duplicate");
+            // figure out how to determine if user already exists without actually querying
         }
     }
 

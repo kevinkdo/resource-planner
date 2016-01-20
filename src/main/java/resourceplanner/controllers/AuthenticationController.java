@@ -25,7 +25,7 @@ public class AuthenticationController {
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse register(@RequestBody final AuthRequest rd) {
-        return registerDB(rd.getEmail(), rd.getPassword().toCharArray());
+        return registerDB(rd);
     }
 
     @RequestMapping(value = "/login",
@@ -33,14 +33,14 @@ public class AuthenticationController {
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse login(@RequestBody final AuthRequest rd) {
-        return loginDB(rd.getEmail(), rd.getPassword().toCharArray());
+        return loginDB(rd);
     }
 
 
-    private StandardResponse registerDB(String email, char[] password) {
+    private StandardResponse registerDB(AuthRequest req) {
         String passwordHash = null;
         try {
-            passwordHash = PasswordHash.createHash(password);
+            passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
             return new StandardResponse(true, "Failed during hashing in register");
         }
@@ -48,7 +48,7 @@ public class AuthenticationController {
         PreparedStatement st = null;
         try {
             st = c.prepareStatement("INSERT INTO users (email, passhash, should_email) VALUES (?, ?, true);");
-            st.setString(1, email);
+            st.setString(1, req.getEmail());
             st.setString(2, passwordHash);
             st.executeUpdate();
             st.close();
@@ -58,20 +58,20 @@ public class AuthenticationController {
         }
     }
 
-    private StandardResponse loginDB(String email, char[] password) {
+    private StandardResponse loginDB(AuthRequest req) {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
             st = c.prepareStatement("SELECT user_id, passhash FROM users WHERE email = ?;");
-            st.setString(1, email);
+            st.setString(1, req.getEmail());
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 int userId = rs.getInt("user_id");
                 String passhash = rs.getString("passhash");
                 st.close();
                 rs.close();
-                if (PasswordHash.validatePassword(password, passhash)) {
-                    String jwt = TokenCreator.generateToken(userId, email);
+                if (PasswordHash.validatePassword(req.getPassword(), passhash)) {
+                    String jwt = TokenCreator.generateToken(userId, req.getEmail());
                     Token token = new Token(jwt);
                     return new StandardResponse(false, "Successfully logged in", null, token);
                 } else {

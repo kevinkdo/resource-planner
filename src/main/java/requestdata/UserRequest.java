@@ -5,7 +5,7 @@ package requestdata;
  */
 public class UserRequest {
     private String email;
-    private String password;
+    private char[] password;
     private String username;
     private boolean should_email;
 
@@ -13,7 +13,7 @@ public class UserRequest {
         return email;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
