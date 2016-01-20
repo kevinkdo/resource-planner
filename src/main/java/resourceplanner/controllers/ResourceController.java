@@ -88,7 +88,7 @@ public class ResourceController {
             }
             ps.executeBatch();
             c.commit();
-            return new StandardResponse(false, "successful resource insert");
+            return new StandardResponse(false, "successful resource insert", req);
         } catch (Exception e) {
             return new StandardResponse(true, "insert resourcetags failed");
         }
@@ -125,7 +125,7 @@ public class ResourceController {
                 tags.add(tag);
             }
         } catch (Exception f) {
-            return new StandardResponse(true, "No resource found with given id 2");
+            return new StandardResponse(true, "failed to fetch resource tags");
         }
         return new StandardResponse(false, "success", null, new Resource(resourceId, name, description, tags));
     }
