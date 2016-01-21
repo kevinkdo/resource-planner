@@ -6,7 +6,7 @@ package resourceplanner.controllers;
 
 import databases.JDBC;
 import org.springframework.web.bind.annotation.*;
-import requestdata.AuthRequest;
+import requestdata.UserRequest;
 import responses.StandardResponse;
 import responses.data.Token;
 import utilities.PasswordHash;
@@ -24,54 +24,63 @@ public class AuthenticationController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse register(@RequestBody final AuthRequest rd) {
-        return registerDB(rd.getEmail(), rd.getPassword().toCharArray());
+    public StandardResponse register(@RequestBody final UserRequest rd) {
+        return registerDB(rd);
     }
 
     @RequestMapping(value = "/login",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse login(@RequestBody final AuthRequest rd) {
-        return loginDB(rd.getEmail(), rd.getPassword().toCharArray());
+    public StandardResponse login(@RequestBody final UserRequest rd) {
+        return loginDB(rd);
     }
 
 
-    private StandardResponse registerDB(String email, char[] password) {
+    private StandardResponse registerDB(UserRequest req) {
+        if (usernameExists(req.getUsername())) {
+            return new StandardResponse(true, "username exists already");
+        }
+        if (emailExists(req.getEmail())) {
+            return new StandardResponse(true, "email exists already");
+        }
+
         String passwordHash = null;
         try {
-            passwordHash = PasswordHash.createHash(password);
+            passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
             return new StandardResponse(true, "Failed during hashing in register");
         }
+
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
-            st = c.prepareStatement("INSERT INTO users (email, passhash, should_email) VALUES (?, ?, true);");
-            st.setString(1, email);
+            st = c.prepareStatement("INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, true);");
+            st.setString(1, req.getEmail());
             st.setString(2, passwordHash);
+            st.setString(3, req.getUsername());
             st.executeUpdate();
             st.close();
             return new StandardResponse(false, "Successfully registered");
         } catch (Exception g) {
-            return new StandardResponse(true, "Emails already exists");
+            return new StandardResponse(true, "Invalid input - missing required email or username");
         }
     }
 
-    private StandardResponse loginDB(String email, char[] password) {
+    private StandardResponse loginDB(UserRequest req) {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
             st = c.prepareStatement("SELECT user_id, passhash FROM users WHERE email = ?;");
-            st.setString(1, email);
+            st.setString(1, req.getEmail());
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 int userId = rs.getInt("user_id");
                 String passhash = rs.getString("passhash");
                 st.close();
                 rs.close();
-                if (PasswordHash.validatePassword(password, passhash)) {
-                    String jwt = TokenCreator.generateToken(userId, email);
+                if (PasswordHash.validatePassword(req.getPassword(), passhash)) {
+                    String jwt = TokenCreator.generateToken(userId, req.getEmail());
                     Token token = new Token(jwt);
                     return new StandardResponse(false, "Successfully logged in", null, token);
                 } else {
@@ -81,6 +90,42 @@ public class AuthenticationController {
             return new StandardResponse(true, "Invalid username or password");
         } catch (Exception f) {
             return new StandardResponse(true, "Invalid username or password");
+        }
+    }
+
+    private boolean usernameExists(String username) {
+        Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String selectUsersQuery = "SELECT should_email FROM users WHERE username = ?;";
+        try {
+            st = c.prepareStatement(selectUsersQuery);
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception f) {
+            return false;
+        }
+    }
+
+    private boolean emailExists(String email) {
+        Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String selectUsersQuery = "SELECT should_email FROM users WHERE email = ?;";
+        try {
+            st = c.prepareStatement(selectUsersQuery);
+            st.setString(1, email);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception f) {
+            return false;
         }
     }
 }

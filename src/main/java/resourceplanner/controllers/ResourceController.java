@@ -110,7 +110,7 @@ public class ResourceController {
     private StandardResponse getResourceByIdDB(int resourceId) {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
-        String selectResourcesQuery = "SELECT name, description FROM resources WHERE resource_id = ?";
+        String selectResourcesQuery = "SELECT name, description FROM resources WHERE resource_id = ?;";
         String selectResourceTagsQuery = "SELECT tag FROM resourcetags WHERE resource_id = ?";
         String name;
         String description;
