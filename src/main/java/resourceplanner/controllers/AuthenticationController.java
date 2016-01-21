@@ -65,7 +65,7 @@ public class AuthenticationController {
     @ResponseBody
     public StandardResponse login(@RequestBody final UserRequest req) {
         List<User> users = jt.query(
-                "SELECT user_id, passhash, should_email FROM users WHERE email = ? OR username = ?;",
+                "SELECT user_id, passhash FROM users WHERE email = ? OR username = ?;",
                 new Object[]{req.getEmail(), req.getUsername()},
                 new RowMapper<User>() {
                     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
