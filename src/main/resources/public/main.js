@@ -66,8 +66,8 @@ const Overview = React.createClass({
       loading_tags: false,
       loading_table: false,
       tags: [
-        {name: "laptop", state: "Included"},
-        {name: "classroom", state: "Included"},
+        {name: "laptop", state: "Required"},
+        {name: "classroom", state: "Required"},
         {name: "server", state: "Excluded"},
         {name: "projector", state: ""},
         {name: "other", state: ""}
@@ -75,9 +75,9 @@ const Overview = React.createClass({
       reservations: [
         {id: 0, resource_id: 0, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
         {id: 1, resource_id: 1, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 1, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 1, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 1, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
+        {id: 2, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        {id: 3, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        {id: 4, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
       ],
       resources: {
         0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
@@ -94,9 +94,9 @@ const Overview = React.createClass({
     var tags = this.state.tags;
     tags.forEach(function(x) {
       if (x.name == tag_name) {
-        if (x.state == "Included") x.state = "Excluded";
+        if (x.state == "Required") x.state = "Excluded";
         else if (x.state == "Excluded") x.state = "";
-        else x.state = "Included";
+        else x.state = "Required";
       }
     });
     this.setState({tags: tags});
@@ -107,7 +107,7 @@ const Overview = React.createClass({
     var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
       <ul className="list-group">
         {this.state.tags.map(x =>
-          <a href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+          <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
         )}
       </ul>
     );
@@ -123,7 +123,7 @@ const Overview = React.createClass({
         </thead>
         <tbody>
           {this.state.reservations.map(x =>
-            <tr><td>{this.state.resources[x.resource_id].name}</td><td>{this.state.users[x.user_id].username}</td><td>{x.start_timestamp.toLocaleString()}</td><td>{x.end_timestamp.toLocaleString()}</td></tr>
+            <tr key={"reservation " + x.id}><td>{this.state.resources[x.resource_id].name}</td><td>{this.state.users[x.user_id].username}</td><td>{x.start_timestamp.toLocaleString()}</td><td>{x.end_timestamp.toLocaleString()}</td></tr>
           )}
         </tbody>
       </table>
@@ -156,6 +156,22 @@ const Overview = React.createClass({
   }
 });
 
+const TagInput = React.createClass({
+  render() {
+    var add_on = !this.props.hasAddon ? null :
+      <span className="input-group-btn">
+        <button className="btn btn-default" type="button" onClick={this.props.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+      </span>;
+
+    return (
+      <div className="input-group">
+        <input type="text" className="form-control" id="resource_creator_tags" placeholder="" onChange={(evt) => this.props.setTag(evt, this.props.index)} value={this.props.value}/>
+        {add_on}
+      </div>
+    );
+  }
+});
+
 const ResourceCreator = React.createClass({
   createResource() {
     console.log("resource created!");
@@ -171,10 +187,33 @@ const ResourceCreator = React.createClass({
   },
 
   addTag() {
-    console.log("add tag");
+    this.state.tags.push("");
+    this.setState({tags: this.state.tags});
+  },
+
+  setName(evt) {
+    this.setState({name: evt.target.value});
+  },
+
+  setDescription(evt) {
+    this.setState({description: evt.target.value});
+  },
+
+  setTag(evt, i) {
+    this.state.tags[i] = evt.target.value;
+    this.setState({tags: this.state.tags});
+  },
+
+  getInitialState() {
+    return {
+      name: "",
+      description: "",
+      tags: [""]
+    };
   },
 
   render() {
+    var last_tag = this.state.tags[this.state.tags.length-1];
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
@@ -185,28 +224,20 @@ const ResourceCreator = React.createClass({
               <form>
                 <div className="form-group">
                   <label htmlFor="resource_creator_name">Name</label>
-                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" />
+                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_description">Description</label>
-                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" />
+                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_tags">Tags</label>
                   <div className="row">
                     <div className="col-md-4">
-                      <div className="input-group">
-                        <input type="text" className="form-control" id="resource_creator_tags" placeholder="" />
-                        <span className="input-group-btn">
-                          <button className="btn btn-default" type="button" onClick={this.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
-                        </span>
-                      </div>
-                      <div className="input-group">
-                        <input type="text" className="form-control" id="resource_creator_tags" placeholder="" />
-                        <span className="input-group-btn">
-                          <button className="btn btn-default" type="button" onClick={this.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
-                        </span>
-                      </div>
+                      {this.state.tags.slice(0, -1).map((x,i) =>
+                        <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                      )}
+                      <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
                     </div>
                   </div>
                 </div>
@@ -231,6 +262,21 @@ const Login = React.createClass({
     });
   },
 
+  setEmail(evt) {
+    this.setState({email: evt.target.value});
+  },
+
+  setPassword(evt) {
+    this.setState({password: evt.target.value});
+  },
+
+  getInitialState() {
+    return {
+      email: "",
+      password: ""
+    }
+  },
+
   render() {
     return (
       <div className="vertical-center">
@@ -242,11 +288,11 @@ const Login = React.createClass({
               <form onSubmit={this.handleSubmit} >
                 <div className="form-group">
                   <label htmlFor="exampleInputEmail1">Email address</label>
-                  <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email" />
+                  <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email" onChange={this.setEmail} value={this.state.email}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="exampleInputPassword1">Password</label>
-                  <input type="email" className="form-control" id="exampleInputPassword1" placeholder="Password" />
+                  <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" onChange={this.setPassword} value={this.state.password}/>
                 </div>
                 <button type="submit" className="btn btn-primary">Log In</button>
               </form>
