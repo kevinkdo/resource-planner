@@ -1,5 +1,5 @@
 # Setup Instructions (linux/vagrant instructions)
-The directory containing Vagrantfile will now be shared from your computer and the vm. You can access it in the vm by going to the folder 'Vagrant'.
+The directory containing Vagrantfile will now be shared from your computer and the vm. You can access it in the vm by going to the folder 'Vagrant'. Go up two levels so that when you hit ls it should read 'vagrant@vagrant-ubuntu-trusty-64:/$'
 
 In Mac terminal:
 ```
