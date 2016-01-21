@@ -8,7 +8,7 @@ create table users (
 	user_id serial primary key not null,
 	email varchar(255) unique not null,
 	passhash varchar(255) not null,
-	username varchar(255),
+	username varchar(255) unique not null,
 	should_email boolean not null
 );
 

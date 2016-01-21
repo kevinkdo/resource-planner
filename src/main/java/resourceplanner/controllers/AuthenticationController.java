@@ -6,7 +6,7 @@ package resourceplanner.controllers;
 
 import databases.JDBC;
 import org.springframework.web.bind.annotation.*;
-import requestdata.AuthRequest;
+import requestdata.UserRequest;
 import responses.StandardResponse;
 import responses.data.Token;
 import utilities.PasswordHash;
@@ -24,7 +24,7 @@ public class AuthenticationController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse register(@RequestBody final AuthRequest rd) {
+    public StandardResponse register(@RequestBody final UserRequest rd) {
         return registerDB(rd);
     }
 
@@ -32,12 +32,12 @@ public class AuthenticationController {
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse login(@RequestBody final AuthRequest rd) {
+    public StandardResponse login(@RequestBody final UserRequest rd) {
         return loginDB(rd);
     }
 
 
-    private StandardResponse registerDB(AuthRequest req) {
+    private StandardResponse registerDB(UserRequest req) {
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
@@ -47,9 +47,10 @@ public class AuthenticationController {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
-            st = c.prepareStatement("INSERT INTO users (email, passhash, should_email) VALUES (?, ?, true);");
+            st = c.prepareStatement("INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, true);");
             st.setString(1, req.getEmail());
             st.setString(2, passwordHash);
+            st.setString(3, "");
             st.executeUpdate();
             st.close();
             return new StandardResponse(false, "Successfully registered");
@@ -58,7 +59,7 @@ public class AuthenticationController {
         }
     }
 
-    private StandardResponse loginDB(AuthRequest req) {
+    private StandardResponse loginDB(UserRequest req) {
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {

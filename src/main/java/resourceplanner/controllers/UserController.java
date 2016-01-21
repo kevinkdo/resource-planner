@@ -7,7 +7,6 @@ package resourceplanner.controllers;
 import databases.JDBC;
 import io.jsonwebtoken.Claims;
 import org.springframework.web.bind.annotation.*;
-import requestdata.AuthRequest;
 import requestdata.UserRequest;
 import responses.StandardResponse;
 import responses.data.User;
