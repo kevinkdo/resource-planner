@@ -4,6 +4,9 @@ package resourceplanner.controllers;
  * Created by jiaweizhang on 1/20/2016.
  */
 import databases.JDBC;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import responses.StandardResponse;
 import responses.data.Tags;
@@ -17,29 +20,20 @@ import java.util.List;
 @RequestMapping("/api/tags")
 public class TagController {
 
+    @Autowired
+    private JdbcTemplate jt;
+
+    public void setDataSource(DataSource dataSource) {
+        jt = new JdbcTemplate(dataSource);
+    }
+
     @RequestMapping(value = "",
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse getTags(final HttpServletRequest request) {
-        return getTagsDB();
-    }
-
-    private StandardResponse getTagsDB() {
-        Connection c = JDBC.connect();
-        PreparedStatement st = null;
-        String selectTagsQuery = "SELECT DISTINCT tag FROM resourcetags;";
-        List<String> tags = new ArrayList<String>();
-        try {
-            st = c.prepareStatement(selectTagsQuery);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                String tag = rs.getString("tag");
-                tags.add(tag);
-            }
-            return new StandardResponse(false, "successfully retrieved tags", null, new Tags(tags));
-        } catch (Exception f) {
-            return new StandardResponse(true, "Failed to fetch tags");
-        }
+        List<String> tags = jt.queryForList(
+                "SELECT DISTINCT tag FROM resourcetags;", String.class);
+        return new StandardResponse(false, "Successfully retrieved  tags", null, new Tags(tags));
     }
 }
 
