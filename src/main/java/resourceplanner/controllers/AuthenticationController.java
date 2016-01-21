@@ -38,24 +38,32 @@ public class AuthenticationController {
 
 
     private StandardResponse registerDB(UserRequest req) {
+        if (usernameExists(req.getUsername())) {
+            return new StandardResponse(true, "username exists already");
+        }
+        if (emailExists(req.getEmail())) {
+            return new StandardResponse(true, "email exists already");
+        }
+
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
             return new StandardResponse(true, "Failed during hashing in register");
         }
+
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         try {
             st = c.prepareStatement("INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, true);");
             st.setString(1, req.getEmail());
             st.setString(2, passwordHash);
-            st.setString(3, "");
+            st.setString(3, req.getUsername());
             st.executeUpdate();
             st.close();
             return new StandardResponse(false, "Successfully registered");
         } catch (Exception g) {
-            return new StandardResponse(true, "Emails already exists");
+            return new StandardResponse(true, "Invalid input - missing required email or username");
         }
     }
 
@@ -82,6 +90,42 @@ public class AuthenticationController {
             return new StandardResponse(true, "Invalid username or password");
         } catch (Exception f) {
             return new StandardResponse(true, "Invalid username or password");
+        }
+    }
+
+    private boolean usernameExists(String username) {
+        Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String selectUsersQuery = "SELECT should_email FROM users WHERE username = ?;";
+        try {
+            st = c.prepareStatement(selectUsersQuery);
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception f) {
+            return false;
+        }
+    }
+
+    private boolean emailExists(String email) {
+        Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String selectUsersQuery = "SELECT should_email FROM users WHERE email = ?;";
+        try {
+            st = c.prepareStatement(selectUsersQuery);
+            st.setString(1, email);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception f) {
+            return false;
         }
     }
 }
