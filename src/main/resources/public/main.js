@@ -30,7 +30,7 @@ const Navbar = React.createClass({
   render() {
     return (
       <nav className="navbar navbar-default">
-        <div className="container-fluid">
+        <div className="container">
           <div className="navbar-header">
             <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
               <span className="sr-only">Toggle navigation</span>
@@ -38,10 +38,14 @@ const Navbar = React.createClass({
               <span className="icon-bar"></span>
               <span className="icon-bar"></span>
             </button>
-            <a className="navbar-brand" href="#">Resource Manager</a>
+            <a className="navbar-brand" href="#"><span className="glyphicon glyphicon-pawn" aria-hidden="true"></span></a>
           </div>
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul className="nav navbar-nav navbar-left">
+              <li><a href="#">Resources</a></li>
+              <li className="active"><a href="#">Reservations</a></li>
+            </ul>
             <ul className="nav navbar-nav navbar-right">
               <li><p className="navbar-text">{this.props.pstate.username}</p></li>
               <li className="dropdown">
