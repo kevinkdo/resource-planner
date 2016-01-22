@@ -27,17 +27,7 @@ const Router = React.createClass({
 const Navbar = React.createClass({
   logout() {
     localStorage.setItem("session", "");
-    this.props.setPstate({
-      route: "login"
-    });
-  },
-
-  routeToResources() {
-    this.props.setPstate({route: "resource_list"});
-  },
-
-  routeToReservations() {
-    this.props.setPstate({route: "reservation_list"});
+    this.props.setPstate({ route: "login" });
   },
 
   render() {
@@ -56,8 +46,8 @@ const Navbar = React.createClass({
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul className="nav navbar-nav navbar-left">
-              <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#" onClick={this.routeToResources}>Resources</a></li>
-              <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#" onClick={this.routeToReservations}>Reservations</a></li>
+              <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "resource_list"})}>Resources</a></li>
+              <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "reservation_list"})}>Reservations</a></li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
               <li><p className="navbar-text">{this.props.pstate.username}</p></li>
@@ -105,10 +95,6 @@ const ReservationList = React.createClass({
         1: {email: "kevin.kydat.do@gmail.com", username: "kevinkdo", should_email: true}
       }
     };
-  },
-
-  routeToReservationCreator() {
-    this.props.setPstate({route: "reservation_creator"});
   },
 
   cycleState(tag_name) {
@@ -160,7 +146,7 @@ const ReservationList = React.createClass({
               {leftpane}
             </div>
             <div className="col-md-9">
-              <h3>Reservations <button type="button" className="btn btn-success pull-right" onClick={this.routeToReservationCreator}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
+              <h3>Reservations <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
               {rightpane}
             </div>
           </div>
@@ -171,10 +157,6 @@ const ReservationList = React.createClass({
 });
 
 const ResourceList = React.createClass({
-  routeToResourceCreator() {
-    this.props.setPstate({route: "resource_creator"});
-  },
-
   render() {
     var me = this;
     return (
@@ -183,7 +165,7 @@ const ResourceList = React.createClass({
 
         <div className="container">
           <div className="row">
-            <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={this.routeToResourceCreator}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
+            <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "resource_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
           </div>
         </div>
       </div>
@@ -210,15 +192,11 @@ const TagInput = React.createClass({
 const ResourceCreator = React.createClass({
   createResource() {
     console.log("resource created!");
-    this.props.setPstate({
-      route: "reservation_list"
-    });
+    this.props.setPstate({ route: "resource_list" });
   },
 
   cancel() {
-    this.props.setPstate({
-      route: "reservation_list"
-    });
+    this.props.setPstate({ route: "resource_list" });
   },
 
   addTag() {
@@ -306,9 +284,7 @@ const ReservationCreator = React.createClass({
 const Login = React.createClass({
   handleSubmit() {
     localStorage.setItem("session", "my_session_id");
-    this.props.setPstate({
-      route: "reservation_list"
-    });
+    this.props.setPstate({ route: "reservation_list" });
   },
 
   setEmail(evt) {
