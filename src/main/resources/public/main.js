@@ -2,7 +2,7 @@ const Router = React.createClass({
   getInitialState() {
     var session = localStorage.getItem("session");
     return {
-      route: session ? "overview" : "login",
+      route: session ? "reservation_list" : "login",
       username: "kevinkdo"
     };
   },
@@ -11,11 +11,16 @@ const Router = React.createClass({
     switch (this.state.route) {
       case "login":
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
-      case "overview":
-        return <Overview setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "reservation_list":
+        return <ReservationList setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "reservation_creator":
+        return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "resource_list":
+        return <ResourceList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_creator":
         return <ResourceCreator setPstate={this.setState.bind(this)} pstate={this.state} />
     }
+    return <div>ERROR</div>;
   }
 });
 
@@ -25,6 +30,14 @@ const Navbar = React.createClass({
     this.props.setPstate({
       route: "login"
     });
+  },
+
+  routeToResources() {
+    this.props.setPstate({route: "resource_list"});
+  },
+
+  routeToReservations() {
+    this.props.setPstate({route: "reservation_list"});
   },
 
   render() {
@@ -43,8 +56,8 @@ const Navbar = React.createClass({
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul className="nav navbar-nav navbar-left">
-              <li><a href="#">Resources</a></li>
-              <li className="active"><a href="#">Reservations</a></li>
+              <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#" onClick={this.routeToResources}>Resources</a></li>
+              <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#" onClick={this.routeToReservations}>Reservations</a></li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
               <li><p className="navbar-text">{this.props.pstate.username}</p></li>
@@ -64,7 +77,7 @@ const Navbar = React.createClass({
   }
 });
 
-const Overview = React.createClass({
+const ReservationList = React.createClass({
   getInitialState() {
     return {
       loading_tags: false,
@@ -92,6 +105,10 @@ const Overview = React.createClass({
         1: {email: "kevin.kydat.do@gmail.com", username: "kevinkdo", should_email: true}
       }
     };
+  },
+
+  routeToReservationCreator() {
+    this.props.setPstate({route: "reservation_creator"});
   },
 
   cycleState(tag_name) {
@@ -138,21 +155,35 @@ const Overview = React.createClass({
 
         <div className="container">
           <div className="row">
-            <div className="btn-group" role="group" aria-label="...">
-              <button type="button" className="btn btn-default" onClick={function() {me.props.setPstate({route: "resource_creator"})}}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New resource</button>
-              <button type="button" className="btn btn-default"><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button>
-            </div>
-          </div>
-          
-          <div className="row">
             <div className="col-md-3">
               <h3>Tags</h3>
               {leftpane}
             </div>
             <div className="col-md-9">
-              <h3>Reservations</h3>
+              <h3>Reservations <button type="button" className="btn btn-success pull-right" onClick={this.routeToReservationCreator}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
               {rightpane}
             </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+});
+
+const ResourceList = React.createClass({
+  routeToResourceCreator() {
+    this.props.setPstate({route: "resource_creator"});
+  },
+
+  render() {
+    var me = this;
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+          <div className="row">
+            <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={this.routeToResourceCreator}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
           </div>
         </div>
       </div>
@@ -180,13 +211,13 @@ const ResourceCreator = React.createClass({
   createResource() {
     console.log("resource created!");
     this.props.setPstate({
-      route: "overview"
+      route: "reservation_list"
     });
   },
 
   cancel() {
     this.props.setPstate({
-      route: "overview"
+      route: "reservation_list"
     });
   },
 
@@ -258,11 +289,25 @@ const ResourceCreator = React.createClass({
   }
 });
 
+const ReservationCreator = React.createClass({
+  render() {
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+        Reservation creator
+        </div>
+      </div>
+    )
+  }
+});
+
 const Login = React.createClass({
   handleSubmit() {
     localStorage.setItem("session", "my_session_id");
     this.props.setPstate({
-      route: "overview"
+      route: "reservation_list"
     });
   },
 
