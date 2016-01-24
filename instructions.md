@@ -24,6 +24,8 @@ $ ***Run setup.sql file. You can just copy paste it into the psql utility***
 $ ***Run following two commands to test it worked. You should see all 4 tables and the 1 default admin user***
 $ \dt
 $ SELECT * FROM user;
+$ ***Next, we want to make sure that your postgres password matches what is listed in our Spring code***
+$ ALTER USER Postgres WITH PASSWORD 'password';
 $ *** Now we return to normal shell user ***
 $ su vagrant (password should be 'vagrant')
 $ *** Finally, change directory to normal vagrant directory***
