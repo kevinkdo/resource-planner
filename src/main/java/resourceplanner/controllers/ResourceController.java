@@ -103,7 +103,8 @@ public class ResourceController {
                 ps.executeBatch();
             }
             c.commit();
-            return new StandardResponse(false, "successful resource insert", req);
+            return new StandardResponse(false, "successful resource insert", new Resource(resourceId, req.getName(), 
+                req.getDescription(), req.getTags()));
         } catch (Exception e) {
             return new StandardResponse(true, "insert resourcetags failed");
         }
