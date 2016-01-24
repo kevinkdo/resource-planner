@@ -120,6 +120,7 @@ public class UserController {
         return new StandardResponse(false, "success", null, new User(email, username, should_email));
     }
 
+
     private StandardResponse updateUserDB(int userId, UserRequest req) {
         StandardResponse sr = getUserByIdDB(userId);
         if (sr.getIs_error()) {
