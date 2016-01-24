@@ -96,7 +96,9 @@ public class ReservationController{
 
         try{
         	c.commit();
-        	return new StandardResponse(false, "Reservation inserted successfully", req);
+        	ReservationWithIDs newReservation = new ReservationWithIDs(reservation_id, req.getUser_id(), req.getResource_id(),
+        		req.getBegin_time(), req.getEnd_time(), req.getShould_email());
+        	return new StandardResponse(false, "Reservation inserted successfully", newReservation);
         }
         catch (Exception e){
         	return new StandardResponse(true, "Insert reservation commit failed");
