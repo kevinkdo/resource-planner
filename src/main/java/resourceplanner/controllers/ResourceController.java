@@ -93,13 +93,15 @@ public class ResourceController {
             return new StandardResponse(true, "insert resource failed - no ID obtained.");
         }
         try {
-            PreparedStatement ps = c.prepareStatement(resourceTagsInsert);
-            for (String tag : req.getTags()) {
-                ps.setInt(1, resourceId);
-                ps.setString(2, tag);
-                ps.addBatch();
+            if(req.getTags() != null){
+                PreparedStatement ps = c.prepareStatement(resourceTagsInsert);
+                for (String tag : req.getTags()) {
+                    ps.setInt(1, resourceId);
+                    ps.setString(2, tag);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
             }
-            ps.executeBatch();
             c.commit();
             return new StandardResponse(false, "successful resource insert", req);
         } catch (Exception e) {
