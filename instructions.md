@@ -15,6 +15,20 @@ $ chmod 755 setupvm.sh
 $ ./setupvm.sh
 ```
 
+Setting up DB:
+```
+$ sudo -u postgres -i
+$ createdb rp
+$ psql rp
+$ ***Run setup.sql file. You can just copy paste it into the psql utility***
+$ ***Run following two commands to test it worked. You should see all 4 tables and the 1 default admin user***
+$ \dt
+$ SELECT * FROM user;
+$ *** Now we return to normal shell user ***
+$ su vagrant (password should be 'vagrant')
+$ *** Finally, change directory to normal vagrant directory***
+```
+
 # Run
 ```
 $ chmod 755 run.sh
