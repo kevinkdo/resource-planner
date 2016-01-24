@@ -27,10 +27,11 @@ import io.jsonwebtoken.Claims;
 import requestdata.*;
 import responses.StandardResponse;
 import responses.data.*;
+import resourceplanner.controllers.Controller;
 
 @RestController
 @RequestMapping("/api/reservations")
-public class ReservationController{
+public class ReservationController extends Controller{
 	
 	@RequestMapping(value = "/{reservationId}",
             method = RequestMethod.GET)
@@ -46,17 +47,50 @@ public class ReservationController{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse createReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request){
-    	final Claims claims = (Claims) request.getAttribute("claims");
-    	//Verify that the user_id in the requesrt == current user
-    	int userId = Integer.parseInt(claims.get("user_id").toString());
-    	int reservationUserId = req.getUser_id();
-    	if(userId != reservationUserId){
-    		return new StandardResponse(true, "User attempting to make reservation for another user");
-    	}
-    	else{
+    	//An admin can make a reservation for anyone. A normal user can only make a reservation for himself. 
+    	// Verify that the user_id in the reservation == current user OR the current user is the admin
+    	if(isAdmin(request) || getRequesterID(request) == req.getUser_id()){
     		return createReservationDB(req);
     	}
+    	else{
+    		return new StandardResponse(true, "Non-Admin user attempting to make reservation for another user");
+    	}
     }
+
+    @RequestMapping(value = "/{reservationId}",
+            method = RequestMethod.DELETE)
+    @ResponseBody
+    public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
+    	//We must do an initial get to check for the user of the reservation.    
+        ReservationWithIDs reservation = getReservationWithIdsObjectById(reservationId);
+        //Admin can delete ANY reservation, user can only delete his/her own
+    	if(isAdmin(request) || getRequesterID(request) == reservation.getUser_id()){
+    		return deleteReservationByIdDB(reservationId);
+    	}
+    	else{
+    		return new StandardResponse(true, "Non-Admin user attempting to delete reservation for another user");
+    	}
+    }
+
+    private StandardResponse deleteReservationByIdDB(int reservationId){
+    	Connection c = JDBC.connect();
+    	PreparedStatement st = null;
+    	String deleteReservation = "DELETE FROM reservations WHERE reservation_id = ?;";
+    	try{
+    		st = c.prepareStatement(deleteReservation);
+    		st.setInt(1, reservationId);
+    		int affectedRows = st.executeUpdate();
+    		if(affectedRows == 0){
+    			return new StandardResponse(true, "No reservation with that ID exists");
+    		}
+
+    		return new StandardResponse(false, "Reservation successfully deleted");
+    	}
+    	catch(Exception e){
+    		return new StandardResponse(true, "Failed to delete reservation");
+    	}
+    }
+
 
     private StandardResponse createReservationDB(ReservationRequest req){
     	Connection c = JDBC.connect();
@@ -82,7 +116,6 @@ public class ReservationController{
         } catch (Exception e) {
             return new StandardResponse(true, "Failed to add reservation");
         }
-
         try {
             ResultSet generatedKeys = st.getGeneratedKeys();
             if (generatedKeys.next()) {
@@ -108,7 +141,17 @@ public class ReservationController{
     }
 
     private StandardResponse getReservationByIdDB(int reservationId) {
-        Connection c = JDBC.connect();
+    	Reservation reservation = getReservationObjectById(reservationId);
+    	if (reservation == null){
+    		return new StandardResponse(true, "Reservation with given ID not found");
+    	}
+    	else{
+    		return new StandardResponse(false, "Reservation with given ID found", null, reservation);
+    	}
+    }
+
+    private Reservation getReservationObjectById(int reservationId){
+    	Connection c = JDBC.connect();
         PreparedStatement st = null;
         String selectResourcesQuery = "SELECT * FROM reservations WHERE reservation_id = ?;";
         int reservation_id, user_id, resource_id;
@@ -127,19 +170,51 @@ public class ReservationController{
                 end_time = rs.getTimestamp("end_time");
                 should_email = rs.getBoolean("should_email");
             } else {
-                return new StandardResponse(true, "No reservation found with given id");
+                return null;
             }
         } catch (Exception f) {
-            return new StandardResponse(true, "No reservation found with given id 2");
+            return null;
         }
 
         User user = getUserByID(user_id);
         Resource resource = getResourceById(resource_id);
+        if(user == null || resource == null){
+        	return null;
+        }
         Reservation reservation = new Reservation(reservation_id, user, resource, begin_time, end_time,
         	should_email);
+        return reservation;
+    }
 
+    private ReservationWithIDs getReservationWithIdsObjectById(int reservationId){
+    	Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String selectResourcesQuery = "SELECT * FROM reservations WHERE reservation_id = ?;";
+        int reservation_id, user_id, resource_id;
+        Timestamp begin_time, end_time;
+        boolean should_email;
 
-        return new StandardResponse(false, "success", null, reservation);
+        try {
+            st = c.prepareStatement(selectResourcesQuery);
+            st.setInt(1, reservationId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                reservation_id = rs.getInt("reservation_id");
+                user_id = rs.getInt("user_id");
+                resource_id = rs.getInt("resource_id");
+                begin_time = rs.getTimestamp("begin_time");
+                end_time = rs.getTimestamp("end_time");
+                should_email = rs.getBoolean("should_email");
+            } else {
+                return null;
+            }
+        } catch (Exception f) {
+            return null;
+        }
+
+        ReservationWithIDs reservation = new ReservationWithIDs(reservation_id, user_id, resource_id, begin_time, end_time,
+        	should_email);
+        return reservation;
     }
 
     public User getUserByID(int userID){

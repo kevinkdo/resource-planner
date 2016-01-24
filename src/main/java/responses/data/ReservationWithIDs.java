@@ -27,11 +27,11 @@ public class ReservationWithIDs {
         return reservation_id;
     }
 
-    public int getUser(){
+    public int getUser_id(){
         return user_id;
     }
 
-    public int getResource(){
+    public int getResource_id(){
         return resource_id;
     }
 

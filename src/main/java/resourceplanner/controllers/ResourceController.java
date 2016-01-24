@@ -17,21 +17,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import resourceplanner.controllers.Controller;
 
 @RestController
 @RequestMapping("/api/resources")
-public class ResourceController {
+public class ResourceController extends Controller{
 
     @RequestMapping(value = "",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse createResource(@RequestBody final ResourceRequest req, final HttpServletRequest request) {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String email = claims.get("email").toString();
-        int userId = Integer.parseInt(claims.get("user_id").toString());
-        System.out.println("userId: "+userId);
-        if (userId != 1) {
+        if(!isAdmin(request)){
             return new StandardResponse(true, "Not authorized", req);
         }
 
@@ -50,11 +47,7 @@ public class ResourceController {
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse updateResource(@PathVariable final int resourceId, @RequestBody final ResourceRequest req, final HttpServletRequest request) {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String email = claims.get("email").toString();
-        int userId = Integer.parseInt(claims.get("user_id").toString());
-        System.out.println("userId: "+userId);
-        if (userId != 1) {
+        if (!isAdmin(request)) {
             return new StandardResponse(true, "Not authorized", req);
         }
         return updateResourceDB(resourceId, req);
