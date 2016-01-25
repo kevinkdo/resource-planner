@@ -197,7 +197,7 @@ const TagInput = React.createClass({
 
     return (
       <div className="input-group">
-        <input type="text" className="form-control" id="resource_creator_tags" placeholder="" onChange={(evt) => this.props.setTag(evt, this.props.index)} value={this.props.value}/>
+        <input type="text" className="form-control" id="resource_creator_tags" placeholder="Optional tag" onChange={(evt) => this.props.setTag(evt, this.props.index)} value={this.props.value}/>
         {add_on}
       </div>
     );
@@ -250,6 +250,7 @@ const ResourceCreator = React.createClass({
           <div className="row">
             <div className="col-md-6 col-md-offset-3">
               <form>
+                <legend>New resource</legend>
                 <div className="form-group">
                   <label htmlFor="resource_creator_name">Name</label>
                   <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
