@@ -15,6 +15,8 @@ const Router = React.createClass({
         return <ReservationList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_creator":
         return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "reservation_editor":
+        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_list":
         return <ResourceList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_creator":
@@ -109,6 +111,17 @@ const ReservationList = React.createClass({
     this.setState({tags: tags});
   },
 
+  editReservation(id) {
+    this.props.setPstate({
+      route: "reservation_editor",
+      view_id: id
+    });
+  },
+
+  deleteReservation(id) {
+    console.log("reservation deleted: " + id);
+  },
+
   render() {
     var me = this;
     var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
@@ -126,11 +139,13 @@ const ReservationList = React.createClass({
             <th>User</th>
             <th>Start</th>
             <th>End</th>
+            <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {this.state.reservations.map(x =>
-            <tr key={"reservation " + x.id}><td>{this.state.resources[x.resource_id].name}</td><td>{this.state.users[x.user_id].username}</td><td>{x.start_timestamp.toLocaleString()}</td><td>{x.end_timestamp.toLocaleString()}</td></tr>
+            <tr key={"reservation " + x.id}><td>{this.state.resources[x.resource_id].name}</td><td>{this.state.users[x.user_id].username}</td><td>{x.start_timestamp.toLocaleString()}</td><td>{x.end_timestamp.toLocaleString()}</td><td><a role="button" onClick={() => this.editReservation(x.id)}>Edit</a></td><td><a role="button" onClick={() => this.deleteReservation(x.id)}>Delete</a></td></tr>
           )}
         </tbody>
       </table>
@@ -275,6 +290,20 @@ const ReservationCreator = React.createClass({
 
         <div className="container">
         Reservation creator
+        </div>
+      </div>
+    )
+  }
+});
+
+const ReservationEditor = React.createClass({
+  render() {
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+        Reservation editor
         </div>
       </div>
     )
