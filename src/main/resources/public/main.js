@@ -146,7 +146,14 @@ const ReservationList = React.createClass({
         </thead>
         <tbody>
           {this.state.reservations.map(x =>
-            <tr key={"reservation " + x.id}><td>{this.state.resources[x.resource_id].name}</td><td>{this.state.users[x.user_id].username}</td><td>{x.start_timestamp.toLocaleString()}</td><td>{x.end_timestamp.toLocaleString()}</td><td><a role="button" onClick={() => this.editReservation(x.id)}>Edit</a></td><td><a role="button" onClick={() => this.deleteReservation(x.id)}>Delete</a></td></tr>
+            <tr key={"reservation " + x.id}>
+              <td>{this.state.resources[x.resource_id].name}</td>
+              <td>{this.state.users[x.user_id].username}</td>
+              <td>{x.start_timestamp.toLocaleString()}</td>
+              <td>{x.end_timestamp.toLocaleString()}</td>
+              <td><a role="button" onClick={() => this.editReservation(x.id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.deleteReservation(x.id)}>Delete</a></td>
+            </tr>
           )}
         </tbody>
       </table>
@@ -173,15 +180,94 @@ const ReservationList = React.createClass({
 });
 
 const ResourceList = React.createClass({
+  getInitialState() {
+    return {
+      tags: [
+        {name: "laptop", state: "Required"},
+        {name: "classroom", state: "Required"},
+        {name: "server", state: "Excluded"},
+        {name: "projector", state: ""},
+        {name: "other", state: ""}
+      ],
+      resources: {
+        0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
+        1: {name: "classroom server", description: "description2", tags: ["classroom", "server"]},
+        2: {id: 2, name: "projector", description: "description3", tags: ["projector"]}
+      }
+    };
+  },
+
+  cycleState(tag_name) {
+    var tags = this.state.tags;
+    tags.forEach(function(x) {
+      if (x.name == tag_name) {
+        if (x.state == "Required") x.state = "Excluded";
+        else if (x.state == "Excluded") x.state = "";
+        else x.state = "Required";
+      }
+    });
+    this.setState({tags: tags});
+  },
+
+  editResource(id) {
+    this.props.setPstate({
+      route: "resource_editor",
+      view_id: id
+    });
+  },
+
+  deleteResource(id) {
+    console.log("resource deleted: " + id);
+  },
+
   render() {
     var me = this;
+    var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
+      <ul className="list-group">
+        {this.state.tags.map(x =>
+          <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+        )}
+      </ul>
+    );
+    var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Tags</th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.keys(me.state.resources).map(id => {
+            var x = me.state.resources[id];debugger;
+            return <tr key={"resource " + id}>
+              <td>{x.name}</td>
+              <td>{x.description}</td>
+              <td>{x.description}</td>
+              <td><a role="button" onClick={() => this.editResource(x.id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.deleteResource(x.id)}>Delete</a></td>
+            </tr>
+          })}
+        </tbody>
+      </table>
+    );
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
           <div className="row">
-            <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "resource_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
+            <div className="col-md-3">
+              <h3>Tags</h3>
+              {leftpane}
+            </div>
+            <div className="col-md-9">
+              <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "resource_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
+              {rightpane}
+            </div>
           </div>
         </div>
       </div>
