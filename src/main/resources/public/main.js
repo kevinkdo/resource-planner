@@ -3,7 +3,8 @@ const Router = React.createClass({
     var session = localStorage.getItem("session");
     return {
       route: session ? "reservation_list" : "login",
-      username: "kevinkdo"
+      username: "kevinkdo",
+      user_id: 234234
     };
   },
 
@@ -284,13 +285,96 @@ const ResourceCreator = React.createClass({
 });
 
 const ReservationCreator = React.createClass({
+  createResource() {
+    console.log("resource created!");
+    this.props.setPstate({ route: "resource_list" });
+  },
+
+  cancel() {
+    this.props.setPstate({ route: "resource_list" });
+  },
+
+  setResource(evt) {
+    this.setState({resource: evt.target.value});
+  },
+
+  setUserId(evt) {
+    this.setState({user_id: evt.target.value});
+  },
+
+  setStartDate(evt) {
+    this.setState({start_date: evt.target.value});
+  },
+
+  setStartTime(evt) {
+    this.setState({start_time: evt.target.value});
+  },
+
+  setEndDate(evt) {
+    this.setState({end_date: evt.target.value});
+  },
+
+  setEndTime(evt) {
+    this.setState({end_time: evt.target.value});
+  },
+
+  getInitialState() {
+    return {
+      resources: ["laptop", "resource 2"],
+      resource: "",
+      user_id: this.props.pstate.user_id,
+      start_date: null,
+      start_time: null,
+      end_date: null,
+      end_time: null
+    };
+  },
+
   render() {
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-        Reservation creator
+          <div className="row">
+            <div className="col-md-6 col-md-offset-3">
+              <form>
+                <legend>New reservation</legend>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_resource">Resource</label>
+                  <select className="form-control" id="reservation_creator_resource" value={this.state.resource} onChange={this.setResource}>
+                  {this.state.resources.map(x =>
+                    <option key={"resource" + x} value={x}>{x}</option>
+                  )}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_user_id">User ID (yours by default)</label>
+                  <input type="number" className="form-control" id="resource_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={this.setUserId}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_start_date">Start Date</label>
+                  <input type="date" className="form-control" id="resource_creator_start_date" value={this.state.start_date} onChange={this.setStartDate} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_start_time">Start Time</label>
+                  <input type="time" className="form-control" id="resource_creator_start_time" value={this.state.start_time} onChange={this.setStartTime} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_end_date">End Date</label>
+                  <input type="date" className="form-control" id="resource_creator_end_date" value={this.state.end_date} onChange={this.setEndDate} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_end_time">Start Time</label>
+                  <input type="time" className="form-control" id="resource_creator_end_time" value={this.state.end_time} onChange={this.setEndTime} />
+                </div>
+                <div className="btn-toolbar">
+                  <button type="submit" className="btn btn-primary" onClick={this.reserve}>Reserve</button>
+                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     )
