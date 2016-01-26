@@ -192,7 +192,7 @@ const ResourceList = React.createClass({
       resources: {
         0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
         1: {name: "classroom server", description: "description2", tags: ["classroom", "server"]},
-        2: {id: 2, name: "projector", description: "description3", tags: ["projector"]}
+        2: {name: "projector", description: "description3", tags: ["projector"]}
       }
     };
   },
@@ -242,13 +242,13 @@ const ResourceList = React.createClass({
         </thead>
         <tbody>
           {Object.keys(me.state.resources).map(id => {
-            var x = me.state.resources[id];debugger;
+            var x = me.state.resources[id];
             return <tr key={"resource " + id}>
               <td>{x.name}</td>
               <td>{x.description}</td>
               <td>{x.description}</td>
-              <td><a role="button" onClick={() => this.editResource(x.id)}>Edit</a></td>
-              <td><a role="button" onClick={() => this.deleteResource(x.id)}>Delete</a></td>
+              <td><a role="button" onClick={() => this.editResource(id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
             </tr>
           })}
         </tbody>
