@@ -371,13 +371,13 @@ const ResourceCreator = React.createClass({
 });
 
 const ReservationCreator = React.createClass({
-  createResource() {
-    console.log("resource created!");
-    this.props.setPstate({ route: "resource_list" });
+  createReservation() {
+    console.log("reservation created!");
+    this.props.setPstate({ route: "reservation_list" });
   },
 
   cancel() {
-    this.props.setPstate({ route: "resource_list" });
+    this.props.setPstate({ route: "reservation_list" });
   },
 
   setResource(evt) {
@@ -455,7 +455,7 @@ const ReservationCreator = React.createClass({
                   <input type="time" className="form-control" id="resource_creator_end_time" value={this.state.end_time} onChange={this.setEndTime} />
                 </div>
                 <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.reserve}>Reserve</button>
+                  <button type="submit" className="btn btn-primary" onClick={this.createReservation}>Reserve</button>
                   <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
