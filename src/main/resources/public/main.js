@@ -169,7 +169,9 @@ const ReservationList = React.createClass({
               {leftpane}
             </div>
             <div className="col-md-9">
-              <h3>Reservations <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
+              <h3>Reservations
+              <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
+              <p>from <input type="date" className="" id="reservation_list_start_date"/><input type="time" className="" id="reservation_list_start_time"/> to <input type="date" className="" id="reservation_list_end_date"/><input type="time" className="" id="reservation_list_end_time"/></p>
               {rightpane}
             </div>
           </div>
