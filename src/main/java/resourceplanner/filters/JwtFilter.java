@@ -1,22 +1,18 @@
 package resourceplanner.filters;
 
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import org.springframework.web.filter.GenericFilterBean;
+import utilities.ExceptionCreator;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.filter.GenericFilterBean;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureException;
-import utilities.ExceptionCreator;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Created by jiaweizhang on 1/17/2016.

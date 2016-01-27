@@ -6,28 +6,17 @@ package resourceplanner.controllers;
 
 import databases.JDBC;
 import org.springframework.web.bind.annotation.*;
-import requestdata.UserRequest;
+import requestdata.ReservationRequest;
 import responses.StandardResponse;
-import responses.data.Token;
-import utilities.PasswordHash;
-import utilities.TokenCreator;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import responses.data.Reservation;
+import responses.data.ReservationWithIDs;
+import responses.data.Resource;
+import responses.data.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import io.jsonwebtoken.Claims;
-import requestdata.*;
-import responses.StandardResponse;
-import responses.data.*;
-import resourceplanner.controllers.Controller;
 
 @RestController
 @RequestMapping("/api/reservations")

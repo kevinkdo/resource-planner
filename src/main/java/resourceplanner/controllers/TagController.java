@@ -3,17 +3,18 @@ package resourceplanner.controllers;
 /**
  * Created by jiaweizhang on 1/20/2016.
  */
-import databases.JDBC;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import responses.StandardResponse;
 import responses.data.Tags;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController

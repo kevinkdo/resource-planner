@@ -5,7 +5,6 @@ package resourceplanner.controllers;
  */
 
 import databases.JDBC;
-import io.jsonwebtoken.Claims;
 import org.springframework.web.bind.annotation.*;
 import requestdata.ResourceRequest;
 import responses.StandardResponse;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import resourceplanner.controllers.Controller;
 
 @RestController
 @RequestMapping("/api/resources")

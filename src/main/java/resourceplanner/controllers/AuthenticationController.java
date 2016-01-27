@@ -4,6 +4,9 @@ package resourceplanner.controllers;
  * Created by jiaweizhang on 1/16/2016.
  */
 
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
 import requestdata.UserRequest;
@@ -13,11 +16,6 @@ import utilities.PasswordHash;
 import utilities.TokenCreator;
 
 import java.sql.ResultSet;
-
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import java.sql.SQLException;
 import java.util.List;
 

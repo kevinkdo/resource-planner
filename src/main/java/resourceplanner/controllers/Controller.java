@@ -1,18 +1,8 @@
 package resourceplanner.controllers;
 
-import databases.JDBC;
 import io.jsonwebtoken.Claims;
-import org.springframework.web.bind.annotation.*;
-import requestdata.ResourceRequest;
-import responses.StandardResponse;
-import responses.data.Resource;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class Controller {
 	public boolean isAdmin(HttpServletRequest request){
