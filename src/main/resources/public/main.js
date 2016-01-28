@@ -126,11 +126,29 @@ const ReservationList = React.createClass({
   render() {
     var me = this;
     var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
-      <ul className="list-group">
-        {this.state.tags.map(x =>
-          <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
-        )}
-      </ul>
+      <div>
+        <h3></h3>
+        <div className="panel panel-primary">
+          <div className="panel-heading">
+            <h3 className="panel-title">Display settings</h3>
+          </div>
+          <div className="panel-body">
+            <button type="button" className="btn btn-primary">Load reservations</button>
+            <h4>Start</h4>
+              <input type="date" className="" id="reservation_list_start_date"/>
+              <input type="time" className="" id="reservation_list_start_time"/>
+            <h4>End</h4>
+              <input type="date" className="" id="reservation_list_end_date"/>
+              <input type="time" className="" id="reservation_list_end_time"/>
+            <h4>Tags</h4>
+            <ul className="list-group">
+              {this.state.tags.map(x =>
+                <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
     );
     var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
       <table className="table table-hover">
@@ -165,13 +183,11 @@ const ReservationList = React.createClass({
         <div className="container">
           <div className="row">
             <div className="col-md-3">
-              <h3>Tags</h3>
               {leftpane}
             </div>
             <div className="col-md-9">
               <h3>Reservations
               <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
-              <p>from <input type="date" className="" id="reservation_list_start_date"/><input type="time" className="" id="reservation_list_start_time"/> to <input type="date" className="" id="reservation_list_end_date"/><input type="time" className="" id="reservation_list_end_time"/></p>
               {rightpane}
             </div>
           </div>
@@ -225,11 +241,23 @@ const ResourceList = React.createClass({
   render() {
     var me = this;
     var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
-      <ul className="list-group">
-        {this.state.tags.map(x =>
-          <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
-        )}
-      </ul>
+      <div>
+        <h3></h3>
+        <div className="panel panel-primary">
+          <div className="panel-heading">
+            <h3 className="panel-title">Display settings</h3>
+          </div>
+          <div className="panel-body">
+            <button type="button" className="btn btn-primary">Load resources</button>
+            <h4>Tags</h4>
+            <ul className="list-group">
+              {this.state.tags.map(x =>
+                <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
     );
     var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
       <table className="table table-hover">
@@ -263,7 +291,6 @@ const ResourceList = React.createClass({
         <div className="container">
           <div className="row">
             <div className="col-md-3">
-              <h3>Tags</h3>
               {leftpane}
             </div>
             <div className="col-md-9">
