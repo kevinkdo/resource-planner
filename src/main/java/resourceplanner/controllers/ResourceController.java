@@ -29,7 +29,6 @@ public class ResourceController extends Controller{
         if(!isAdmin(request)){
             return new StandardResponse(true, "Not authorized", req);
         }
-
         return createResourceDB(req);
     }
 

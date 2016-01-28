@@ -7,14 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 public class Controller {
 	public boolean isAdmin(HttpServletRequest request){
 		final Claims claims = (Claims) request.getAttribute("claims");
-        int userId = Integer.parseInt(claims.get("user_id").toString());
-        if (userId == 1) {
-            return true;
-        }
-        else{
-        	return false;
-        }
-
+        int permission = Integer.parseInt(claims.get("permission").toString());
+        return permission == 1;
 	}
 
 	public int getRequesterID(HttpServletRequest request){
