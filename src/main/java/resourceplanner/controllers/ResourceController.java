@@ -5,8 +5,12 @@ package resourceplanner.controllers;
  */
 
 import databases.JDBC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ResourceServlet;
 import requestdata.ResourceRequest;
+import resourceplanner.services.ResourceService;
+import resourceplanner.services.UserService;
 import responses.StandardResponse;
 import responses.data.Resource;
 
@@ -21,6 +25,9 @@ import java.util.Set;
 @RequestMapping("/api/resources")
 public class ResourceController extends Controller{
 
+    @Autowired
+    private ResourceService resourceService;
+
     @RequestMapping(value = "",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
@@ -29,7 +36,7 @@ public class ResourceController extends Controller{
         if(!isAdmin(request)){
             return new StandardResponse(true, "Not authorized", req);
         }
-        return createResourceDB(req);
+        return resourceService.createRequest(req);
     }
 
     @RequestMapping(value = "/{resourceId}",

@@ -26,28 +26,31 @@ public class UserService {
     private JdbcTemplate jt;
 
     public StandardResponse createUser(UserRequest req) {
-        User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
+        if (!req.isValid()) {
+            return new StandardResponse(true, "invalid json", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+        }
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
-            return new StandardResponse(true, "Failed during hashing in register", committed);
+            return new StandardResponse(true, "Failed during hashing in register");
         }
         int emailExists = jt.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE email = ?;", Integer.class, req.getEmail());
         if (emailExists != 0) {
-            return new StandardResponse(true, "Email already exists", committed);
+            return new StandardResponse(true, "Email already exists");
         }
 
         int usernameExists = jt.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE username = ?;", Integer.class, req.getUsername());
         if (usernameExists != 0) {
-            return new StandardResponse(true, "Username already exists", committed);
+            return new StandardResponse(true, "Username already exists");
         }
 
         int returnedValue = jt.update(
                 "INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, ?);",
                 req.getEmail(), passwordHash, req.getUsername(), req.isShould_email());
+        User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
         return new StandardResponse(false, "Successfully registered.", committed);
     }
 
@@ -77,17 +80,20 @@ public class UserService {
     }
 
     public StandardResponse updateUser(UserRequest req, int userId) {
+         /* allow null fields or no? */
+        if (!req.isValid()) {
+            return new StandardResponse(true, "invalid json", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+        }
         List<User> users = getUsers(userId);
         if (users.size() == 0) {
             return new StandardResponse(true, "User not found");
         }
 
-        User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
-            return new StandardResponse(true, "Failed during hashing in register", committed);
+            return new StandardResponse(true, "Failed during hashing in register");
         }
 
         User user = users.get(0);
@@ -96,7 +102,7 @@ public class UserService {
             int emailExists = jt.queryForObject(
                     "SELECT COUNT(*) FROM users WHERE email = ?;", Integer.class, req.getEmail());
             if (emailExists != 0) {
-                return new StandardResponse(true, "Email already exists", committed);
+                return new StandardResponse(true, "Email already exists");
             }
         }
 
@@ -105,7 +111,7 @@ public class UserService {
             int usernameExists = jt.queryForObject(
                     "SELECT COUNT(*) FROM users WHERE username = ?;", Integer.class, req.getUsername());
             if (usernameExists != 0) {
-                return new StandardResponse(true, "Username already exists", committed);
+                return new StandardResponse(true, "Username already exists");
             }
         }
 
@@ -116,6 +122,8 @@ public class UserService {
                 passwordHash,
                 req.isShould_email(),
                 userId);
+
+        User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
         return new StandardResponse(false, "successfully updated", committed);
     }
 }
