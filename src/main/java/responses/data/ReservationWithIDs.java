@@ -47,4 +47,23 @@ public class ReservationWithIDs {
         return should_email;
     }
 
+    public void setUser_id(int user_id){
+        this.user_id = user_id;
+    }
+
+    public void setResource_id(int resource_id){
+        this.resource_id = resource_id;
+    }
+
+    public void setBegin_time(Timestamp begin_time){
+        this.begin_time = begin_time;
+    }
+
+    public void setEnd_time(Timestamp end_time){
+        this.end_time = end_time;
+    }
+
+    public void setShould_email(boolean should_email){
+        this.should_email = should_email;
+    }
 }

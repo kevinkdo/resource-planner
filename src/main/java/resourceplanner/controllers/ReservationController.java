@@ -54,8 +54,6 @@ public class ReservationController extends Controller{
         return getReservationByIdDB(reservationId);
     }
 
-    // Anyone can create reservation. They specify resource, start time, end time. Must check it does
-    // not overlap with another reservation
     @RequestMapping(value = "",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
@@ -69,6 +67,16 @@ public class ReservationController extends Controller{
     	else{
     		return new StandardResponse(true, "Non-Admin user attempting to make reservation for another user");
     	}
+    }
+
+    @RequestMapping(value = "/{reservationId}",
+            method = RequestMethod.POST,
+            headers = {"Content-type=application/json"})
+    @ResponseBody
+    public StandardResponse updateReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request,
+            @PathVariable final int reservationId){
+        //GET REQUESTER ID, and verify that the retrieved reservation is valid
+        return updateReservationDB(req, reservationId, request);
     }
 
     @RequestMapping(value = "/{reservationId}",
@@ -103,8 +111,7 @@ public class ReservationController extends Controller{
         //Two cases where it overlaps. 
         //1. Start time between other reservations start/end
         //2. End time between other reservations start/end
-        getMatchingReservations = getMatchingReservations + "((begin_time < ? AND begin_time > ?) OR (end_time < ? AND end_time > ?));";
-        System.out.println(getMatchingReservations);
+        getMatchingReservations = getMatchingReservations + "((begin_time <= ? AND begin_time >= ?) OR (end_time <=? AND end_time >= ?) OR (begin_time <= ?  AND end_time >= ?));";
 
         Connection c = JDBC.connect();
         PreparedStatement st = null;
@@ -115,13 +122,12 @@ public class ReservationController extends Controller{
             st.setTimestamp(2, req.getStart());
             st.setTimestamp(3, req.getEnd());
             st.setTimestamp(4, req.getStart());
-            System.out.println("Start " + req.getStart());
-            System.out.println("End " + req.getEnd());
+            st.setTimestamp(5, req.getStart());
+            st.setTimestamp(6, req.getEnd());
             System.out.println(st);
             ResultSet rs = st.executeQuery();
             
             List<Reservation> reservations = new ArrayList<Reservation>();
-            System.out.println("Got here");
             while (rs.next()){
                 ReservationWithIDs newRes = extractReservationFromResultSet(rs);
                 if(newRes == null){
@@ -203,7 +209,16 @@ public class ReservationController extends Controller{
 
 
     private StandardResponse createReservationDB(ReservationRequest req){
-    	//****NEED TO ADD OVERLAP CHECK***///
+        if(isOverlappingReservation(req.getBegin_time(), req.getEnd_time(), req.getResource_id())){
+            return new StandardResponse(true, "Reservation for that resource overlaps with specified times");
+        }
+        if(getUserByID(req.getUser_id()) == null){
+            return new StandardResponse(true, "User does not exist");
+        }
+        if(getResourceById(req.getResource_id()) == null){
+            return new StandardResponse(true, "Resource does not exist");
+        }
+
         Connection c = JDBC.connect();
         try {
             c.setAutoCommit(false);
@@ -248,8 +263,107 @@ public class ReservationController extends Controller{
         catch (Exception e){
         	return new StandardResponse(true, "Insert reservation commit failed");
         }
-        
 
+    }
+
+    private StandardResponse updateReservationDB(ReservationRequest req, int reservationId, HttpServletRequest request){
+        ReservationWithIDs existingRes = getReservationWithIdsObjectById(reservationId);
+
+        if(existingRes == null){
+            return new StandardResponse(true, "No reservation with given ID exists");
+        }
+        if(getRequesterID(request) != existingRes.getUser_id() && !isAdmin(request)){
+            return new StandardResponse(true, "Non-admin trying to alter another user's reservation");
+        }
+
+        if(req.getUser_id() != null){
+            existingRes.setUser_id(req.getUser_id());
+        }
+        if(req.getResource_id() != null){
+            existingRes.setResource_id(req.getResource_id());
+        }
+        if(req.getBegin_time() != null){
+            existingRes.setBegin_time(req.getBegin_time());
+        }
+        if(req.getEnd_time() != null){
+            existingRes.setEnd_time(req.getEnd_time());
+        }
+        if(req.getShould_email() != null){
+            existingRes.setShould_email(req.getShould_email());
+        }
+
+        if(isOverlappingReservation(existingRes.getBegin_time(), existingRes.getEnd_time(), existingRes.getResource_id(), reservationId)){
+            return new StandardResponse(true, "Resource is occupied during new reservation time");
+        }
+        if(getResourceById(existingRes.getResource_id()) == null || getUserByID(existingRes.getUser_id()) == null){
+            return new StandardResponse(true, "New user or resource id is not valid");
+        }
+
+        Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String query = "UPDATE reservations SET user_id = ?, resource_id = ?, begin_time = ?, end_time = ?, should_email = ? WHERE reservation_id = ?;";
+        try {
+            st = c.prepareStatement(query);
+            st.setInt(1, existingRes.getUser_id());
+            st.setInt(2, existingRes.getResource_id());
+            st.setTimestamp(3, existingRes.getBegin_time());
+            st.setTimestamp(4, existingRes.getEnd_time());
+            st.setBoolean(5, existingRes.getShould_email());
+            st.setInt(6, reservationId);
+
+            int affectedRows = st.executeUpdate();
+            if(affectedRows == 1){
+                return new StandardResponse(false, "Successfully updated reservation", existingRes);
+            }
+            else{
+                return new StandardResponse(true, "Error updating database entry for reservation");
+            }
+        }
+        catch (Exception e){
+            return new StandardResponse(true, "Error issuing SQL update");
+        }
+
+    }
+
+    private Boolean isOverlappingReservation(Timestamp start, Timestamp end, int resource_id, Integer currentReservation_id){
+        Connection c = JDBC.connect();
+        PreparedStatement st = null;
+        String query = "SELECT * FROM reservations WHERE resource_id = ? AND ((? >= begin_time AND ? <= end_time) OR (? >= begin_time AND ? <= end_time) OR (? <= begin_time AND ? >= end_time))";
+
+        if(currentReservation_id != null){
+            query = query + " AND reservation_id != ?";
+        }
+        query = query + ";";
+
+        try {
+            st = c.prepareStatement(query);
+            st.setInt(1, resource_id);
+            st.setTimestamp(2, start);
+            st.setTimestamp(3, start);
+            st.setTimestamp(4, end);
+            st.setTimestamp(5, end);
+            st.setTimestamp(6, start);
+            st.setTimestamp(7, end);
+            if(currentReservation_id != null){
+                st.setInt(8, currentReservation_id);
+            }
+
+            ResultSet rs = st.executeQuery();
+            c.close();
+            if(rs.next()){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
+
+    private Boolean isOverlappingReservation(Timestamp start, Timestamp end, int resource_id){
+        return isOverlappingReservation(start, end, resource_id, null);
     }
 
     private StandardResponse getReservationByIdDB(int reservationId) {

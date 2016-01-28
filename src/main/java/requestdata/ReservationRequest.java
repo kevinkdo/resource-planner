@@ -7,19 +7,19 @@ import java.sql.Timestamp;
 
 public class ReservationRequest {
     
-    private int user_id;
-    private int resource_id;
+    private Integer user_id;
+    private Integer resource_id;
     private Timestamp begin_time;
     private Timestamp end_time;
     private boolean should_email;
 
 
 
-    public int getUser_id(){
+    public Integer getUser_id(){
         return user_id;
     }
 
-    public int getResource_id(){
+    public Integer getResource_id(){
         return resource_id;
     }
 
@@ -31,9 +31,10 @@ public class ReservationRequest {
         return end_time;
     }
 
-    public boolean getShould_email(){
+    public Boolean getShould_email(){
         return should_email;
     }
+
 
 }
 
