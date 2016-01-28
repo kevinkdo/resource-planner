@@ -51,41 +51,18 @@ public class UserService {
         return new StandardResponse(false, "Successfully registered.", committed);
     }
 
-    /*
-    public StandardResponse getUserById(int userId) {
-        int userExists = jt.queryForObject(
-                "SELECT COUNT(*) FROM users WHERE user_id = ?;", Integer.class, userId);
-        if (userExists != 1) {
-            return new StandardResponse(true, "User not found");
-        }
-
-        User user = jt.queryForObject(
-                "SELECT email, username, should_email FROM users WHERE user_id = ?;",
-                new Object[]{userId},
-                new RowMapper<User>() {
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User();
-                        user.setEmail(rs.getString("email"));
-                        user.setUsername(rs.getString("username"));
-                        user.setShould_email(rs.getBoolean("should_email"));
-                        return user;
-                    }
-                });
-        return new StandardResponse(false, "successfully retrieved user", null, user);
-    }
-    */
-
     // alternate implementation that is possibly faster
     public StandardResponse getUserById(int userId) {
-        List<User> users = getUser(userId);
-        if (users.size()==0) {
+        List<User> users = getUsers(userId);
+        if (users.size() == 0) {
             return new StandardResponse(true, "User not found");
         }
-        return new StandardResponse(false, "successfully retrieved user", null, users.get(0));
+        User user = users.get(0);
+        return new StandardResponse(false, "successfully retrieved user", null, user);
     }
 
-    private List<User> getUser(int userId) {
-        List<User> users = jt.query(
+    public List<User> getUsers(int userId) {
+        return jt.query(
                 "SELECT email, username, should_email FROM users WHERE user_id = ?;",
                 new Object[]{userId},
                 new RowMapper<User>() {
@@ -97,12 +74,11 @@ public class UserService {
                         return user;
                     }
                 });
-        return users;
     }
 
     public StandardResponse updateUser(UserRequest req, int userId) {
-        List<User> users = getUser(userId);
-        if (users.size()==0) {
+        List<User> users = getUsers(userId);
+        if (users.size() == 0) {
             return new StandardResponse(true, "User not found");
         }
 
