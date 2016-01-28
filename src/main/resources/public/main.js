@@ -12,6 +12,8 @@ const Router = React.createClass({
     switch (this.state.route) {
       case "login":
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "admin_console":
+        return <AdminConsole setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_list":
         return <ReservationList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_creator":
@@ -57,7 +59,7 @@ const Navbar = React.createClass({
               <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
-                  <li><a href="#">Settings</a></li>
+                  <li><a href="#" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
                   <li role="separator" className="divider"></li>
                   <li><a href="#" onClick={this.logout} >Log Out</a></li>
                 </ul>
@@ -66,6 +68,65 @@ const Navbar = React.createClass({
           </div>
         </div>
       </nav>
+    );
+  }
+});
+
+const AdminConsole = React.createClass({
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
+  },
+
+  createUser() {
+    console.log("creating user");
+  },
+
+  cancel() {
+    this.props.setPstate({
+      route: "reservation_list"
+    });
+  },
+
+  getInitialState() {
+    return {
+      email: "",
+      username: "",
+      password: ""
+    };
+  },
+
+  render() {
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+          <div className="row">
+            <div className="col-md-6 col-md-offset-3">
+              <form>
+                <legend>New user</legend>
+                <div className="form-group">
+                  <label htmlFor="user_creator_email">Email</label>
+                  <input type="text" className="form-control" id="user_creator_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="user_creator_username">Username</label>
+                  <input type="text" className="form-control" id="user_creator_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="user_creator_password">Password</label>
+                  <input type="text" className="form-control" id="user_creator_username" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
+                </div>
+                <div className="btn-toolbar">
+                  <button type="submit" className="btn btn-primary" onClick={this.createUser}>Create user</button>
+                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 });
