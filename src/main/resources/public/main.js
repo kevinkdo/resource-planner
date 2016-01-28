@@ -24,6 +24,8 @@ const Router = React.createClass({
         return <ResourceList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_creator":
         return <ResourceCreator setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "resource_editor":
+        return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} />
     }
     return <div>ERROR</div>;
   }
@@ -184,6 +186,10 @@ const ReservationList = React.createClass({
     console.log("reservation deleted: " + id);
   },
 
+  refresh() {
+    console.log("refreshing reservations");
+  },
+
   render() {
     var me = this;
     var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
@@ -194,13 +200,13 @@ const ReservationList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary">Load reservations</button>
+            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
             <h4>Start</h4>
-              <input type="date" className="" id="reservation_list_start_date"/>
-              <input type="time" className="" id="reservation_list_start_time"/>
+              <input type="date" className="form-control" id="reservation_list_start_date"/>
+              <input type="time" className="form-control" id="reservation_list_start_time"/>
             <h4>End</h4>
-              <input type="date" className="" id="reservation_list_end_date"/>
-              <input type="time" className="" id="reservation_list_end_time"/>
+              <input type="date" className="form-control" id="reservation_list_end_date"/>
+              <input type="time" className="form-control" id="reservation_list_end_time"/>
             <h4>Tags</h4>
             <ul className="list-group">
               {this.state.tags.map(x =>
@@ -299,6 +305,10 @@ const ResourceList = React.createClass({
     console.log("resource deleted: " + id);
   },
 
+  refresh() {
+    console.log("refreshing resources");
+  },
+
   render() {
     var me = this;
     var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
@@ -309,7 +319,7 @@ const ResourceList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary">Load resources</button>
+            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load resources</button>
             <h4>Tags</h4>
             <ul className="list-group">
               {this.state.tags.map(x =>
@@ -565,6 +575,20 @@ const ReservationEditor = React.createClass({
 
         <div className="container">
         Reservation editor
+        </div>
+      </div>
+    )
+  }
+});
+
+const ResourceEditor = React.createClass({
+  render() {
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+        Resource editor
         </div>
       </div>
     )
