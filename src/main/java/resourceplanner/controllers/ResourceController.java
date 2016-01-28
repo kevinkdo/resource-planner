@@ -37,7 +37,15 @@ public class ResourceController extends Controller{
         return resourceService.getResourceById(resourceId);
     }
 
-    @RequestMapping(value = "/{resourceId}",
+    @RequestMapping(value = "/",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getResource(@RequestParam("required_tags") String[] requiredTags, @RequestParam("excluded_tags") String[] excludedTags) {
+        return resourceService.getResource(requiredTags, excludedTags);
+    }
+
+
+        @RequestMapping(value = "/{resourceId}",
             method = RequestMethod.PUT,
             headers = {"Content-type=application/json"})
     @ResponseBody
