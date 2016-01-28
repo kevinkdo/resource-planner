@@ -90,7 +90,8 @@ public class ResourceService {
                 new Object[] {resourceId},
                 String.class);
         resource.setTags(tags);
-        return new StandardResponse(false, "successfully retrieve resource", null, tags);
+        resource.setResource_id(resourceId);
+        return new StandardResponse(false, "successfully retrieve resource", null, resource);
     }
 
     public StandardResponse updateResource(ResourceRequest req, int resourceId) {
@@ -109,7 +110,7 @@ public class ResourceService {
                 req.getDescription(),
                 resourceId);
 
-        jt.update("DELETE FROM resourcetags WHERE resource_id = ?", resourceId);
+        jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
 
         // TODO refactor tag insert
         List<Object[]> batch = new ArrayList<Object[]>();
@@ -123,7 +124,14 @@ public class ResourceService {
                 "INSERT INTO resourcetags (resource_id, tag) VALUES (?, ?);",
                 batch);
 
-        return new StandardResponse(false, "successful resource update", req);
+        return new StandardResponse(false, "successful resource update", new Resource(resourceId, req.getName(),
+                req.getDescription(), req.getTags()));
     }
 
+    public StandardResponse deleteResource(int resourceId) {
+        jt.update("DELETE FROM reservations WHERE resource_id = ?;", resourceId);
+        jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
+        jt.update("DELETE FROM resources WHERE resource_id = ?;", resourceId);
+        return new StandardResponse(false, "successfully deleted resource and all accompanying reservations");
+    }
 }

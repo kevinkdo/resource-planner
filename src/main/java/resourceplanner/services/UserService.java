@@ -54,7 +54,6 @@ public class UserService {
         return new StandardResponse(false, "Successfully registered.", committed);
     }
 
-    // alternate implementation that is possibly faster
     public StandardResponse getUserById(int userId) {
         List<User> users = getUsers(userId);
         if (users.size() == 0) {
