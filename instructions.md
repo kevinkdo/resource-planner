@@ -27,6 +27,7 @@ $ SELECT * FROM user;
 $ ***Next, we want to make sure that your postgres password matches what is listed in our Spring code***
 $ ALTER USER Postgres WITH PASSWORD 'password';
 $ *** Now we return to normal shell user ***
+$ \q
 $ su vagrant (password should be 'vagrant')
 $ *** Finally, change directory to normal vagrant directory***
 ```
