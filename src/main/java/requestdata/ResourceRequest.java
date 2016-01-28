@@ -10,6 +10,10 @@ public class ResourceRequest {
     private String description;
     private List<String> tags;
 
+    public boolean isValid() {
+        return name != null && description != null && tags != null;
+    }
+
     public String getName() {
         return name;
     }

@@ -28,9 +28,6 @@ public class UserController extends Controller{
         if (!isAdmin(request)) {
             return new StandardResponse(true, "Not authorized", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
-        if (!req.isValid()) {
-            return new StandardResponse(true, "invalid json", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
-        }
         return userService.createUser(req);
     }
 
@@ -52,11 +49,17 @@ public class UserController extends Controller{
         if (!isAdmin(request)) {
             return new StandardResponse(true, "Not authorized");
         }
-        /* allow null fields or no? */
-        if (!req.isValid()) {
-            return new StandardResponse(true, "invalid json", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
-        }
         return userService.updateUser(req, userId);
+    }
+
+    @RequestMapping(value = "/{userId}",
+            method = RequestMethod.DELETE)
+    @ResponseBody
+    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            return new StandardResponse(true, "Not authorized");
+        }
+        return userService.deleteUser(userId);
     }
 }
 
