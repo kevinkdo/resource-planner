@@ -125,4 +125,11 @@ public class UserService {
         User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
         return new StandardResponse(false, "successfully updated", committed);
     }
+
+    public StandardResponse deleteUser(int userId) {
+        jt.update("DELETE FROM reservations WHERE user_id = ?;", userId);
+        jt.update("DELETE FROM users WHERE user_id = ?;", userId);
+        return new StandardResponse(false, "successfully deleted user");
+        // TODO make sure that original admin cannot be deleted
+    }
 }

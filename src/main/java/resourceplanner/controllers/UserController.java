@@ -51,5 +51,15 @@ public class UserController extends Controller{
         }
         return userService.updateUser(req, userId);
     }
+
+    @RequestMapping(value = "/{userId}",
+            method = RequestMethod.DELETE)
+    @ResponseBody
+    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            return new StandardResponse(true, "Not authorized");
+        }
+        return userService.deleteUser(userId);
+    }
 }
 
