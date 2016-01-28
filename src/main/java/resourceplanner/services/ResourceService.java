@@ -115,59 +115,53 @@ public class ResourceService {
                     }
                 });
 
-
-        Map<Integer, Res> processList = new TreeMap<Integer, Res>();
-        Set<Integer> deleteList = new TreeSet<Integer>();
+        Map<Integer, Resource> processList = new TreeMap<Integer, Resource>();
         Set<String> excluded = new HashSet<String>(Arrays.asList(excludedTags));
         Set<String> required = new HashSet<String>(Arrays.asList(requiredTags));
-        List<RT> keepList = new ArrayList<RT>();
 
         for (int i=0; i<rts.size(); i++) {
             RT current = rts.get(i);
-            if (excluded.contains(current.tag)) {
-                deleteList.add(current.resourceId);
-            }
-        }
-
-        if (rts.size() == 0) {
-            return new StandardResponse(false, "success", new Resources(new ArrayList()));
-        }
-
-        for (int i=rts.size()-1; i>=0; i--) {
-            RT current = rts.get(i);
-            if (deleteList.contains(current.resourceId)) {
-                rts.remove(i);
-            }
-        }
-
-        for (int i=0; i<rts.size(); i++) {
-            RT current = rts.get(i);
-            if (required.contains(current.tag)) {
-                keepList.add(current);
-            }
-        }
-
-
-        for (int i=0; i<keepList.size(); i++) {
-            RT current = keepList.get(i);
             if (processList.keySet().contains(current.resourceId)) {
-                processList.get(current.resourceId).tags.add(current.tag);
+                processList.get(current.resourceId).getTags().add(current.tag);
             } else {
                 List<String> tagList = new ArrayList<String>();
                 tagList.add(current.tag);
-                Res r = new Res(current.name, current.description, current.resourceId, tagList);
+                Resource r = new Resource(current.resourceId, current.name, current.description, tagList);
                 processList.put(current.resourceId, r);
             }
         }
 
-        List<Resource> response = new ArrayList<Resource>();
+        Map<Integer, Resource> keepMap = new TreeMap<Integer, Resource>();
         for (int i : processList.keySet()) {
-            Res res = processList.get(i);
-            Resource r = new Resource(res.resourceId, res.name, res.description, res.tags);
-            response.add(r);
+            List<String> tags = processList.get(i).getTags();
+            for (int j=0; j<tags.size(); j++) {
+                String tag = tags.get(j);
+                if (required.contains(tag)) {
+                    keepMap.put(i, processList.get(i));
+                    break;
+                }
+            }
         }
 
-        return new StandardResponse(false, "getResource", response);
+        Set<Integer> deleteSet = new HashSet<Integer>();
+        for (int i : processList.keySet()) {
+            List<String> tags = processList.get(i).getTags();
+            for (int j=0; j<tags.size(); j++) {
+                String tag = tags.get(j);
+                if (excluded.contains(tag)) {
+                    deleteSet.add(i);
+                    break;
+                }
+            }
+        }
+
+        keepMap.keySet().removeAll(deleteSet);
+        List<Resource> response = new ArrayList<Resource>();
+        for (int i : keepMap.keySet()) {
+            response.add(keepMap.get(i));
+        }
+
+        return new StandardResponse(false, "getResource", null, new Resources(response));
     }
 
     private static class RT {
@@ -175,20 +169,6 @@ public class ResourceService {
         private String description;
         private int resourceId;
         private String tag;
-    }
-
-    private static class Res {
-        private String name;
-        private String description;
-        private int resourceId;
-        private List<String> tags;
-
-        public Res(String name, String description, int resourceId, List<String> tags) {
-            this.name = name;
-            this.description = description;
-            this.resourceId = resourceId;
-            this.tags = tags;
-        }
     }
 
     public StandardResponse updateResource(ResourceRequest req, int resourceId) {
