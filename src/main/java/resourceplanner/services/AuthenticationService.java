@@ -43,18 +43,21 @@ public class AuthenticationService {
             return new StandardResponse(true, "Username already exists");
         }
         int returnedValue = jt.update(
-                "INSERT INTO users (email, username, passhash, should_email) VALUES (?, ?, ?, true);",
+                "INSERT INTO users (email, username, passhash, permission, should_email) VALUES (?, ?, ?, 0, true);",
                 req.getEmail(), req.getUsername(), passwordHash);
         return new StandardResponse(false, "Successfully registered.");
     }
 
     public StandardResponse login(UserRequest req) {
         List<User> users = jt.query(
-                "SELECT user_id, passhash FROM users WHERE email = ? OR username = ?;",
+                "SELECT user_id, passhash, permission FROM users WHERE email = ? OR username = ?;",
                 new Object[]{req.getEmail(), req.getUsername()},
                 new RowMapper<User>() {
                     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User(rs.getInt("user_id"), rs.getString("passhash"));
+                        User user = new User();
+                        user.setUser_id(rs.getInt("user_id"));
+                        user.setPasshash(rs.getString("passhash"));
+                        user.setPermission(rs.getInt("permission"));
                         return user;
                     }
                 });
@@ -63,7 +66,7 @@ public class AuthenticationService {
         }
         try {
             if (PasswordHash.validatePassword(req.getPassword(), users.get(0).passhash)) {
-                Token token = new Token(TokenCreator.generateToken(users.get(0).user_id));
+                Token token = new Token(TokenCreator.generateToken(users.get(0).user_id, users.get(0).permission));
                 return new StandardResponse(false, "Successfully authenticated.", null, token);
             }
         } catch (Exception e) {
@@ -76,10 +79,30 @@ public class AuthenticationService {
     private final static class User {
         private int user_id;
         private String passhash;
+        private int permission;
 
-        public User(int user_id, String passhash) {
+        public int getUser_id() {
+            return user_id;
+        }
+
+        public void setUser_id(int user_id) {
             this.user_id = user_id;
+        }
+
+        public String getPasshash() {
+            return passhash;
+        }
+
+        public void setPasshash(String passhash) {
             this.passhash = passhash;
+        }
+
+        public int getPermission() {
+            return permission;
+        }
+
+        public void setPermission(int permission) {
+            this.permission = permission;
         }
     }
 }

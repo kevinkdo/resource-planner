@@ -9,11 +9,13 @@ create table users (
 	email varchar(255) unique not null,
 	passhash varchar(255) not null,
 	username varchar(255) unique not null,
+	permission int not null,
 	should_email boolean not null
 );
 
-insert into users (email, username, passhash, should_email)
-values ('admin@admin.com', 'admin', '1000:9816dd56235c68a566b1f50a1815ab96761ebf7ad33d84cd:5b209a5f9b1628fbd80cdffb0aa50b7ec58f07e93f9b18fc', false);
+insert into users (email, username, passhash, permission, should_email)
+values ('admin@admin.com', 'admin', '1000:9816dd56235c68a566b1f50a1815ab96761ebf7ad33d84cd:5b209a5f9b1628fbd80cdffb0aa50b7ec58f07e93f9b18fc',
+        1, false);
 
 create table resources (
   resource_id serial primary key not null,
