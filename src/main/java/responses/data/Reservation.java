@@ -22,6 +22,15 @@ public class Reservation {
         this.should_email = should_email;
     }
 
+    public Reservation(ReservationWithIDs reservation, User user, Resource resource){
+        this.reservation_id = reservation.getReservation_id();
+        this.user = user;
+        this.resource = resource;
+        this.begin_time = reservation.getBegin_time();
+        this.end_time = reservation.getEnd_time();
+        this.should_email = reservation.getShould_email();
+    }
+
 
     public int getReservation_id(){
         return reservation_id;
