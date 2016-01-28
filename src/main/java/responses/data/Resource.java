@@ -18,6 +18,26 @@ public class Resource {
         this.tags = tags;
     }
 
+    public Resource() {
+
+    }
+
+    public void setResource_id(int resource_id) {
+        this.resource_id = resource_id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
     public int getResource_id() {
         return resource_id;
     }

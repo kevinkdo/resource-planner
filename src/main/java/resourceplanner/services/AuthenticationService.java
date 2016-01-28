@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.UserRequest;
+import resourceplanner.models.AuthUser;
 import responses.StandardResponse;
 import responses.data.Token;
 import utilities.PasswordHash;
@@ -49,12 +50,12 @@ public class AuthenticationService {
     }
 
     public StandardResponse login(UserRequest req) {
-        List<User> users = jt.query(
+        List<AuthUser> users = jt.query(
                 "SELECT user_id, passhash, permission FROM users WHERE email = ? OR username = ?;",
                 new Object[]{req.getEmail(), req.getUsername()},
-                new RowMapper<User>() {
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User();
+                new RowMapper<AuthUser>() {
+                    public AuthUser mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        AuthUser user = new AuthUser();
                         user.setUser_id(rs.getInt("user_id"));
                         user.setPasshash(rs.getString("passhash"));
                         user.setPermission(rs.getInt("permission"));
@@ -65,8 +66,8 @@ public class AuthenticationService {
             return new StandardResponse(true, "Email and username do not exist");
         }
         try {
-            if (PasswordHash.validatePassword(req.getPassword(), users.get(0).passhash)) {
-                Token token = new Token(TokenCreator.generateToken(users.get(0).user_id, users.get(0).permission));
+            if (PasswordHash.validatePassword(req.getPassword(), users.get(0).getPasshash())) {
+                Token token = new Token(TokenCreator.generateToken(users.get(0).getUser_id(), users.get(0).getPermission()));
                 return new StandardResponse(false, "Successfully authenticated.", null, token);
             }
         } catch (Exception e) {
@@ -75,34 +76,4 @@ public class AuthenticationService {
         return new StandardResponse(true, "Failed to validate password.");
     }
 
-    /* TODO refactor into separate class */
-    private final static class User {
-        private int user_id;
-        private String passhash;
-        private int permission;
-
-        public int getUser_id() {
-            return user_id;
-        }
-
-        public void setUser_id(int user_id) {
-            this.user_id = user_id;
-        }
-
-        public String getPasshash() {
-            return passhash;
-        }
-
-        public void setPasshash(String passhash) {
-            this.passhash = passhash;
-        }
-
-        public int getPermission() {
-            return permission;
-        }
-
-        public void setPermission(int permission) {
-            this.permission = permission;
-        }
-    }
 }
