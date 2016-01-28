@@ -60,7 +60,7 @@ public class UserService {
             return new StandardResponse(true, "User not found");
         }
         User user = users.get(0);
-        return new StandardResponse(false, "successfully retrieved user", null, user);
+        return new StandardResponse(false, "successfully retrieved user", user);
     }
 
     public List<User> getUsers(int userId) {

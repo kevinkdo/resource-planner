@@ -34,7 +34,7 @@ public class TagController {
     public StandardResponse getTags(final HttpServletRequest request) {
         List<String> tags = jt.queryForList(
                 "SELECT DISTINCT tag FROM resourcetags;", String.class);
-        return new StandardResponse(false, "Successfully retrieved  tags", null, new Tags(tags));
+        return new StandardResponse(false, "Successfully retrieved  tags", new Tags(tags));
     }
 }
 

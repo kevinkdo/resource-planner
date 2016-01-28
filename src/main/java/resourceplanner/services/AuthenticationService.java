@@ -68,7 +68,7 @@ public class AuthenticationService {
         try {
             if (PasswordHash.validatePassword(req.getPassword(), users.get(0).getPasshash())) {
                 Token token = new Token(TokenCreator.generateToken(users.get(0).getUser_id(), users.get(0).getPermission()));
-                return new StandardResponse(false, "Successfully authenticated.", null, token);
+                return new StandardResponse(false, "Successfully authenticated.", token);
             }
         } catch (Exception e) {
             return new StandardResponse(true, "Failed to validate password.");

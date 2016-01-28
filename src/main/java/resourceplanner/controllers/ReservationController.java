@@ -5,21 +5,21 @@ package resourceplanner.controllers;
  */
 
 import databases.JDBC;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import requestdata.GetAllMatchingReservationRequest;
+import requestdata.ReservationRequest;
 import responses.StandardResponse;
 import responses.data.Reservation;
 import responses.data.ReservationWithIDs;
 import responses.data.Resource;
 import responses.data.User;
-import requestdata.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -258,7 +258,7 @@ public class ReservationController extends Controller{
     		return new StandardResponse(true, "Reservation with given ID not found");
     	}
     	else{
-    		return new StandardResponse(false, "Reservation with given ID found", null, reservation);
+    		return new StandardResponse(false, "Reservation with given ID found", reservation);
     	}
     }
 

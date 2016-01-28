@@ -91,7 +91,7 @@ public class ResourceService {
                 String.class);
         resource.setTags(tags);
         resource.setResource_id(resourceId);
-        return new StandardResponse(false, "successfully retrieve resource", null, resource);
+        return new StandardResponse(false, "successfully retrieve resource", resource);
     }
 
     public StandardResponse getResource(String[] requiredTags, String[] excludedTags) {
@@ -161,7 +161,7 @@ public class ResourceService {
             response.add(keepMap.get(i));
         }
 
-        return new StandardResponse(false, "getResource", null, new Resources(response));
+        return new StandardResponse(false, "getResource", new Resources(response));
     }
 
     private static class RT {
