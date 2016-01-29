@@ -1,4 +1,22 @@
-var DOMAIN = "http://colab-sbx-93.oit.duke.edu:8080";
+var send_xhr = function(verb, endpoint, token, success_callback, error_callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 200) {
+        success_callback(JSON.parse(xhr.responseText));
+      } else {
+        error_callback(JSON.parse(xhr.responseText));
+      }
+    }
+  };
+  xhr.open(verb, endpoint, true);
+  if (verb != "GET") {
+    xhr.setRequestHeader("Content-Type", "application/json");
+  }
+  xhr.setRequestHeader("Accept", "application/json");
+  xhr.setRequestHeader("Authorization", "Bearer " + token);
+  xhr.send();
+};
 
 const Router = React.createClass({
   getInitialState() {
@@ -6,23 +24,11 @@ const Router = React.createClass({
     return {
       route: session ? "reservation_list" : "login",
       username: "kevinkdo",
-      user_id: 234234
+      user_id: 0
     };
   },
 
   render() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (xhttp.readyState == 4) {
-        if (xhttp.status == 200) {
-          console.log(xhttp.responseText);
-        } else {
-          alert("Having network issues. Sorry!");
-        }
-      }
-    };
-    xhttp.open("GET", "/api/tags", true);
-    xhttp.send();
     switch (this.state.route) {
       case "login":
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
@@ -611,8 +617,11 @@ const ResourceEditor = React.createClass({
 
 const Login = React.createClass({
   handleSubmit() {
-    localStorage.setItem("session", "my_session_id");
-    this.props.setPstate({ route: "reservation_list" });
+    var xhr = send_xhr("POST", "/auth/login", "",
+      (obj) => console.log(obj),
+      (obj) => console.log(obj));
+    //localStorage.setItem("session", "my_session_id");
+    //this.props.setPstate({ route: "reservation_list" });
   },
 
   setEmail(evt) {
