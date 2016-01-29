@@ -1,3 +1,5 @@
+var DOMAIN = "http://colab-sbx-93.oit.duke.edu:8080";
+
 const Router = React.createClass({
   getInitialState() {
     var session = localStorage.getItem("session");
@@ -9,6 +11,18 @@ const Router = React.createClass({
   },
 
   render() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (xhttp.readyState == 4) {
+        if (xhttp.status == 200) {
+          console.log(xhttp.responseText);
+        } else {
+          alert("Having network issues. Sorry!");
+        }
+      }
+    };
+    xhttp.open("GET", "/api/tags", true);
+    xhttp.send();
     switch (this.state.route) {
       case "login":
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
