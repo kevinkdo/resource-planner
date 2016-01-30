@@ -1,11 +1,14 @@
-var send_xhr = function(verb, endpoint, token, success_callback, error_callback) {
+var send_xhr = function(verb, endpoint, token, data, success_callback, error_callback) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
     if (xhr.readyState == 4) {
       if (xhr.status == 200) {
-        success_callback(JSON.parse(xhr.responseText));
-      } else {
-        error_callback(JSON.parse(xhr.responseText));
+        var responseObject = JSON.parse(xhr.responseText);
+        if (responseObject.is_error) {
+          error_callback(responseObject);
+        } else {
+          success_callback(responseObject);
+        }
       }
     }
   };
@@ -15,7 +18,7 @@ var send_xhr = function(verb, endpoint, token, success_callback, error_callback)
   }
   xhr.setRequestHeader("Accept", "application/json");
   xhr.setRequestHeader("Authorization", "Bearer " + token);
-  xhr.send();
+  xhr.send(data);
 };
 
 const Router = React.createClass({
@@ -616,20 +619,23 @@ const ResourceEditor = React.createClass({
 });
 
 const Login = React.createClass({
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
+  },
+
   handleSubmit() {
-    var xhr = send_xhr("POST", "/auth/login", "",
-      (obj) => console.log(obj),
-      (obj) => console.log(obj));
-    //localStorage.setItem("session", "my_session_id");
-    //this.props.setPstate({ route: "reservation_list" });
-  },
-
-  setEmail(evt) {
-    this.setState({email: evt.target.value});
-  },
-
-  setPassword(evt) {
-    this.setState({password: evt.target.value});
+    var me = this;
+    var xhr = send_xhr("POST", "/auth/login", "o",
+      JSON.stringify({email:this.state.email, password:this.state.password}),
+      function(obj) {
+        localStorage.setItem("session", obj.data.token);
+        me.props.setPstate({ route: "reservation_list" });
+      },
+      function(obj) {
+        console.log("todo");
+      }
+    );
   },
 
   getInitialState() {
@@ -649,12 +655,12 @@ const Login = React.createClass({
               <br/>
               <form onSubmit={this.handleSubmit} >
                 <div className="form-group">
-                  <label htmlFor="exampleInputEmail1">Email address</label>
-                  <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email" onChange={this.setEmail} value={this.state.email}/>
+                  <label htmlFor="login_email">Email address</label>
+                  <input type="email" className="form-control" id="login_email" placeholder="Email" onChange={(evt)=>this.set("email", evt.target.value)} value={this.state.email}/>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="exampleInputPassword1">Password</label>
-                  <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password" onChange={this.setPassword} value={this.state.password}/>
+                  <label htmlFor="login_password">Password</label>
+                  <input type="password" className="form-control" id="login_password" placeholder="Password" onChange={(evt)=>this.set("password", evt.target.value)} value={this.state.password}/>
                 </div>
                 <button type="submit" className="btn btn-primary">Log In</button>
               </form>
