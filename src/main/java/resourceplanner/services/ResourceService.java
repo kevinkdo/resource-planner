@@ -115,7 +115,7 @@ public class ResourceService {
                     }
                 });
 
-        Map<Integer, Resource> processList = new TreeMap<Integer, Resource>();
+        Map<Integer, Resource> processList = new HashMap<Integer, Resource>();
         Set<String> excluded = new HashSet<String>(Arrays.asList(excludedTags));
         Set<String> required = new HashSet<String>(Arrays.asList(requiredTags));
 
@@ -131,19 +131,25 @@ public class ResourceService {
             }
         }
 
-        Map<Integer, Resource> keepMap = new TreeMap<Integer, Resource>();
+        Set<Integer> deleteSet = new HashSet<Integer>();
+
         for (int i : processList.keySet()) {
             List<String> tags = processList.get(i).getTags();
-            for (int j=0; j<tags.size(); j++) {
-                String tag = tags.get(j);
-                if (required.contains(tag)) {
-                    keepMap.put(i, processList.get(i));
+            for (String s : required) {
+                boolean doBreak = false;
+                for (int j=0; j<tags.size(); j++) {
+                    if (!tags.contains(s)) {
+                        deleteSet.add(i);
+                        doBreak = true;
+                        break;
+                    }
+                }
+                if (doBreak) {
                     break;
                 }
             }
         }
 
-        Set<Integer> deleteSet = new HashSet<Integer>();
         for (int i : processList.keySet()) {
             List<String> tags = processList.get(i).getTags();
             for (int j=0; j<tags.size(); j++) {
@@ -155,10 +161,10 @@ public class ResourceService {
             }
         }
 
-        keepMap.keySet().removeAll(deleteSet);
+        processList.keySet().removeAll(deleteSet);
         List<Resource> response = new ArrayList<Resource>();
-        for (int i : keepMap.keySet()) {
-            response.add(keepMap.get(i));
+        for (int i : processList.keySet()) {
+            response.add(processList.get(i));
         }
 
         return new StandardResponse(false, "getResource", new Resources(response));
