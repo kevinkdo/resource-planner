@@ -159,15 +159,9 @@ const AdminConsole = React.createClass({
 const ReservationList = React.createClass({
   getInitialState() {
     return {
-      loading_tags: false,
+      loading_tags: true,
       loading_table: false,
-      tags: [
-        {name: "laptop", state: "Required"},
-        {name: "classroom", state: "Required"},
-        {name: "server", state: "Excluded"},
-        {name: "projector", state: ""},
-        {name: "other", state: ""}
-      ],
+      tags: [],
       reservations: [
         {id: 0, resource_id: 0, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
         {id: 1, resource_id: 1, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
@@ -213,9 +207,24 @@ const ReservationList = React.createClass({
     console.log("refreshing reservations");
   },
 
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
+      function(obj) {
+        me.setState({
+          tags: obj.data.tags.map(x => ({name: x, state: ""})),
+          loading_tags: false
+        });
+      },
+      function(obj) {
+        console.log("todo");
+      }
+    );
+  },
+
   render() {
     var me = this;
-    var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
+    var leftpane =
       <div>
         <h3></h3>
         <div className="panel panel-primary">
@@ -231,15 +240,16 @@ const ReservationList = React.createClass({
               <input type="date" className="form-control" id="reservation_list_end_date"/>
               <input type="time" className="form-control" id="reservation_list_end_time"/>
             <h4>Tags</h4>
-            <ul className="list-group">
-              {this.state.tags.map(x =>
-                <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
-              )}
-            </ul>
+            {this.state.loading_tags ? <div className="loader">Loading...</div> : (
+              <ul className="list-group">
+                {this.state.tags.map(x =>
+                  <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                )}
+              </ul>
+            )}
           </div>
         </div>
       </div>
-    );
     var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
       <table className="table table-hover">
         <thead>
@@ -290,13 +300,7 @@ const ReservationList = React.createClass({
 const ResourceList = React.createClass({
   getInitialState() {
     return {
-      tags: [
-        {name: "laptop", state: "Required"},
-        {name: "classroom", state: "Required"},
-        {name: "server", state: "Excluded"},
-        {name: "projector", state: ""},
-        {name: "other", state: ""}
-      ],
+      tags: [],
       resources: {
         0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
         1: {name: "classroom server", description: "description2", tags: ["classroom", "server"]},
@@ -332,9 +336,24 @@ const ResourceList = React.createClass({
     console.log("refreshing resources");
   },
 
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
+      function(obj) {
+        me.setState({
+          tags: obj.data.tags.map(x => ({name: x, state: ""})),
+          loading_tags: false
+        });
+      },
+      function(obj) {
+        console.log("todo");
+      }
+    );
+  },
+
   render() {
     var me = this;
-    var leftpane = this.state.loading_tags ? <div className="loader">Loading...</div> : (
+    var leftpane =
       <div>
         <h3></h3>
         <div className="panel panel-primary">
@@ -344,15 +363,16 @@ const ResourceList = React.createClass({
           <div className="panel-body">
             <button type="button" className="btn btn-primary" onClick={this.refresh}>Load resources</button>
             <h4>Tags</h4>
-            <ul className="list-group">
-              {this.state.tags.map(x =>
-                <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
-              )}
-            </ul>
+            {this.state.loading_tags ? <div className="loader">Loading...</div> :
+              <ul className="list-group">
+                {this.state.tags.map(x =>
+                  <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                )}
+              </ul>
+            }
           </div>
         </div>
       </div>
-    );
     var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
       <table className="table table-hover">
         <thead>
