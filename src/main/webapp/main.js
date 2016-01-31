@@ -300,6 +300,8 @@ const ReservationList = React.createClass({
 const ResourceList = React.createClass({
   getInitialState() {
     return {
+      loading_tags: true,
+      loading_table: true,
       tags: [],
       resources: {
         0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
@@ -332,8 +334,25 @@ const ResourceList = React.createClass({
     console.log("resource deleted: " + id);
   },
 
-  refresh() {
-    console.log("refreshing resources");
+  loadResources() {
+    var me = this;
+    var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
+    var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
+    send_xhr("GET", "/api/resources/?required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
+      function(obj) {
+        var new_resources = {};
+        obj.data.resources.forEach(function(x) {
+          new_resources[x.resource_id] = x;
+        });
+        me.setState({
+          resources: new_resources,
+          loading_table: false
+        });
+      },
+      function(obj) {
+        console.log("todo");
+      }
+    );
   },
 
   componentDidMount() {
@@ -349,6 +368,7 @@ const ResourceList = React.createClass({
         console.log("todo");
       }
     );
+    this.loadResources();
   },
 
   render() {
@@ -361,7 +381,7 @@ const ResourceList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load resources</button>
+            <button type="button" className="btn btn-primary" onClick={this.loadResources}>Load resources</button>
             <h4>Tags</h4>
             {this.state.loading_tags ? <div className="loader">Loading...</div> :
               <ul className="list-group">
