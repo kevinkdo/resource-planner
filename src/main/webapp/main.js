@@ -327,7 +327,15 @@ const ResourceList = React.createClass({
   },
 
   deleteResource(id) {
-    console.log("resource deleted: " + id);
+    var me = this;
+    send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
+      function(obj) {
+        me.loadResources();
+      },
+      function(obj) {
+        console.log("todo");
+      }
+    );
   },
 
   loadResources() {
