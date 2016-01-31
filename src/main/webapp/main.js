@@ -303,11 +303,7 @@ const ResourceList = React.createClass({
       loading_tags: true,
       loading_table: true,
       tags: [],
-      resources: {
-        0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
-        1: {name: "classroom server", description: "description2", tags: ["classroom", "server"]},
-        2: {name: "projector", description: "description3", tags: ["projector"]}
-      }
+      resources: {}
     };
   },
 
@@ -410,7 +406,7 @@ const ResourceList = React.createClass({
             return <tr key={"resource " + id}>
               <td>{x.name}</td>
               <td>{x.description}</td>
-              <td>{x.description}</td>
+              <td>{x.tags.join(",")}</td>
               <td><a role="button" onClick={() => this.editResource(id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
             </tr>
@@ -459,7 +455,7 @@ const ResourceCreator = React.createClass({
     var me = this;
     this.setState({loading: true});
     send_xhr("POST", "/api/resources", localStorage.getItem("session"),
-      JSON.stringify({name:this.state.name, description:this.state.description, tags: this.state.tags}),
+      JSON.stringify({name:this.state.name, description:this.state.description, tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({ route: "resource_list" });
       },
