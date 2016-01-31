@@ -16,7 +16,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import resourceplanner.filters.JwtFilter;
 
 
-
 @EnableAutoConfiguration
 @ComponentScan
 @Configuration
