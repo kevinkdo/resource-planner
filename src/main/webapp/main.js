@@ -456,8 +456,18 @@ const TagInput = React.createClass({
 
 const ResourceCreator = React.createClass({
   createResource() {
-    console.log("resource created!");
-    this.props.setPstate({ route: "resource_list" });
+    var me = this;
+    this.setState({loading: true});
+    send_xhr("POST", "/api/resources", localStorage.getItem("session"),
+      JSON.stringify({name:this.state.name, description:this.state.description, tags: this.state.tags}),
+      function(obj) {
+        me.props.setPstate({ route: "resource_list" });
+      },
+      function(obj) {
+        me.setState({loading: false});
+        console.log("todo");
+      }
+    );
   },
 
   cancel() {
@@ -521,7 +531,7 @@ const ResourceCreator = React.createClass({
                   </div>
                 </div>
                 <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.createResource}>Create resource</button>
+                  <button type="submit" className={"btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.createResource}>Create resource</button>
                   <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
@@ -666,7 +676,7 @@ const Login = React.createClass({
 
   handleSubmit() {
     var me = this;
-    var xhr = send_xhr("POST", "/auth/login", "o",
+    send_xhr("POST", "/auth/login", "o",
       JSON.stringify({email:this.state.email, password:this.state.password}),
       function(obj) {
         localStorage.setItem("session", obj.data.token);
