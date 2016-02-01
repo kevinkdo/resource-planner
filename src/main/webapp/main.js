@@ -21,6 +21,29 @@ var send_xhr = function(verb, endpoint, token, data, success_callback, error_cal
   xhr.send(data);
 };
 
+//Convert Date object to y-m-d string for date input
+var formatDate = function(d) {
+  var month = '' + (d.getMonth() + 1);
+  var day = '' + d.getDate();
+  var year = d.getFullYear();
+
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+
+  return [year, month, day].join('-');
+};
+
+//Converts Date object to h:m string for time input
+var formatTime = function(d) {
+  var h = '' + d.getHours();
+  var m = '' + d.getMinutes();
+
+  if (h.length < 2) h = '0' + h;
+  if (m.length < 2) m = '0' + m;
+
+  return h + ":" + m;
+};
+
 const Router = React.createClass({
   getInitialState() {
     var session = localStorage.getItem("session");
@@ -162,13 +185,15 @@ const ReservationList = React.createClass({
       loading_tags: true,
       loading_table: false,
       tags: [],
-      reservations: [
-        {id: 0, resource_id: 0, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 1, resource_id: 1, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 2, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 3, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        {id: 4, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
-      ],
+      start: new Date(),
+      end: new Date(),
+      reservations: {
+        0: {id: 0, resource_id: 0, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        1: {id: 1, resource_id: 1, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        2: {id: 2, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        3: {id: 3, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
+        4: {id: 4, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
+      },
       resources: {
         0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
         1: {name: "classroom server", description: "description2", tags: ["classroom", "server"]},
@@ -190,6 +215,21 @@ const ReservationList = React.createClass({
       }
     });
     this.setState({tags: tags});
+  },
+
+  setDate(field, str) {
+    var parts = str.split('-');
+    this.state[field].setFullYear(parts[0]);
+    this.state[field].setMonth(parts[1]-1);
+    this.state[field].setDate(parts[2]);
+    this.setState(this.state);
+  },
+
+  setTime(field, str) {
+    var parts = str.split(':');
+    this.state[field].setHours(parts[0]);
+    this.state[field].setMinutes(parts[1]);
+    this.setState(this.state);
   },
 
   editReservation(id) {
@@ -234,11 +274,11 @@ const ReservationList = React.createClass({
           <div className="panel-body">
             <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
             <h4>Start</h4>
-              <input type="date" className="form-control" id="reservation_list_start_date"/>
-              <input type="time" className="form-control" id="reservation_list_start_time"/>
+              <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
+              <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
             <h4>End</h4>
-              <input type="date" className="form-control" id="reservation_list_end_date"/>
-              <input type="time" className="form-control" id="reservation_list_end_time"/>
+              <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
+              <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
             <h4>Tags</h4>
             {this.state.loading_tags ? <div className="loader">Loading...</div> : (
               <ul className="list-group">
@@ -263,8 +303,9 @@ const ReservationList = React.createClass({
           </tr>
         </thead>
         <tbody>
-          {this.state.reservations.map(x =>
-            <tr key={"reservation " + x.id}>
+          {Object.keys(me.state.reservations).map(id => {
+            var x = me.state.reservations[id];
+            return <tr key={"reservation " + x.id}>
               <td>{this.state.resources[x.resource_id].name}</td>
               <td>{this.state.users[x.user_id].username}</td>
               <td>{x.start_timestamp.toLocaleString()}</td>
@@ -272,7 +313,7 @@ const ReservationList = React.createClass({
               <td><a role="button" onClick={() => this.editReservation(x.id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteReservation(x.id)}>Delete</a></td>
             </tr>
-          )}
+          })}
         </tbody>
       </table>
     );
@@ -621,15 +662,15 @@ const ReservationCreator = React.createClass({
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_start_time">Start Time</label>
-                  <input type="time" className="form-control" id="resource_creator_start_time" value={this.state.start_time} onChange={this.setStartTime} />
+                  <input type="time" className="form-control" id="resource_creator_start_time" value={this.state.start_time} onChange={this.setStartTime}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_end_date">End Date</label>
                   <input type="date" className="form-control" id="resource_creator_end_date" value={this.state.end_date} onChange={this.setEndDate} />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="resource_creator_end_time">Start Time</label>
-                  <input type="time" className="form-control" id="resource_creator_end_time" value={this.state.end_time} onChange={this.setEndTime} />
+                  <label htmlFor="resource_creator_end_time">End Time</label>
+                  <input type="time" className="form-control" id="resource_creator_end_time" value={this.state.end_time} onChange={this.setEndTime}/>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createReservation}>Reserve</button>
