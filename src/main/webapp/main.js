@@ -598,28 +598,9 @@ const ReservationCreator = React.createClass({
     this.props.setPstate({ route: "reservation_list" });
   },
 
-  setResource(evt) {
-    this.setState({resource: evt.target.value});
-  },
-
-  setUserId(evt) {
-    this.setState({user_id: evt.target.value});
-  },
-
-  setStartDate(evt) {
-    this.setState({start_date: evt.target.value});
-  },
-
-  setStartTime(evt) {
-    this.setState({start_time: evt.target.value});
-  },
-
-  setEndDate(evt) {
-    this.setState({end_date: evt.target.value});
-  },
-
-  setEndTime(evt) {
-    this.setState({end_time: evt.target.value});
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
   },
 
   getInitialState() {
@@ -646,7 +627,7 @@ const ReservationCreator = React.createClass({
                 <legend>New reservation</legend>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_resource">Resource</label>
-                  <select className="form-control" id="reservation_creator_resource" value={this.state.resource} onChange={this.setResource}>
+                  <select className="form-control" id="reservation_creator_resource" value={this.state.resource} onChange={(evt)=>this.set("resource", evt.target.value)}>
                   {this.state.resources.map(x =>
                     <option key={"resource" + x} value={x}>{x}</option>
                   )}
@@ -654,23 +635,23 @@ const ReservationCreator = React.createClass({
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_user_id">User ID (yours by default)</label>
-                  <input type="number" className="form-control" id="resource_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={this.setUserId}/>
+                  <input type="number" className="form-control" id="resource_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={(evt)=>this.set("user_id", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_start_date">Start Date</label>
-                  <input type="date" className="form-control" id="resource_creator_start_date" value={this.state.start_date} onChange={this.setStartDate} />
+                  <input type="date" className="form-control" id="resource_creator_start_date" value={this.state.start_date} onChange={(evt)=>this.set("start_date", evt.target.value)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_start_time">Start Time</label>
-                  <input type="time" className="form-control" id="resource_creator_start_time" value={this.state.start_time} onChange={this.setStartTime}/>
+                  <input type="time" className="form-control" id="resource_creator_start_time" value={this.state.start_time} onChange={(evt)=>this.set("start_time", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_end_date">End Date</label>
-                  <input type="date" className="form-control" id="resource_creator_end_date" value={this.state.end_date} onChange={this.setEndDate} />
+                  <input type="date" className="form-control" id="resource_creator_end_date" value={this.state.end_date} onChange={(evt)=>this.set("end_date", evt.target.value)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_end_time">End Time</label>
-                  <input type="time" className="form-control" id="resource_creator_end_time" value={this.state.end_time} onChange={this.setEndTime}/>
+                  <input type="time" className="form-control" id="resource_creator_end_time" value={this.state.end_time} onChange={(evt)=>this.set("end_time", evt.target.value)}/>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createReservation}>Reserve</button>
