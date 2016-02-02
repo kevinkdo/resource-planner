@@ -40,8 +40,17 @@ public class ResourceController extends Controller{
     @RequestMapping(value = "/",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse getResource(@RequestParam("required_tags") String[] requiredTags, @RequestParam("excluded_tags") String[] excludedTags) {
+    public StandardResponse getResource(
+            @RequestParam(value = "required_tags", required = false) String[] requiredTags,
+            @RequestParam(value = "excluded_tags", required = false) String[] excludedTags) {
         return resourceService.getResource(requiredTags, excludedTags);
+    }
+
+    @RequestMapping(value = "",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getAllResources() {
+        return resourceService.getAllResources();
     }
 
 
