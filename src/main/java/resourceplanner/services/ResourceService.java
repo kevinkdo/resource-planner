@@ -95,6 +95,15 @@ public class ResourceService {
     }
 
     public StandardResponse getResource(String[] requiredTags, String[] excludedTags) {
+        if (requiredTags == null) {
+            requiredTags = new String[0];
+        }
+        if (excludedTags == null) {
+            excludedTags = new String[0];
+        }
+        if (requiredTags.length == 0 && excludedTags.length == 0) {
+            return getAllResources();
+        }
 
         final String statement =
                 "SELECT resources.name, resources.description, resources.resource_id, resourcetags.tag "+
@@ -209,6 +218,46 @@ public class ResourceService {
 
         return new StandardResponse(false, "successful resource update", new Resource(resourceId, req.getName(),
                 req.getDescription(), req.getTags()));
+    }
+
+    public StandardResponse getAllResources() {
+        final String statement =
+                "SELECT resources.name, resources.description, resources.resource_id, resourcetags.tag "+
+                        "FROM resourcetags INNER JOIN resources "+
+                        "ON resourcetags.resource_id = resources.resource_id "+
+                        "ORDER BY resourcetags.resource_id ASC ;";
+
+        List<RT> rts = jt.query(
+                statement,
+                new RowMapper<RT>() {
+                    public RT mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        RT rt = new RT();
+                        rt.name = rs.getString("name");
+                        rt.description = rs.getString("description");
+                        rt.resourceId = rs.getInt("resource_id");
+                        rt.tag = rs.getString("tag");
+                        return rt;
+                    }
+                });
+
+        Map<Integer, Resource> processList = new HashMap<Integer, Resource>();
+
+        for (int i=0; i<rts.size(); i++) {
+            RT current = rts.get(i);
+            if (processList.keySet().contains(current.resourceId)) {
+                processList.get(current.resourceId).getTags().add(current.tag);
+            } else {
+                List<String> tagList = new ArrayList<String>();
+                tagList.add(current.tag);
+                Resource r = new Resource(current.resourceId, current.name, current.description, tagList);
+                processList.put(current.resourceId, r);
+            }
+        }
+        List<Resource> response = new ArrayList<Resource>();
+        for (int i : processList.keySet()) {
+            response.add(processList.get(i));
+        }
+        return new StandardResponse(false, "getResource", new Resources(response));
     }
 
     public StandardResponse deleteResource(int resourceId) {
