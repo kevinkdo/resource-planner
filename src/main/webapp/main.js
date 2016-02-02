@@ -294,6 +294,7 @@ const ReservationList = React.createClass({
       <table className="table table-hover">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Resource</th>
             <th>User</th>
             <th>Start</th>
@@ -306,6 +307,7 @@ const ReservationList = React.createClass({
           {Object.keys(me.state.reservations).map(id => {
             var x = me.state.reservations[id];
             return <tr key={"reservation " + x.id}>
+              <td>{x.id}</td>
               <td>{this.state.resources[x.resource_id].name}</td>
               <td>{this.state.users[x.user_id].username}</td>
               <td>{x.start_timestamp.toLocaleString()}</td>
@@ -442,6 +444,7 @@ const ResourceList = React.createClass({
       <table className="table table-hover">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Description</th>
             <th>Tags</th>
@@ -453,6 +456,7 @@ const ResourceList = React.createClass({
           {Object.keys(me.state.resources).map(id => {
             var x = me.state.resources[id];
             return <tr key={"resource " + id}>
+              <td>{id}</td>
               <td>{x.name}</td>
               <td>{x.description}</td>
               <td>{x.tags.join(",")}</td>
