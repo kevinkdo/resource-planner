@@ -1,5 +1,6 @@
 package responses.data;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 /**
  * Created by Davis Treybig on 1/24/2016.
@@ -8,8 +9,8 @@ public class Reservation {
     private int reservation_id;
     private User user;
     private Resource resource;
-    private Timestamp begin_time;
-    private Timestamp end_time;
+    private String begin_time;
+    private String end_time;
     private boolean should_email;
 
     public Reservation(int reservation_id, User user, Resource resource, Timestamp begin_time,
@@ -17,8 +18,10 @@ public class Reservation {
         this.reservation_id = reservation_id;
         this.user = user;
         this.resource = resource;
-        this.begin_time = begin_time;
-        this.end_time = end_time;
+        String beg = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(begin_time);
+        String end = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(end_time);
+        this.begin_time = beg;
+        this.end_time = end;
         this.should_email = should_email;
     }
 
@@ -26,8 +29,10 @@ public class Reservation {
         this.reservation_id = reservation.getReservation_id();
         this.user = user;
         this.resource = resource;
-        this.begin_time = reservation.getBegin_time();
-        this.end_time = reservation.getEnd_time();
+        String beg = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(reservation.getBegin_time());
+        String end = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(reservation.getEnd_time());
+        this.begin_time = beg;
+        this.end_time = end;
         this.should_email = reservation.getShould_email();
     }
 
@@ -44,11 +49,11 @@ public class Reservation {
         return resource;
     }
 
-    public Timestamp getBegin_time() {
+    public String getBegin_time() {
         return begin_time;
     }
 
-    public Timestamp getEnd_time(){
+    public String getEnd_time(){
         return end_time;
     }
 

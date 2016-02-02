@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import requestdata.GetAllMatchingReservationRequest;
 import requestdata.ReservationRequest;
 import responses.StandardResponse;
-import responses.data.Reservation;
-import responses.data.ReservationWithIDs;
-import responses.data.Resource;
-import responses.data.User;
+import responses.data.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
@@ -255,7 +252,7 @@ public class ReservationController extends Controller{
 
         try{
         	c.commit();
-        	ReservationWithIDs newReservation = new ReservationWithIDs(reservation_id, req.getUser_id(), req.getResource_id(),
+        	ReservationWithIDsData newReservation = new ReservationWithIDsData(reservation_id, req.getUser_id(), req.getResource_id(),
         		req.getBegin_time(), req.getEnd_time(), req.getShould_email());
             c.close();
         	return new StandardResponse(false, "Reservation inserted successfully", newReservation);
