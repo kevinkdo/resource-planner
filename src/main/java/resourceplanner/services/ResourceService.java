@@ -74,7 +74,7 @@ public class ResourceService {
                     public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
                         Resource resource = new Resource();
                         resource.setName(rs.getString("name"));
-                        resource.setName(rs.getString("description"));
+                        resource.setDescription(rs.getString("description"));
                         return resource;
                     }
                 });
