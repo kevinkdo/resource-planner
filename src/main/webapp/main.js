@@ -113,7 +113,7 @@ const Navbar = React.createClass({
                 <ul className="dropdown-menu">
                   <li><a href="#" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
                   <li role="separator" className="divider"></li>
-                  <li><a href="#" onClick={this.logout} >Log Out</a></li>
+                  <li><a href="#" onClick={this.logout}>Log Out</a></li>
                 </ul>
               </li>
             </ul>
@@ -287,7 +287,7 @@ const ReservationList = React.createClass({
             {this.state.loading_tags ? <div className="loader">Loading...</div> : (
               <ul className="list-group">
                 {this.state.tags.map(x =>
-                  <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
                 )}
               </ul>
             )}
@@ -437,7 +437,7 @@ const ResourceList = React.createClass({
             {this.state.loading_tags ? <div className="loader">Loading...</div> :
               <ul className="list-group">
                 {this.state.tags.map(x =>
-                  <a key={x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  <a key={"resourcetag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
                 )}
               </ul>
             }
@@ -658,7 +658,7 @@ const ReservationCreator = React.createClass({
                 <legend>New reservation</legend>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_resource">Resource ID</label>
-                  <input type="number" className="form-control" id="resource_creator_resource_id" placeholder="Resource ID" value={this.state.resourcue_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
+                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resourcue_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_user_id">User ID (yours by default)</label>
