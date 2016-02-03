@@ -22,7 +22,7 @@ import org.apache.coyote.http11.Http11NioProtocol;
 @Configuration
 @SpringBootApplication
 public class Application {
-    boolean production = true;
+    boolean production = false;
     
     @Bean
     public FilterRegistrationBean jwtFilter() {
