@@ -10,12 +10,20 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.DispatcherServlet;
 import resourceplanner.filters.JwtFilter;
+import org.apache.catalina.connector.Connector;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
+import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+import org.apache.coyote.http11.Http11NioProtocol;
+
+
 
 @EnableAutoConfiguration
 @ComponentScan
 @Configuration
 @SpringBootApplication
 public class Application {
+    boolean production = false;
+    
     @Bean
     public FilterRegistrationBean jwtFilter() {
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
@@ -23,6 +31,25 @@ public class Application {
         registrationBean.addUrlPatterns("/api/*");
 
         return registrationBean;
+    }
+
+    @Bean
+    public EmbeddedServletContainerFactory servletContainer() {
+        TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory();
+        if (!production) {
+            tomcat.addAdditionalTomcatConnectors(createSslConnector());
+        }
+            
+        return tomcat;
+    }
+
+    private Connector createSslConnector(){
+        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
+        connector.setScheme("http");
+        connector.setSecure(false);
+        connector.setPort(8080);
+        return connector;
     }
 
     public static void main(String[] args) {
