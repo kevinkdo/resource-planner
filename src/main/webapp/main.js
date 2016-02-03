@@ -17,7 +17,9 @@ var send_xhr = function(verb, endpoint, token, data, success_callback, error_cal
     xhr.setRequestHeader("Content-Type", "application/json");
   }
   xhr.setRequestHeader("Accept", "application/json");
-  xhr.setRequestHeader("Authorization", "Bearer " + token);
+  if (token) {
+    xhr.setRequestHeader("Authorization", "Bearer " + token);
+  }
   xhr.send(data);
 };
 
