@@ -261,7 +261,9 @@ const ReservationList = React.createClass({
         });
       },
       function(obj) {
-        console.log("todo");
+        me.setState({
+          loading_tags: false
+        });
       }
     );
   },
@@ -350,7 +352,8 @@ const ResourceList = React.createClass({
       loading_tags: true,
       loading_table: true,
       tags: [],
-      resources: {}
+      resources: {},
+      error_msg: ""
     };
   },
 
@@ -380,7 +383,7 @@ const ResourceList = React.createClass({
         me.loadResources();
       },
       function(obj) {
-        console.log("todo");
+        me.loadResources();
       }
     );
   },
@@ -401,7 +404,9 @@ const ResourceList = React.createClass({
         });
       },
       function(obj) {
-        console.log("todo");
+        me.setState({
+          error_msg: obj.error_msg
+        });
       }
     );
   },
@@ -416,7 +421,9 @@ const ResourceList = React.createClass({
         });
       },
       function(obj) {
-        console.log("todo");
+        me.setState({
+          loading_tags: false
+        });
       }
     );
     this.loadResources();
@@ -482,6 +489,11 @@ const ResourceList = React.createClass({
             </div>
             <div className="col-md-9">
               <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "resource_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
+              {!this.state.error_msg ? <div></div> :
+                <div className="alert alert-danger">
+                  <strong>{this.state.error_msg}</strong>
+                </div>
+              }
               {rightpane}
             </div>
           </div>
@@ -517,8 +529,7 @@ const ResourceCreator = React.createClass({
         me.props.setPstate({ route: "resource_list" });
       },
       function(obj) {
-        me.setState({loading: false});
-        console.log("todo");
+        me.setState({loading: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -549,7 +560,8 @@ const ResourceCreator = React.createClass({
     return {
       name: "",
       description: "",
-      tags: [""]
+      tags: [""],
+      error_msg: ""
     };
   },
 
@@ -564,6 +576,11 @@ const ResourceCreator = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               <form>
                 <legend>New resource</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="resource_creator_name">Name</label>
                   <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
@@ -606,8 +623,7 @@ const ReservationCreator = React.createClass({
         me.props.setPstate({ route: "reservation_list" });
       },
       function(obj) {
-        me.setState({loading: false});
-        console.log("todo");
+        me.setState({loading: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -642,7 +658,8 @@ const ReservationCreator = React.createClass({
       user_id: this.props.pstate.user_id,
       start: new Date(),
       end: new Date(),
-      should_email: false
+      should_email: false,
+      error_msg: ""
     };
   },
 
@@ -656,6 +673,11 @@ const ReservationCreator = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               <form>
                 <legend>New reservation</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="reservation_creator_resource">Resource ID</label>
                   <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resourcue_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
@@ -720,8 +742,7 @@ const ResourceEditor = React.createClass({
         me.props.setPstate({ route: "resource_list" });
       },
       function(obj) {
-        me.setState({loading: false});
-        console.log("todo");
+        me.setState({loading: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -754,7 +775,8 @@ const ResourceEditor = React.createClass({
       loading: false,
       name: "",
       description: "",
-      tags: [""]
+      tags: [""],
+      error_msg: ""
     };
   },
 
@@ -767,7 +789,6 @@ const ResourceEditor = React.createClass({
       },
       function(obj) {
         me.setState({initial_load: false});
-        console.log("todo");
       }
     );
   },
@@ -783,13 +804,18 @@ const ResourceEditor = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               <form>
                 <legend>Edit resource {this.props.id}</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="resource_creator_name">Name</label>
-                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
+                  <input type="text" className="form-control" id="resource_editor_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_description">Description</label>
-                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
+                  <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_tags">Tags</label>
@@ -830,7 +856,7 @@ const Login = React.createClass({
         me.props.setPstate({ route: "reservation_list" });
       },
       function(obj) {
-        console.log("todo");
+        me.setState({error_msg: obj.error_msg});
       }
     );
   },
@@ -838,7 +864,8 @@ const Login = React.createClass({
   getInitialState() {
     return {
       email: "",
-      password: ""
+      password: "",
+      error_msg: ""
     }
   },
 
@@ -850,7 +877,12 @@ const Login = React.createClass({
             <div className="col-md-4 col-md-offset-4">
               <h1 className="text-center">Resource Manager</h1>
               <br/>
-              <form onSubmit={this.handleSubmit} >
+              <form onSubmit={this.handleSubmit}>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="login_email">Email address</label>
                   <input type="email" className="form-control" id="login_email" placeholder="Email" onChange={(evt)=>this.set("email", evt.target.value)} value={this.state.email}/>
