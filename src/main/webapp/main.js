@@ -51,7 +51,8 @@ const Router = React.createClass({
     return {
       route: session ? "reservation_list" : "login",
       username: "kevinkdo",
-      user_id: 0
+      user_id: 0,
+      view_id: 0
     };
   },
 
@@ -72,7 +73,7 @@ const Router = React.createClass({
       case "resource_creator":
         return <ResourceCreator setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_editor":
-        return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
     }
     return <div>ERROR</div>;
   }
@@ -708,13 +709,104 @@ const ReservationEditor = React.createClass({
 });
 
 const ResourceEditor = React.createClass({
+  editResource() {
+    var me = this;
+    this.setState({loading: true});
+    send_xhr("PUT", "/api/resources/" + this.props.id, localStorage.getItem("session"),
+      JSON.stringify({name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0)}),
+      function(obj) {
+        me.props.setPstate({ route: "resource_list" });
+      },
+      function(obj) {
+        me.setState({loading: false});
+        console.log("todo");
+      }
+    );
+  },
+
+  cancel() {
+    this.props.setPstate({ route: "resource_list" });
+  },
+
+  addTag() {
+    this.state.tags.push("");
+    this.setState({tags: this.state.tags});
+  },
+
+  setName(evt) {
+    this.setState({name: evt.target.value});
+  },
+
+  setDescription(evt) {
+    this.setState({description: evt.target.value});
+  },
+
+  setTag(evt, i) {
+    this.state.tags[i] = evt.target.value;
+    this.setState({tags: this.state.tags});
+  },
+
+  getInitialState() {
+    return {
+      initial_load: true,
+      loading: false,
+      name: "",
+      description: "",
+      tags: [""]
+    };
+  },
+
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/resources/" + this.props.id, localStorage.getItem("session"), null,
+      function(obj) {
+        obj.data.initial_load = false;
+        me.setState(obj.data);
+      },
+      function(obj) {
+        me.setState({initial_load: false});
+        console.log("todo");
+      }
+    );
+  },
+
   render() {
+    var last_tag = this.state.tags[this.state.tags.length-1];
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-        Resource editor
+          <div className="row">
+            <div className="col-md-6 col-md-offset-3">
+              <form>
+                <legend>Edit resource {this.props.id}</legend>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_name">Name</label>
+                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_description">Description</label>
+                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_tags">Tags</label>
+                  <div className="row">
+                    <div className="col-md-4">
+                      {this.state.tags.slice(0, -1).map((x,i) =>
+                        <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                      )}
+                      <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
+                    </div>
+                  </div>
+                </div>
+                <div className="btn-toolbar">
+                  <button type="submit" className={"btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.editResource}>Create resource</button>
+                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     )
