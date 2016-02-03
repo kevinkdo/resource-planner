@@ -223,8 +223,8 @@ public class ResourceService {
     public StandardResponse getAllResources() {
         final String statement =
                 "SELECT resources.name, resources.description, resources.resource_id, resourcetags.tag "+
-                        "FROM resourcetags INNER JOIN resources "+
-                        "ON resourcetags.resource_id = resources.resource_id "+
+                        "FROM resourcetags, resources "+
+                        "WHERE resourcetags.resource_id = resources.resource_id "+
                         "ORDER BY resourcetags.resource_id ASC ;";
 
         List<RT> rts = jt.query(
@@ -240,6 +240,27 @@ public class ResourceService {
                     }
                 });
 
+        final String noTagsStatement =
+                "SELECT name, description, resource_id "+
+                        "FROM resources "+
+                        "WHERE NOT EXISTS (SELECT 1 FROM resourcetags WHERE resourcetags.resource_id = resources.resource_id) "+
+                        "ORDER BY resource_id ASC ;";
+
+        List<RT> noTagsrts = jt.query(
+                noTagsStatement,
+                new RowMapper<RT>() {
+                    public RT mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        RT rt = new RT();
+                        rt.name = rs.getString("name");
+                        rt.description = rs.getString("description");
+                        rt.resourceId = rs.getInt("resource_id");
+                        rt.tag = null;
+                        return rt;
+                    }
+                });
+
+        rts.addAll(noTagsrts);
+
         Map<Integer, Resource> processList = new HashMap<Integer, Resource>();
 
         for (int i=0; i<rts.size(); i++) {
@@ -248,7 +269,9 @@ public class ResourceService {
                 processList.get(current.resourceId).getTags().add(current.tag);
             } else {
                 List<String> tagList = new ArrayList<String>();
-                tagList.add(current.tag);
+                if (current.tag != null) {
+                    tagList.add(current.tag);
+                }
                 Resource r = new Resource(current.resourceId, current.name, current.description, tagList);
                 processList.put(current.resourceId, r);
             }
