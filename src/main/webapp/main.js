@@ -326,7 +326,15 @@ const ReservationList = React.createClass({
   },
 
   deleteReservation(id) {
-    console.log("reservation deleted: " + id);
+    var me = this;
+    send_xhr("DELETE", "/api/reservations/" + id, localStorage.getItem("session"), null,
+      function(obj) {
+        me.loadReservations();
+      },
+      function(obj) {
+        me.loadReservations();
+      }
+    );
   },
 
   loadReservations() {
@@ -418,8 +426,8 @@ const ReservationList = React.createClass({
               <td>{x.user.username}</td>
               <td>{x.begin_time}</td>
               <td>{x.end_time}</td>
-              <td><a role="button" onClick={() => this.editReservation(x.id)}>Edit</a></td>
-              <td><a role="button" onClick={() => this.deleteReservation(x.id)}>Delete</a></td>
+              <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
             </tr>
           })}
         </tbody>
