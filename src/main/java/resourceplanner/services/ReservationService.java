@@ -41,7 +41,7 @@ import java.util.*;
 
 @Transactional
 @Service
-public class ReservationService extends Controller{
+public class ReservationService{
 
 	@Autowired
 	private UserService userService;
