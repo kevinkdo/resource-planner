@@ -224,13 +224,6 @@ public class ReservationService extends Controller{
     public StandardResponse updateReservationDB(ReservationRequest req, int reservationId, HttpServletRequest request){
         ReservationWithIDs existingRes = getReservationWithIdsObjectById(reservationId);
 
-        if(existingRes == null){
-            return new StandardResponse(true, "No reservation with given ID exists");
-        }
-        if(getRequesterID(request) != existingRes.getUser_id() && !isAdmin(request)){
-            return new StandardResponse(true, "Non-admin trying to alter another user's reservation");
-        }
-
         if(req.getUser_id() != null){
             existingRes.setUser_id(req.getUser_id());
         }

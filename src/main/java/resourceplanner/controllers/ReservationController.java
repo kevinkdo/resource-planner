@@ -80,6 +80,14 @@ public class ReservationController extends Controller{
     @ResponseBody
     public StandardResponse updateReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request,
             @PathVariable final int reservationId){
+        ReservationWithIDs existingRes = reservationService.getReservationWithIdsObjectById(reservationId);
+        if(existingRes == null){
+            return new StandardResponse(true, "No reservation with given ID exists");
+        }
+        if(getRequesterID(request) != existingRes.getUser_id() && !isAdmin(request)){
+            return new StandardResponse(true, "Non-admin trying to alter another user's reservation");
+        }
+
         return reservationService.updateReservationDB(req, reservationId, request);
     }
 
@@ -89,6 +97,9 @@ public class ReservationController extends Controller{
     public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
     	//We must do an initial get to check for the user of the reservation.    
         ReservationWithIDs reservation = reservationService.getReservationWithIdsObjectById(reservationId);
+        if(reservation == null){
+            return new StandardResponse(true, "No reservation with given ID exists");
+        }
         //Admin can delete ANY reservation, user can only delete his/her own
     	if(isAdmin(request) || getRequesterID(request) == reservation.getUser_id()){
     		return reservationService.deleteReservationByIdDB(reservationId);
