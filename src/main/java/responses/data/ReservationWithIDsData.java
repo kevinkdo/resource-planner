@@ -2,6 +2,7 @@ package responses.data;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import responses.data.ReservationWithIDs;
 
 /**
  * Created by jiaweizhang on 2/2/16.
@@ -24,6 +25,15 @@ public class ReservationWithIDsData {
         this.begin_time = beg;
         this.end_time = end;
         this.should_email = should_email;
+    }
+
+    public ReservationWithIDsData(ReservationWithIDs reservationWithIDs){
+        this.reservation_id = reservationWithIDs.getReservation_id();
+        this.user_id = reservationWithIDs.getUser_id();
+        this.resource_id = reservationWithIDs.getResource_id();
+        this.begin_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(reservationWithIDs.getBegin_time());
+        this.end_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(reservationWithIDs.getEnd_time());
+        this.should_email = reservationWithIDs.getShould_email();
     }
 
     public int getReservation_id() {

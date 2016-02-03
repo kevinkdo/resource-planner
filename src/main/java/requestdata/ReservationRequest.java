@@ -11,7 +11,7 @@ public class ReservationRequest {
     private Integer resource_id;
     private Timestamp begin_time;
     private Timestamp end_time;
-    private boolean should_email;
+    private Boolean should_email;
 
 
 
@@ -33,6 +33,11 @@ public class ReservationRequest {
 
     public Boolean getShould_email(){
         return should_email;
+    }
+
+    public boolean isValidCreateRequest(){
+        return user_id != null && resource_id != null && begin_time != null && end_time != null 
+            && should_email != null && begin_time.before(end_time);
     }
 
 

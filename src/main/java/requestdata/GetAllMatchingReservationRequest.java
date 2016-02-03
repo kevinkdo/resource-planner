@@ -38,7 +38,7 @@ public class GetAllMatchingReservationRequest {
     //The id_lists may be null if the query does not specify them, and that is fine. 
     //Only the timestamps need to be verified. 
     public boolean isValid(){
-        return (start != null && end != null);
+        return (start != null && end != null && start.before(end));
     }
 
     //Returns true if either of the id lists are null, indicating that
