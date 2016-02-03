@@ -49,6 +49,9 @@ public class ReservationService{
 	@Autowired
 	private ResourceService resourceService;
 
+	@Autowired
+	private JdbcTemplate jt;
+
 	// Matches all reservations from ANY of the supplied users or ANY of the supplied resources, if
     // they overlap with the start-end times
     public StandardResponse getMatchingReservations(GetAllMatchingReservationRequest req){
