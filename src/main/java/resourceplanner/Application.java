@@ -16,11 +16,14 @@ import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletCon
 import org.apache.coyote.http11.Http11NioProtocol;
 
 
+
 @EnableAutoConfiguration
 @ComponentScan
 @Configuration
 @SpringBootApplication
 public class Application {
+    boolean production = true;
+    
     @Bean
     public FilterRegistrationBean jwtFilter() {
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
@@ -33,7 +36,10 @@ public class Application {
     @Bean
     public EmbeddedServletContainerFactory servletContainer() {
         TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory();
-        tomcat.addAdditionalTomcatConnectors(createSslConnector());
+        if (!production) {
+            tomcat.addAdditionalTomcatConnectors(createSslConnector());
+        }
+            
         return tomcat;
     }
 
