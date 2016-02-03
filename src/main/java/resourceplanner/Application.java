@@ -35,22 +35,6 @@ public class Application {
     @Bean
     public EmbeddedServletContainerFactory servletContainer() {
         TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory();
-        tomcat.addAdditionalTomcatConnectors(createSslConnector());
-        return tomcat;
-    }
-
-    private Connector createSslConnector(){
-        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
-        connector.setScheme("http");
-        connector.setSecure(false);
-        connector.setPort(8080);
-        return connector;
-    }
-
-    @Bean
-    public EmbeddedServletContainerFactory servletContainer() {
-        TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory();
         if (!production) {
             tomcat.addAdditionalTomcatConnectors(createSslConnector());
         }
