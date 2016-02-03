@@ -16,13 +16,14 @@ import org.springframework.web.servlet.DispatcherServlet;
 import resourceplanner.filters.JwtFilter;
 
 
+
 @EnableAutoConfiguration
 @ComponentScan
 @Configuration
 @SpringBootApplication
 public class Application {
     boolean production = false;
-    
+
     @Bean
     public FilterRegistrationBean jwtFilter() {
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
