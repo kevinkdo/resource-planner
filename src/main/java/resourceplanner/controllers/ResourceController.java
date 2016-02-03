@@ -74,5 +74,15 @@ public class ResourceController extends Controller{
         }
         return resourceService.deleteResource(resourceId);
     }
+
+    @RequestMapping(value = "/{resourceId}/candelete",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse canDeleteResource(@PathVariable final int resourceId, final HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            return new StandardResponse(true, "Not authorized", request);
+        }
+        return resourceService.canDeleteResource(resourceId);
+    }
 }
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.ResourceRequest;
 import responses.StandardResponse;
+import responses.data.CanDelete;
 import responses.data.Resource;
 import responses.data.Resources;
 
@@ -373,5 +374,14 @@ public class ResourceService {
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resources WHERE resource_id = ?;", resourceId);
         return new StandardResponse(false, "successfully deleted resource and all accompanying reservations");
+    }
+
+    public StandardResponse canDeleteResource(int resourceId) {
+
+        int reservations = jt.queryForObject(
+                "SELECT COUNT(*) FROM reservations WHERE reservation_id = ? AND now() < end_time;", Integer.class, resourceId);
+
+        boolean canDelete = reservations == 0;
+        return new StandardResponse(false, "Successful response", new CanDelete(canDelete));
     }
 }
