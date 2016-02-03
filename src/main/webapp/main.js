@@ -283,25 +283,11 @@ const ReservationList = React.createClass({
   getInitialState() {
     return {
       loading_tags: true,
-      loading_table: false,
+      loading_table: true,
       tags: [],
       start: new Date(),
       end: new Date(),
-      reservations: {
-        0: {id: 0, resource_id: 0, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        1: {id: 1, resource_id: 1, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        2: {id: 2, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        3: {id: 3, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        4: {id: 4, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
-      },
-      resources: {
-        0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
-        1: {name: "classroom server", description: "description2", tags: ["classroom", "server"]},
-        2: {id: 2, name: "projector", description: "description3", tags: ["projector"]}
-      },
-      users: {
-        1: {email: "kevin.kydat.do@gmail.com", username: "kevinkdo", should_email: true}
-      }
+      reservations: {}
     };
   },
 
@@ -343,8 +329,25 @@ const ReservationList = React.createClass({
     console.log("reservation deleted: " + id);
   },
 
-  refresh() {
-    console.log("refreshing reservations");
+  loadReservations() {
+    var me = this;
+    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString(), localStorage.getItem("session"), null,
+      function(obj) {
+        var new_reservations = {};
+          obj.data.forEach(function(x) {
+            new_reservations[x.reservation_id] = x;
+          });
+        me.setState({
+          reservations: new_reservations,
+          loading_table: false
+        });
+      },
+      function(obj) {
+        me.setState({
+          loading_table: false
+        });
+      }
+    );
   },
 
   componentDidMount() {
@@ -362,6 +365,7 @@ const ReservationList = React.createClass({
         });
       }
     );
+    this.loadReservations();
   },
 
   render() {
@@ -374,7 +378,7 @@ const ReservationList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
+            <button type="button" className="btn btn-primary" onClick={this.loadReservations}>Load reservations</button>
             <h4>Start</h4>
               <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
@@ -408,12 +412,12 @@ const ReservationList = React.createClass({
         <tbody>
           {Object.keys(me.state.reservations).map(id => {
             var x = me.state.reservations[id];
-            return <tr key={"reservation " + x.id}>
-              <td>{x.id}</td>
-              <td>{this.state.resources[x.resource_id].name}</td>
-              <td>{this.state.users[x.user_id].username}</td>
-              <td>{x.start_timestamp.toLocaleString()}</td>
-              <td>{x.end_timestamp.toLocaleString()}</td>
+            return <tr key={"reservation " + x.reservation_id}>
+              <td>{x.reservation_id}</td>
+              <td>{x.resource.name}</td>
+              <td>{x.user.username}</td>
+              <td>{x.begin_time}</td>
+              <td>{x.end_time}</td>
               <td><a role="button" onClick={() => this.editReservation(x.id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteReservation(x.id)}>Delete</a></td>
             </tr>
