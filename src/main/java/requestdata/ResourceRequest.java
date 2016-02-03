@@ -1,5 +1,7 @@
 package requestdata;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -23,6 +25,7 @@ public class ResourceRequest {
     }
 
     public List<String> getTags() {
+        tags = new ArrayList<String>(new LinkedHashSet<String>(tags));
         return tags;
     }
 }

@@ -48,8 +48,12 @@ public class UserService {
         }
 
         int returnedValue = jt.update(
-                "INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, ?);",
-                req.getEmail(), passwordHash, req.getUsername(), req.isShould_email());
+                "INSERT INTO users (email, passhash, username, should_email, permission) VALUES (?, ?, ?, ?, ?);",
+                req.getEmail(),
+                passwordHash,
+                req.getUsername(),
+                req.isShould_email(),
+                0);
         User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
         return new StandardResponse(false, "Successfully registered.", committed);
     }
