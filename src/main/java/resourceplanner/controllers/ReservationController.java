@@ -21,6 +21,14 @@ import java.util.List;
 import resourceplanner.services.ReservationService;
 
 
+import org.springframework.mail.*;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import java.util.Properties;
+import org.springframework.mail.javamail.MimeMessageHelper;
+
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController extends Controller{
@@ -64,6 +72,27 @@ public class ReservationController extends Controller{
     	//An admin can make a reservation for anyone. A normal user can only make a reservation for himself. 
     	// Verify that the user_id in the reservation == current user OR the current user is the admin
         
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+        sender.setUsername("ResourceManagerAlerts@gmail.com");
+        sender.setPassword("resourcemanager");
+        sender.setHost("smtp.gmail.com");
+        sender.setPort(587);
+
+
+        Properties javaMailProperties = new Properties();
+        javaMailProperties.setProperty("mail.smtp.auth", "true");
+        javaMailProperties.setProperty("mail.smtp.starttls.enable", "true");
+
+        sender.setJavaMailProperties(javaMailProperties);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo("davis.treybig@gmail.com");
+        message.setText("Plz work");
+        message.setSubject("Hi");
+        message.setFrom("resourcemanager@gmail.com");
+
+        sender.send(message);
+
         if(!req.isValidCreateRequest()){
             return new StandardResponse(true, "Begin time after end time");
         }
