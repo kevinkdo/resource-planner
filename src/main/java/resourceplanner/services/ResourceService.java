@@ -357,7 +357,6 @@ public class ResourceService {
 
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
 
-        // TODO refactor tag insert
         List<Object[]> batch = new ArrayList<Object[]>();
         for (String tag : req.getTags()) {
             Object[] values = new Object[]{
@@ -374,6 +373,12 @@ public class ResourceService {
     }
 
     public StandardResponse deleteResource(int resourceId) {
+        int resourceExists = jt.queryForObject(
+                "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, resourceId);
+        if (resourceExists != 1) {
+            return new StandardResponse(true, "Resource does not exist");
+        }
+
         jt.update("DELETE FROM reservations WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resources WHERE resource_id = ?;", resourceId);
