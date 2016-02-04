@@ -41,7 +41,7 @@ public class ReservationController extends Controller{
             return reservationService.getMatchingReservations(req);
         }
         else{
-            return new StandardResponse(true, "Invalid input parameters (Issue with start and end times");
+            return new StandardResponse(true, "Invalid input parameters (Issue with start and end times)");
         }
     }
 
