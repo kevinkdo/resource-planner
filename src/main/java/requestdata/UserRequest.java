@@ -11,11 +11,7 @@ public class UserRequest {
     private Boolean should_email;
 
     public boolean isValid() {
-        boolean valid = email != null && password != null && username != null && should_email != null;
-        if (!valid) {
-            return false;
-        }
-        return !(email.length() >= 250 || username.length() >= 250);
+        return email != null && password != null && username != null && should_email != null;
     }
 
     public boolean isUpdateValid() {

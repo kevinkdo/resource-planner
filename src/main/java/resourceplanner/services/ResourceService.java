@@ -36,6 +36,10 @@ public class ResourceService {
             return new StandardResponse(true, "Invalid request");
         }
 
+        if (req.getName().length() < 1) {
+            return new StandardResponse(true, "Resource name required");
+        }
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
                 new PreparedStatementCreator() {

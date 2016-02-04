@@ -27,6 +27,22 @@ public class AuthenticationService {
     private JdbcTemplate jt;
 
     public StandardResponse register(UserRequest req) {
+        if (!req.isValid()) {
+            return new StandardResponse(true, "Request is not valid");
+        }
+
+        if (req.getEmail().length() < 5 || req.getEmail().length() > 250) {
+            return new StandardResponse(true, "Email must be between 5 and 250 characters long");
+        }
+
+        if (req.getUsername().length() < 1 || req.getUsername().length() > 250) {
+            return new StandardResponse(true, "Username must be between 1 and 250 characters long");
+        }
+
+        if (req.getPassword().length < 1 || req.getPassword().length > 250) {
+            return new StandardResponse(true, "Password must be between 1 and 250 characters long");
+        }
+
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
