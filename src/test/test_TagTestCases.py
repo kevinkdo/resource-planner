@@ -13,7 +13,7 @@ class TestTagTestCases(unittest.TestCase):
 
   def test_GetInitialTags(self):      
       r = requests.get(self.baseUrl + self.tagUrl, headers = self.headers)
-      decoded =  r.json()#json.loads(r.text)
+      decoded =  r.json()
       assert decoded['is_error'] == False 
       assert decoded['data'] == {'tags': []}
       assert decoded['error_msg'] == 'Successfully retrieved  tags'
