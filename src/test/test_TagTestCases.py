@@ -2,7 +2,7 @@ import unittest
 import json
 import requests
 
-class TestTagTestCases(unittest.TestCase):
+class TagTestCases(unittest.TestCase):
   def setUp(self):
       self.baseUrl = 'http://localhost:8080/'
       self.headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
@@ -12,7 +12,7 @@ class TestTagTestCases(unittest.TestCase):
 
   def test_GetInitialTags(self):      
       r = requests.get(self.baseUrl + self.tagUrl, headers = self.headers)
-      decoded =  r.json()
+      decoded = r.json()
       assert decoded['is_error'] == False 
       assert decoded['data'] == {'tags': []}
       assert decoded['error_msg'] == 'Successfully retrieved tags'
