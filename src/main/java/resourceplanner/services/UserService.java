@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import requestdata.UserRequest;
 import responses.StandardResponse;
 import responses.data.User;
+import responses.data.UserUpdate;
 import utilities.PasswordHash;
 
 import java.sql.ResultSet;
@@ -83,8 +84,7 @@ public class UserService {
     }
 
     public StandardResponse updateUser(UserRequest req, int userId) {
-         /* allow null fields or no? */
-        if (!req.isValid()) {
+        if (!req.isUpdateValid()) {
             return new StandardResponse(true, "invalid json", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         List<User> users = getUsers(userId);
@@ -92,6 +92,7 @@ public class UserService {
             return new StandardResponse(true, "User not found");
         }
 
+        /*
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
@@ -117,17 +118,24 @@ public class UserService {
                 return new StandardResponse(true, "Username already exists");
             }
         }
+        */
 
-        // do update
+        // do full update
+        /*
         jt.update("UPDATE users SET email = ?, username = ?, passhash = ?, should_email = ? WHERE user_id = ?;",
                 req.getEmail(),
                 req.getUsername(),
                 passwordHash,
                 req.isShould_email(),
                 userId);
+                */
+        jt.update("UPDATE users SET should_email = ? WHERE user_id = ?;",
+                req.isShould_email(),
+                userId);
 
-        User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
-        return new StandardResponse(false, "successfully updated", committed);
+        //User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
+        UserUpdate committed = new UserUpdate(req.isShould_email());
+        return new StandardResponse(false, "Successfully updated email.", committed);
     }
 
     public StandardResponse deleteUser(int userId) {

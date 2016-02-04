@@ -14,6 +14,11 @@ public class UserRequest {
         return email != null && password != null && username != null && should_email != null;
     }
 
+    public boolean isUpdateValid() {
+        return should_email != null;
+    }
+
+
     public String getEmail() {
         return email;
     }
