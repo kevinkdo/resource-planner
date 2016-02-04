@@ -9,14 +9,13 @@ class TestTagTestCases(unittest.TestCase):
       self.resetUrl = '/admin/init'
       self.tagUrl = 'api/tags'
       r = requests.get(self.baseUrl + self.resetUrl, headers = self.headers)
-      print r.text
 
   def test_GetInitialTags(self):      
       r = requests.get(self.baseUrl + self.tagUrl, headers = self.headers)
       decoded =  r.json()
       assert decoded['is_error'] == False 
       assert decoded['data'] == {'tags': []}
-      assert decoded['error_msg'] == 'Successfully retrieved  tags'
+      assert decoded['error_msg'] == 'Successfully retrieved tags'
 
   def test_GetTagsAfterPosting(self):
       resource = {"name":"some resource", "description":"some resource description", "tags":["tag1","tag2"]}
@@ -25,7 +24,7 @@ class TestTagTestCases(unittest.TestCase):
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'description': u'some resource description', u'tags': [u'tag1', u'tag2'], u'name': u'some resource', u'resource_id': 1}
-      assert decoded['error_msg'] == 'successful resource insert'
+      assert decoded['error_msg'] == 'Successfully inserted resource'
 
 if __name__ == '__main__':
     unittest.main()
