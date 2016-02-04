@@ -73,9 +73,6 @@ public class ReservationController extends Controller{
     public StandardResponse createReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request){
     	//An admin can make a reservation for anyone. A normal user can only make a reservation for himself. 
     	// Verify that the user_id in the reservation == current user OR the current user is the admin
-        
-        EmailUtility utility = new EmailUtility();
-        utility.sendMessage("davis.treybig@gmail.com", "ressourcemanager@gmail.com", "Alert", "Reservation about to start");
 
         if(!req.isValidCreateRequest()){
             return new StandardResponse(true, "Begin time after end time");

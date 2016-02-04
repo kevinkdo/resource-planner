@@ -37,11 +37,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-
+import utilities.EmailScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
 @Transactional
 @Service
 public class ReservationService{
+
+	private ConcurrentTaskScheduler concurrentTaskScheduler = new ConcurrentTaskScheduler();
 
 	@Autowired
 	private UserService userService;
@@ -216,6 +219,8 @@ public class ReservationService{
         	ReservationWithIDsData newReservation = new ReservationWithIDsData(reservation_id, req.getUser_id(), req.getResource_id(),
         		req.getBegin_time(), req.getEnd_time(), req.getShould_email());
             c.close();
+            //To be implemented:
+            //scheduleEmailUpdate(newReservation);
         	return new StandardResponse(false, "Reservation inserted successfully", newReservation);
         }
         catch (Exception e){
@@ -412,5 +417,18 @@ public class ReservationService{
             return null;
         }
         
+    }
+
+    private void scheduleEmailUpdate(ReservationWithIDsData res){
+    	Reservation completeReservation = getReservationObjectById(res.getReservation_id());
+    	if(completeReservation.getShould_email() && completeReservation.getUser().isShould_email()){
+    		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, "begin");
+			EmailScheduler endReservationEmailScheduler = new EmailScheduler(completeReservation, "end");
+
+			//Date startDate = new Date(completeReservation.getBegin_time());
+
+			//ScheduledFuture futureEvent = concurrentTaskScheduler.schedule(startReservationEmailScheduler, )
+
+    	}
     }
 }

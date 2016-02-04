@@ -38,13 +38,5 @@ public class EmailUtility{
         sender.send(message);
 	}
 
-	public void sendReservationStartEmail(){
-
-	}
-
-	public void sendReservationEndEmail(){
-
-	}
-
 
 }
