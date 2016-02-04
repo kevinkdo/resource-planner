@@ -33,7 +33,7 @@ public class ResourceService {
 
     public StandardResponse createRequest(final ResourceRequest req) {
         if (!req.isValid()) {
-            return new StandardResponse(true, "invalid json");
+            return new StandardResponse(true, "Invalid request");
         }
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -63,7 +63,7 @@ public class ResourceService {
                 "INSERT INTO resourcetags (resource_id, tag) VALUES (?, ?);",
                 batch);
 
-        return new StandardResponse(false, "successful resource insert", new Resource(resourceId, req.getName(),
+        return new StandardResponse(false, "Successfully inserted resource", new Resource(resourceId, req.getName(),
                 req.getDescription(), req.getTags()));
     }
 
@@ -81,7 +81,7 @@ public class ResourceService {
                 });
 
         if (resources.size() != 1) {
-            return new StandardResponse(true, "resource does not exist");
+            return new StandardResponse(true, "Resource does not exist");
         }
 
         Resource resource = resources.get(0);
@@ -92,7 +92,7 @@ public class ResourceService {
                 String.class);
         resource.setTags(tags);
         resource.setResource_id(resourceId);
-        return new StandardResponse(false, "successfully retrieve resource", resource);
+        return new StandardResponse(false, "Successfully retrieved resource", resource);
     }
 
     public StandardResponse getResource(String[] requiredTags, String[] excludedTags) {
@@ -181,7 +181,7 @@ public class ResourceService {
             response.add(processList.get(i));
         }
 
-        return new StandardResponse(false, "getResource", new Resources(response));
+        return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
     }
 
     private static class RT {
@@ -251,7 +251,7 @@ public class ResourceService {
         for (int i : processList.keySet()) {
             response.add(processList.get(i));
         }
-        return new StandardResponse(false, "getResource", new Resources(response));
+        return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
     }
 
     private StandardResponse getResourcesExcluded(String[] excludedTags) {
@@ -332,18 +332,18 @@ public class ResourceService {
         for (int i : processList.keySet()) {
             response.add(processList.get(i));
         }
-        return new StandardResponse(false, "get resources successful - only excluded tags", new Resources(response));
+        return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
     }
 
     public StandardResponse updateResource(ResourceRequest req, int resourceId) {
         if (!req.isValid()) {
-            return new StandardResponse(true, "invalid json");
+            return new StandardResponse(true, "Invalid request");
         }
 
         int resourceExists = jt.queryForObject(
                 "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, resourceId);
         if (resourceExists != 1) {
-            return new StandardResponse(true, "Resource doesn't exist");
+            return new StandardResponse(true, "Resource does not exist");
         }
 
         jt.update("UPDATE resources SET name = ?, description = ? WHERE resource_id = ?;",
@@ -365,7 +365,7 @@ public class ResourceService {
                 "INSERT INTO resourcetags (resource_id, tag) VALUES (?, ?);",
                 batch);
 
-        return new StandardResponse(false, "successful resource update", new Resource(resourceId, req.getName(),
+        return new StandardResponse(false, "Successfully updated resource", new Resource(resourceId, req.getName(),
                 req.getDescription(), req.getTags()));
     }
 
@@ -382,6 +382,6 @@ public class ResourceService {
                 "SELECT COUNT(*) FROM reservations WHERE reservation_id = ? AND now() < end_time;", Integer.class, resourceId);
 
         boolean canDelete = reservations == 0;
-        return new StandardResponse(false, "Successful response", new CanDelete(canDelete));
+        return new StandardResponse(false, "Successful retrieved canDelete status", new CanDelete(canDelete));
     }
 }

@@ -1,24 +1,10 @@
 package resourceplanner.services;
 
+import databases.JDBC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import requestdata.*;
-import responses.StandardResponse;
-import responses.data.Resource;
-import responses.data.Resources;
-import responses.data.Reservation;
-import responses.data.ReservationWithIDs;
-import responses.data.ReservationWithIDsData;
-
-import databases.JDBC;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
 import requestdata.GetAllMatchingReservationRequest;
 import requestdata.ReservationRequest;
 import responses.StandardResponse;
@@ -26,17 +12,8 @@ import responses.data.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import resourceplanner.services.ReservationService;
-import resourceplanner.controllers.Controller;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
 
 
 @Transactional

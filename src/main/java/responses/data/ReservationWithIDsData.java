@@ -2,7 +2,6 @@ package responses.data;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import responses.data.ReservationWithIDs;
 
 /**
  * Created by jiaweizhang on 2/2/16.

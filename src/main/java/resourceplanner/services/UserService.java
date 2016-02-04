@@ -28,13 +28,13 @@ public class UserService {
 
     public StandardResponse createUser(UserRequest req) {
         if (!req.isValid()) {
-            return new StandardResponse(true, "invalid json", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "Invalid request", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
-            return new StandardResponse(true, "Failed during hashing in register");
+            return new StandardResponse(true, "Invalid password");
         }
         int emailExists = jt.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE email = ?;", Integer.class, req.getEmail());
@@ -65,7 +65,7 @@ public class UserService {
             return new StandardResponse(true, "User not found");
         }
         User user = users.get(0);
-        return new StandardResponse(false, "successfully retrieved user", user);
+        return new StandardResponse(false, "Successfully retrieved user", user);
     }
 
     public List<User> getUsers(int userId) {
@@ -85,7 +85,7 @@ public class UserService {
 
     public StandardResponse updateUser(UserRequest req, int userId) {
         if (!req.isUpdateValid()) {
-            return new StandardResponse(true, "invalid json", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "Invalid request", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         List<User> users = getUsers(userId);
         if (users.size() == 0) {
@@ -135,13 +135,13 @@ public class UserService {
 
         //User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
         UserUpdate committed = new UserUpdate(req.isShould_email());
-        return new StandardResponse(false, "Successfully updated email.", committed);
+        return new StandardResponse(false, "Successfully updated email settings", committed);
     }
 
     public StandardResponse deleteUser(int userId) {
         jt.update("DELETE FROM reservations WHERE user_id = ?;", userId);
         jt.update("DELETE FROM users WHERE user_id = ?;", userId);
-        return new StandardResponse(false, "successfully deleted user");
+        return new StandardResponse(false, "Successfully deleted user");
         // TODO make sure that original admin cannot be deleted
     }
 }

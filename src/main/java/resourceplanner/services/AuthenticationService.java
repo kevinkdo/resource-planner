@@ -31,7 +31,7 @@ public class AuthenticationService {
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
         } catch (Exception f) {
-            return new StandardResponse(true, "Failed during password hashing.");
+            return new StandardResponse(true, "Invalid password");
         }
         int emailExists = jt.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE email = ?;", Integer.class, req.getEmail());
@@ -46,7 +46,7 @@ public class AuthenticationService {
         int returnedValue = jt.update(
                 "INSERT INTO users (email, username, passhash, permission, should_email) VALUES (?, ?, ?, 0, true);",
                 req.getEmail(), req.getUsername(), passwordHash);
-        return new StandardResponse(false, "Successfully registered.");
+        return new StandardResponse(false, "Successfully registered");
     }
 
     public StandardResponse login(UserRequest req) {
@@ -63,18 +63,18 @@ public class AuthenticationService {
                     }
                 });
         if (users.size() != 1) {
-            return new StandardResponse(true, "Email and username do not exist");
+            return new StandardResponse(true, "Account does not exist");
         }
         try {
             if (PasswordHash.validatePassword(req.getPassword(), users.get(0).getPasshash())) {
                 String token = TokenCreator.generateToken(users.get(0).getUser_id(), users.get(0).getPermission());
                 Login login = new Login(token, users.get(0).getUser_id());
-                return new StandardResponse(false, "Successfully authenticated.", login);
+                return new StandardResponse(false, "Successfully authenticated", login);
             }
         } catch (Exception e) {
-            return new StandardResponse(true, "Failed to validate password.");
+            return new StandardResponse(true, "Failed to validate password");
         }
-        return new StandardResponse(true, "Failed to validate password.");
+        return new StandardResponse(true, "Failed to validate password");
     }
 
 }

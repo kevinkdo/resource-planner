@@ -25,7 +25,7 @@ public class ResourceController extends Controller{
     @ResponseBody
     public StandardResponse createResource(@RequestBody final ResourceRequest req, final HttpServletRequest request) {
         if(!isAdmin(request)){
-            return new StandardResponse(true, "Not authorized", req);
+            return new StandardResponse(true, "You are not authorized.", req);
         }
         return resourceService.createRequest(req);
     }
@@ -60,7 +60,7 @@ public class ResourceController extends Controller{
     @ResponseBody
     public StandardResponse updateResource(@PathVariable final int resourceId, @RequestBody final ResourceRequest req, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "Not authorized", req);
+            return new StandardResponse(true, "You are not authorized", req);
         }
         return resourceService.updateResource(req, resourceId);
     }
@@ -70,7 +70,7 @@ public class ResourceController extends Controller{
     @ResponseBody
     public StandardResponse deleteResource(@PathVariable final int resourceId, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "Not authorized", request);
+            return new StandardResponse(true, "You are not authorized", request);
         }
         return resourceService.deleteResource(resourceId);
     }
@@ -80,7 +80,7 @@ public class ResourceController extends Controller{
     @ResponseBody
     public StandardResponse canDeleteResource(@PathVariable final int resourceId, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "Not authorized", request);
+            return new StandardResponse(true, "You are not authorized", request);
         }
         return resourceService.canDeleteResource(resourceId);
     }

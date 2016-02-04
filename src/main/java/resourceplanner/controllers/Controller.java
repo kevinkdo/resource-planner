@@ -19,7 +19,7 @@ public class Controller {
 		if (claims.get("user_id") == null) {
 			return 0; // TODO decide what to do
 		}
-    	//Verify that the user_id in the requesrt == current user
+    	//Verify that the user_id in the request == current user
     	int requesterID = Integer.parseInt(claims.get("user_id").toString());
     	return requesterID;
 	}
