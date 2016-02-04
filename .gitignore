@@ -112,3 +112,6 @@ fabric.properties
 ### Mac ###
 *.DS_Store
 .vagrant/*
+
+# Backend Tests
+*.pyc
