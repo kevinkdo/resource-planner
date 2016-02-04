@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by jiaweizhang on 2/4/16.
  */
-
+/*
 
 @EnableWebMvc
 @ControllerAdvice
@@ -38,6 +38,7 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
         }
     }
 
+
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         Map<String,Object> responseBody = new HashMap<String, Object>();
@@ -45,4 +46,6 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
         responseBody.put("message","Endpoint not found");
         return new ResponseEntity<Object>(responseBody,HttpStatus.NOT_FOUND);
     }
+
 }
+*/

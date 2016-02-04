@@ -47,7 +47,7 @@ public class Application {
         Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
         connector.setScheme("http");
         connector.setSecure(false);
-        connector.setPort(8080);
+        connector.setPort(80);
         return connector;
     }
 
