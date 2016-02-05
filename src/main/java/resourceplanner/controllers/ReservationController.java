@@ -4,21 +4,18 @@ package resourceplanner.controllers;
  * Created by Davis Treybig on 1/23/2016.
  */
 
-import databases.JDBC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import requestdata.GetAllMatchingReservationRequest;
 import requestdata.ReservationRequest;
+import resourceplanner.services.ReservationService;
 import responses.StandardResponse;
-import responses.data.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import responses.data.ReservationWithIDs;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.*;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import resourceplanner.services.ReservationService;
 
 
 import org.springframework.mail.*;
@@ -57,7 +54,7 @@ public class ReservationController extends Controller{
             return reservationService.getMatchingReservations(req);
         }
         else{
-            return new StandardResponse(true, "Invalid input parameters (Issue with start and end times");
+            return new StandardResponse(true, "Invalid input parameters (Issue with start and end times)");
         }
     }
 
@@ -123,4 +120,5 @@ public class ReservationController extends Controller{
     		return new StandardResponse(true, "Non-Admin user attempting to delete reservation for another user");
     	}
     }
+
 }

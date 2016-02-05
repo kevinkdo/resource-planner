@@ -47,13 +47,16 @@ var formatTime = function(d) {
   return h + ":" + m;
 };
 
+var userId = function() {
+  return jwt_decode(localStorage.getItem("session")).user_id;
+};
+
 const Router = React.createClass({
   getInitialState() {
     var session = localStorage.getItem("session");
     return {
       route: session ? "reservation_list" : "login",
       username: "kevinkdo",
-      user_id: 0,
       view_id: 0
     };
   },
@@ -64,6 +67,8 @@ const Router = React.createClass({
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
       case "admin_console":
         return <AdminConsole setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "settings":
+        return <Settings setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_list":
         return <ReservationList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_creator":
@@ -112,6 +117,7 @@ const Navbar = React.createClass({
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
                   <li><a href="#" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
+                  <li><a href="#" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
                   <li><a href="#" onClick={this.logout}>Log Out</a></li>
                 </ul>
@@ -183,29 +189,108 @@ const AdminConsole = React.createClass({
   }
 });
 
-const ReservationList = React.createClass({
+const Settings = React.createClass({
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
+  },
+
+  editSettings() {
+    var me = this;
+    this.setState({loading: true});
+    send_xhr("PUT", "/api/users/" + userId(), localStorage.getItem("session"),
+      JSON.stringify({email:this.state.email, username:this.state.username, password:this.state.password, should_email: this.state.should_email}),
+      function(obj) {
+        me.props.setPstate({ route: "reservation_list" });
+      },
+      function(obj) {
+        me.setState({loading: false, error_msg: obj.error_msg});
+      }
+    );
+  },
+
+  cancel() {
+    this.props.setPstate({
+      route: "reservation_list"
+    });
+  },
+
   getInitialState() {
     return {
-      loading_tags: true,
-      loading_table: false,
-      tags: [],
-      start: new Date(),
-      end: new Date(),
-      reservations: {
-        0: {id: 0, resource_id: 0, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        1: {id: 1, resource_id: 1, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        2: {id: 2, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        3: {id: 3, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()},
-        4: {id: 4, resource_id: 2, user_id: 1, start_timestamp: new Date(), end_timestamp: new Date()}
+      initial_load: true,
+      email: "",
+      username: "",
+      password: "",
+      should_email: ""
+    };
+  },
+
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/users/" + userId(), localStorage.getItem("session"), null,
+      function(obj) {
+        obj.data.initial_load = false;
+        me.setState(obj.data);
       },
-      resources: {
-        0: {name: "laptop classroom", description: "description1", tags: ["laptop", "classroom"]},
-        1: {name: "classroom server", description: "description2", tags: ["classroom", "server"]},
-        2: {id: 2, name: "projector", description: "description3", tags: ["projector"]}
-      },
-      users: {
-        1: {email: "kevin.kydat.do@gmail.com", username: "kevinkdo", should_email: true}
+      function(obj) {
+        me.setState({initial_load: false});
       }
+    );
+  },
+
+  render() {
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+          <div className="row">
+            <div className="col-md-6 col-md-offset-3">
+              <form>
+                <legend>User Settings</legend>
+                <div className="form-group">
+                  <label htmlFor="settings_user_id">User ID: {userId()}</label>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="settings_email">Email</label>
+                  <input type="email" className="form-control" id="settings_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="settings_username">Username</label>
+                  <input type="text" className="form-control" id="settings_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="settings_password">Password</label>
+                  <input type="password" className="form-control" id="settings_password" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
+                </div>
+                <div className="checkbox">
+                  <label htmlFor="settings_should_email"><input type="checkbox" id="settings_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/> Enable email reminders</label>
+                </div>
+                <div className="btn-toolbar">
+                  <button type="submit" className="btn btn-primary" onClick={this.editSettings}>Edit user</button>
+                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+});
+
+const ReservationList = React.createClass({
+  getInitialState() {
+    var now = new Date();
+    var start = new Date();
+    start.setMonth(now.getMonth() - 1);
+    return {
+      loading_tags: true,
+      loading_table: true,
+      tags: [],
+      start: start,
+      end: now,
+      reservations: {}
     };
   },
 
@@ -244,11 +329,38 @@ const ReservationList = React.createClass({
   },
 
   deleteReservation(id) {
-    console.log("reservation deleted: " + id);
+    var me = this;
+    send_xhr("DELETE", "/api/reservations/" + id, localStorage.getItem("session"), null,
+      function(obj) {
+        me.loadReservations();
+      },
+      function(obj) {
+        me.loadReservations();
+      }
+    );
   },
 
-  refresh() {
-    console.log("refreshing reservations");
+  loadReservations() {
+    var me = this;
+    var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
+    var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
+    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
+      function(obj) {
+        var new_reservations = {};
+          obj.data.forEach(function(x) {
+            new_reservations[x.reservation_id] = x;
+          });
+        me.setState({
+          reservations: new_reservations,
+          loading_table: false
+        });
+      },
+      function(obj) {
+        me.setState({
+          loading_table: false
+        });
+      }
+    );
   },
 
   componentDidMount() {
@@ -266,6 +378,7 @@ const ReservationList = React.createClass({
         });
       }
     );
+    this.loadReservations();
   },
 
   render() {
@@ -278,7 +391,7 @@ const ReservationList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
+            <button type="button" className="btn btn-primary" onClick={this.loadReservations}>Load reservations</button>
             <h4>Start</h4>
               <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
@@ -312,16 +425,18 @@ const ReservationList = React.createClass({
         <tbody>
           {Object.keys(me.state.reservations).map(id => {
             var x = me.state.reservations[id];
-            return <tr key={"reservation " + x.id}>
-              <td>{x.id}</td>
-              <td>{this.state.resources[x.resource_id].name}</td>
-              <td>{this.state.users[x.user_id].username}</td>
-              <td>{x.start_timestamp.toLocaleString()}</td>
-              <td>{x.end_timestamp.toLocaleString()}</td>
-              <td><a role="button" onClick={() => this.editReservation(x.id)}>Edit</a></td>
-              <td><a role="button" onClick={() => this.deleteReservation(x.id)}>Delete</a></td>
+            return <tr key={"reservation " + x.reservation_id}>
+              <td>{x.reservation_id}</td>
+              <td>{x.resource.name}</td>
+              <td>{x.user.username}</td>
+              <td>{x.begin_time}</td>
+              <td>{x.end_time}</td>
+              <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
             </tr>
           })}
+          {Object.keys(me.state.reservations).length > 0 ? null :
+            <tr><td className="lead text-center" colSpan="7">No reservations in this timespan</td></tr>}
         </tbody>
       </table>
     );
@@ -655,7 +770,7 @@ const ReservationCreator = React.createClass({
   getInitialState() {
     return {
       resource_id: 0,
-      user_id: this.props.pstate.user_id,
+      user_id: userId(),
       start: new Date(),
       end: new Date(),
       should_email: false,
@@ -829,7 +944,7 @@ const ResourceEditor = React.createClass({
                   </div>
                 </div>
                 <div className="btn-toolbar">
-                  <button type="submit" className={"btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.editResource}>Create resource</button>
+                  <button type="submit" className={"btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.editResource}>Edit resource</button>
                   <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
@@ -847,7 +962,8 @@ const Login = React.createClass({
     this.setState(this.state);
   },
 
-  handleSubmit() {
+  handleSubmit(evt) {
+    evt.preventDefault();
     var me = this;
     send_xhr("POST", "/auth/login", "o",
       JSON.stringify({email:this.state.email, password:this.state.password}),

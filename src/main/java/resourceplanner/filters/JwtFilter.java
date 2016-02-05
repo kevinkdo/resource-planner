@@ -53,7 +53,6 @@ public class JwtFilter extends GenericFilterBean {
             CharArrayWriter caw = new CharArrayWriter();
             caw.write(ExceptionCreator.createJson(message));
             res.setContentType("application/json;charset=UTF-8"); // must be before close
-            res.setContentLength(caw.toString().getBytes().length);
             out.write(caw.toString());
             out.close();
         } catch (IOException e) {

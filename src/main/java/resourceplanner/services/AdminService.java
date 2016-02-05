@@ -32,15 +32,15 @@ public class AdminService {
             in.close();
 
             query = sb.toString();
-            System.out.println(query);
+            //System.out.println(query);
         } catch (Exception e) {
             e.printStackTrace();
-            return new StandardResponse(false, "failed to read .sql");
+            return new StandardResponse(false, "Failed to read SQL file");
         }
 
         jt.execute(query);
 
-        return new StandardResponse(false, "successfully executed");
+        return new StandardResponse(false, "Successfully reset database");
     }
 
 }

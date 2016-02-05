@@ -18,14 +18,14 @@ public class TestController {
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse register(@RequestBody final Object rd, final HttpServletRequest request) {
-        return new StandardResponse(false, "successful post request", rd);
+        return new StandardResponse(false, "Successful POST request test", rd);
     }
 
     @RequestMapping(value = "/test",
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse login(final HttpServletRequest request) {
-        return new StandardResponse(false, "successful get request");
+        return new StandardResponse(false, "successful GET request test");
     }
 }
 

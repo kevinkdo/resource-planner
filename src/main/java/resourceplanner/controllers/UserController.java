@@ -26,7 +26,7 @@ public class UserController extends Controller{
     @ResponseBody
     public StandardResponse createUser(@RequestBody final UserRequest req, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "Not authorized", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "You are not authorized", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         return userService.createUser(req);
     }
@@ -36,7 +36,7 @@ public class UserController extends Controller{
     @ResponseBody
     public StandardResponse getUserById(@PathVariable final int userId, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "Not authorized");
+            return new StandardResponse(true, "You are not authorized");
         }
         return userService.getUserById(userId);
     }
@@ -47,7 +47,7 @@ public class UserController extends Controller{
     @ResponseBody
     public StandardResponse updateUser(@PathVariable final int userId, @RequestBody final UserRequest req, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "Not authorized");
+            return new StandardResponse(true, "You are not authorized");
         }
         return userService.updateUser(req, userId);
     }
@@ -57,9 +57,10 @@ public class UserController extends Controller{
     @ResponseBody
     public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "Not authorized");
+            return new StandardResponse(true, "You are not authorized");
         }
         return userService.deleteUser(userId);
     }
+
 }
 

@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tags")
-public class TagController {
+public class TagController extends Controller {
 
     @Autowired
     private JdbcTemplate jt;
@@ -34,7 +34,8 @@ public class TagController {
     public StandardResponse getTags(final HttpServletRequest request) {
         List<String> tags = jt.queryForList(
                 "SELECT DISTINCT tag FROM resourcetags;", String.class);
-        return new StandardResponse(false, "Successfully retrieved  tags", new Tags(tags));
+        return new StandardResponse(false, "Successfully retrieved tags", new Tags(tags));
     }
+
 }
 

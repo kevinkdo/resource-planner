@@ -17,10 +17,16 @@ public class ResourceRequest {
     }
 
     public String getName() {
+        if (name.length() >= 250) {
+            return name.substring(0, 250);
+        }
         return name;
     }
 
     public String getDescription() {
+        if (description.length() >= 2000) {
+            return description.substring(0, 2000);
+        }
         return description;
     }
 

@@ -1,39 +1,40 @@
-drop table reservations;
-drop table resourcetags;
-drop table resources;
-drop table users;
+DROP TABLE IF EXISTS reservations;
+DROP TABLE IF EXISTS resourcetags;
+DROP TABLE IF EXISTS resources;
+DROP TABLE IF EXISTS users;
 
 
-create table users (
-	user_id serial primary key not null,
-	email varchar(255) unique not null,
-	passhash varchar(255) not null,
-	username varchar(255) unique not null,
-	permission int not null,
-	should_email boolean not null
+CREATE TABLE users (
+  user_id      SERIAL PRIMARY KEY  NOT NULL,
+  email        VARCHAR(255) UNIQUE NOT NULL,
+  passhash     VARCHAR(255)        NOT NULL,
+  username     VARCHAR(255) UNIQUE NOT NULL,
+  permission   INT                 NOT NULL,
+  should_email BOOLEAN             NOT NULL
 );
 
-insert into users (email, username, passhash, permission, should_email)
-values ('admin@admin.com', 'admin', '1000:9816dd56235c68a566b1f50a1815ab96761ebf7ad33d84cd:5b209a5f9b1628fbd80cdffb0aa50b7ec58f07e93f9b18fc',
-        1, false);
+INSERT INTO users (email, username, passhash, permission, should_email)
+VALUES ('admin@admin.com', 'admin',
+        '1000:9816dd56235c68a566b1f50a1815ab96761ebf7ad33d84cd:5b209a5f9b1628fbd80cdffb0aa50b7ec58f07e93f9b18fc',
+        1, FALSE);
 
-create table resources (
-  resource_id serial primary key not null,
-  name varchar(255) not null,
-  description varchar(2000)
+CREATE TABLE resources (
+  resource_id SERIAL PRIMARY KEY NOT NULL,
+  name        VARCHAR(255)       NOT NULL,
+  description VARCHAR(2000)
 );
 
-create table resourcetags (
-  resource_id int not null references resources(resource_id) on delete cascade,
-  tag varchar(255) not null
+CREATE TABLE resourcetags (
+  resource_id INT          NOT NULL REFERENCES resources (resource_id) ON DELETE CASCADE,
+  tag         VARCHAR(255) NOT NULL
 );
 
-create table reservations (
-  reservation_id serial primary key not null,
-  user_id int not null references users(user_id) on delete cascade,
-  resource_id int not null references resources(resource_id) on delete cascade,
-  begin_time timestamp,
-  end_time timestamp,
-  should_email boolean not null
+CREATE TABLE reservations (
+  reservation_id SERIAL PRIMARY KEY NOT NULL,
+  user_id        INT                NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+  resource_id    INT                NOT NULL REFERENCES resources (resource_id) ON DELETE CASCADE,
+  begin_time     TIMESTAMP,
+  end_time       TIMESTAMP,
+  should_email   BOOLEAN            NOT NULL
 );
 
