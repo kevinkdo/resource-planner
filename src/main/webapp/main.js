@@ -340,7 +340,7 @@ const ReservationList = React.createClass({
     );
   },
 
-  loadReservations() {
+  refresh() {
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
@@ -361,10 +361,6 @@ const ReservationList = React.createClass({
         });
       }
     );
-  },
-
-  componentDidMount() {
-    var me = this;
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {
         me.setState({
@@ -378,7 +374,10 @@ const ReservationList = React.createClass({
         });
       }
     );
-    this.loadReservations();
+  },
+
+  componentDidMount() {
+    this.refresh();
   },
 
   render() {
@@ -399,13 +398,16 @@ const ReservationList = React.createClass({
               <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
             <h4>Tags</h4>
-            {this.state.loading_tags ? <div className="loader">Loading...</div> : (
+            {this.state.loading_tags ? <div className="loader">Loading...</div> : <div>
               <ul className="list-group">
                 {this.state.tags.map(x =>
                   <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
                 )}
               </ul>
-            )}
+              {Object.keys(me.state.tags).length > 0 ? null :
+                  <div className="lead text-center">No tags to display</div>}
+              </div>
+            }
           </div>
         </div>
       </div>
@@ -495,15 +497,15 @@ const ResourceList = React.createClass({
     var me = this;
     send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
       function(obj) {
-        me.loadResources();
+        me.refresh();
       },
       function(obj) {
-        me.loadResources();
+        me.refresh();
       }
     );
   },
 
-  loadResources() {
+  refresh() {
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
@@ -524,10 +526,6 @@ const ResourceList = React.createClass({
         });
       }
     );
-  },
-
-  componentDidMount() {
-    var me = this;
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {
         me.setState({
@@ -541,7 +539,10 @@ const ResourceList = React.createClass({
         });
       }
     );
-    this.loadResources();
+  },
+
+  componentDidMount() {
+    this.refresh();
   },
 
   render() {
@@ -554,14 +555,18 @@ const ResourceList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.loadResources}>Load resources</button>
+            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load resources</button>
             <h4>Tags</h4>
             {this.state.loading_tags ? <div className="loader">Loading...</div> :
-              <ul className="list-group">
-                {this.state.tags.map(x =>
-                  <a key={"resourcetag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
-                )}
-              </ul>
+              <div>
+                <ul className="list-group">
+                  {this.state.tags.map(x =>
+                    <a key={"resourcetag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  )}
+                </ul>
+                {Object.keys(me.state.tags).length > 0 ? null :
+                  <div className="lead text-center">No tags to display</div>}
+              </div>
             }
           </div>
         </div>
@@ -590,6 +595,8 @@ const ResourceList = React.createClass({
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
             </tr>
           })}
+          {Object.keys(me.state.resources).length > 0 ? null :
+            <tr><td className="lead text-center" colSpan="7">No resources to display</td></tr>}
         </tbody>
       </table>
     );
