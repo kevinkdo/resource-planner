@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 import resourceplanner.services.ReservationService;
 import resourceplanner.controllers.Controller;
 
@@ -24,13 +25,15 @@ import java.sql.SQLException;
 import java.util.*;
 import utilities.EmailScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
-
+import java.util.concurrent.ScheduledFuture;
+import java.text.SimpleDateFormat;
 
 @Transactional
 @Service
 public class ReservationService{
 
 	private ConcurrentTaskScheduler concurrentTaskScheduler = new ConcurrentTaskScheduler();
+	private Map<Integer, List<ScheduledFuture>> scheduledEmailMap = new HashMap<Integer, List<ScheduledFuture>>();
 
 	@Autowired
 	private UserService userService;
@@ -257,8 +260,7 @@ public class ReservationService{
         	ReservationWithIDsData newReservation = new ReservationWithIDsData(reservation_id, req.getUser_id(), req.getResource_id(),
         		req.getBegin_time(), req.getEnd_time(), req.getShould_email());
             c.close();
-            //To be implemented:
-            //scheduleEmailUpdate(newReservation);
+            scheduleEmailUpdate(newReservation);
         	return new StandardResponse(false, "Reservation inserted successfully", newReservation);
         }
         catch (Exception e){
@@ -454,19 +456,40 @@ public class ReservationService{
         catch(Exception e){
             return null;
         }
-        
     }
 
     private void scheduleEmailUpdate(ReservationWithIDsData res){
     	Reservation completeReservation = getReservationObjectById(res.getReservation_id());
+
+    	//Check that the date is in the future. 
     	if(completeReservation.getShould_email() && completeReservation.getUser().isShould_email()){
     		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, "begin");
 			EmailScheduler endReservationEmailScheduler = new EmailScheduler(completeReservation, "end");
 
-			//Date startDate = new Date(completeReservation.getBegin_time());
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			Date dateBegin = sdf.parse(completeReservation.getBegin_time(), new java.text.ParsePosition(0));
+			Date dateEnd = sdf.parse(completeReservation.getEnd_time(), new java.text.ParsePosition(0));
+			System.out.println(dateBegin.toString());
+			System.out.println(dateEnd.toString());
 
-			//ScheduledFuture futureEvent = concurrentTaskScheduler.schedule(startReservationEmailScheduler, )
-
+			ScheduledFuture beginEmail = concurrentTaskScheduler.schedule(startReservationEmailScheduler, dateBegin);
+			ScheduledFuture endEmail = concurrentTaskScheduler.schedule(endReservationEmailScheduler, dateEnd);
+    		
+    		if(scheduledEmailMap.containsKey(completeReservation.getReservation_id())){
+    			List<ScheduledFuture> existingFutures = scheduledEmailMap.get(completeReservation.getReservation_id());
+    			for (ScheduledFuture f : existingFutures){
+    				f.cancel(true);
+    			}
+    			existingFutures = new ArrayList<ScheduledFuture>();
+    			existingFutures.add(beginEmail);
+    			existingFutures.add(endEmail);
+    		}
+    		else{
+    			List<ScheduledFuture> newFutures = new ArrayList<ScheduledFuture>();
+    			newFutures.add(beginEmail);
+    			newFutures.add(endEmail);
+    			scheduledEmailMap.put(completeReservation.getReservation_id(), newFutures);
+    		}
     	}
     }
 }

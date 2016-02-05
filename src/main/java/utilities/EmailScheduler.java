@@ -10,8 +10,10 @@ import responses.data.Reservation;
 public class EmailScheduler implements Runnable{
 	private EmailUtility emailUtility = new EmailUtility();
 	private Reservation reservation;
-	//TODO: Convert this to an enum instead of a string
 	private String alertType;
+
+	public static final String BEGIN_ALERT = "begin";
+	public static final String END_ALERT = "end";
 
 	private static final String fromString = "ResourceManagerAlerts@gmail.com";
 
