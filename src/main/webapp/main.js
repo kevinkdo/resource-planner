@@ -281,12 +281,15 @@ const Settings = React.createClass({
 
 const ReservationList = React.createClass({
   getInitialState() {
+    var now = new Date();
+    var start = new Date();
+    start.setMonth(now.getMonth() - 1);
     return {
       loading_tags: true,
       loading_table: true,
       tags: [],
-      start: new Date(),
-      end: new Date(),
+      start: start,
+      end: now,
       reservations: {}
     };
   },
@@ -339,7 +342,9 @@ const ReservationList = React.createClass({
 
   loadReservations() {
     var me = this;
-    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString(), localStorage.getItem("session"), null,
+    var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
+    var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
+    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
           obj.data.forEach(function(x) {
@@ -430,6 +435,8 @@ const ReservationList = React.createClass({
               <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
             </tr>
           })}
+          {Object.keys(me.state.reservations).length > 0 ? null :
+            <tr><td className="lead text-center" colSpan="7">No reservations in this timespan</td></tr>}
         </tbody>
       </table>
     );
