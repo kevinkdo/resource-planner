@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import responses.StandardResponse;
 import responses.data.Tags;
-import utilities.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -36,12 +35,6 @@ public class TagController extends Controller {
         List<String> tags = jt.queryForList(
                 "SELECT DISTINCT tag FROM resourcetags;", String.class);
         return new StandardResponse(false, "Successfully retrieved tags", new Tags(tags));
-    }
-
-    @RequestMapping(value = "*")
-    @ResponseBody
-    public StandardResponse catchAll(final HttpServletRequest request) throws NotFoundException{
-        throw new NotFoundException();
     }
 
 }
