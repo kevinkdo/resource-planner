@@ -1,3 +1,3 @@
 gradle build
 gradle wrapper
-./gradlew bootRun
+sudo ./gradlew bootRun

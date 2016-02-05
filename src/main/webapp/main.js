@@ -847,7 +847,8 @@ const Login = React.createClass({
     this.setState(this.state);
   },
 
-  handleSubmit() {
+  handleSubmit(evt) {
+    evt.preventDefault();
     var me = this;
     send_xhr("POST", "/auth/login", "o",
       JSON.stringify({email:this.state.email, password:this.state.password}),
