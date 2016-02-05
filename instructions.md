@@ -1,5 +1,5 @@
 # Setup Instructions (linux/vagrant instructions)
-The directory containing Vagrantfile will now be shared from your computer and the vm. You can access it in the vm by going to the folder 'Vagrant'. Go up two levels so that when you hit ls it should read 'vagrant@vagrant-ubuntu-trusty-64:/$'
+This directory (containing Vagrantfile) will now be shared between your host computer and the VM's filesystem (at `/vagrant`)
 
 In Mac terminal:
 ```
@@ -19,8 +19,7 @@ Setting up DB:
 ```
 $ sudo -u postgres -i
 $ createdb rp
-$ psql rp
-$ ***Run setup.sql file. You can just copy paste it into the psql utility***
+$ psql rp < setup.sql
 $ ***Run following two commands to test it worked. You should see all 4 tables and the 1 default admin user***
 $ \dt
 $ SELECT * FROM user;
@@ -29,15 +28,14 @@ $ ALTER USER Postgres WITH PASSWORD 'password';
 $ *** Now we return to normal shell user ***
 $ \q
 $ su vagrant (password should be 'vagrant')
-$ *** Finally, change directory to normal vagrant directory***
 ```
 
 # Run
 ```
-$ chmod +x run.sh
+$ ch /vagrant
 $ ./run.sh
 ```
-App should now be running on localhost:8080
+App should now be running on localhost:8080 (from the perspective of the host computer)
 
 # To run tests
 ```
