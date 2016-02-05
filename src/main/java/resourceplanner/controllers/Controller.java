@@ -31,6 +31,7 @@ public class Controller {
     	return requesterID;
 	}
 
+	/*
 	@ExceptionHandler(PSQLException.class)
 	@ResponseBody
 	public StandardResponse psqlException(Exception ex, HttpServletResponse response) {
@@ -51,4 +52,5 @@ public class Controller {
 		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		return new StandardResponse(true, "Internal server error");
 	}
+	*/
 }
