@@ -11,7 +11,7 @@ vagrant ssh
 
 In vagrant shell: 
 ```
-$ chmod 755 setupvm.sh
+$ chmod +x setupvm.sh
 $ ./setupvm.sh
 ```
 
@@ -34,7 +34,21 @@ $ *** Finally, change directory to normal vagrant directory***
 
 # Run
 ```
-$ chmod 755 run.sh
+$ chmod +x run.sh
 $ ./run.sh
 ```
 App should now be running on localhost:8080
+
+# To run tests
+```
+cd src/test
+python -m unittest discover -v (runs all tests and gives name and status of each)
+```
+or 
+```
+$ python -m unittest discover (runs all without name and status of each)
+```
+or to run an individual test
+```
+$ python nameoftest.py -v (-v optional does same as above)
+```
