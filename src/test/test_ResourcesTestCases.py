@@ -4,7 +4,7 @@ import json
 
 class AuthorizationTestCases(unittest.TestCase):
   def setUp(self):
-      self.baseUrl = 'http://localhost:8080/'
+      self.baseUrl = 'http://localhost:80/'
       self.headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
       self.resourceUrl = 'api/resources'
       self.resetUrl = '/admin/init'
@@ -32,7 +32,7 @@ class AuthorizationTestCases(unittest.TestCase):
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Needs name'
+      assert decoded['error_msg'] == 'Resource name required'
 
   def test_CreateInvalidResourceNoDescription(self):
       validResource = {'name':'some resource', 'description':'', 'tags':[]}
@@ -135,10 +135,9 @@ class AuthorizationTestCases(unittest.TestCase):
       deleteUrl = '/2'
       r = requests.delete(self.baseUrl + self.resourceUrl + deleteUrl, headers = self.headers)
       decoded = r.json()
-      print decoded 
-      assert decoded['is_error'] == False
+      assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'successfully deleted resource and all accompanying reservations'
+      assert decoded['error_msg'] == 'Resource does not exist'
       #change the error message if you try to delete a resource that's already deleted?
 
   def test_GetResourcesCanDeleteWithValidID(self):
@@ -157,7 +156,6 @@ class AuthorizationTestCases(unittest.TestCase):
       canDeleteUrl = '/2/candelete'
       r = requests.get(self.baseUrl + self.resourceUrl + canDeleteUrl, headers = self.headers)
       decoded = r.json()
-      print decoded 
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'canDelete': True}
       assert decoded['error_msg'] == 'Successful retrieved canDelete status'

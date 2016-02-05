@@ -4,7 +4,7 @@ import json
 
 class AuthorizationTestCases(unittest.TestCase):
   def setUp(self):
-      self.baseUrl = 'http://localhost:8080/'
+      self.baseUrl = 'http://localhost:80/'
       self.headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
       self.registerUrl = 'auth/register'
       self.loginUrl = 'auth/login'
@@ -12,7 +12,7 @@ class AuthorizationTestCases(unittest.TestCase):
       r = requests.get(self.baseUrl + self.resetUrl, headers = self.headers)
 
   def test_RegisterValidUser(self):
-      validUser = {'email':'user13@admin.com', 'username':'someusername', 'password':'something'}
+      validUser = {'email':'user13@admin.com', 'username':'someusername', 'password':'something', 'should_email':'False'}
       r = requests.post(self.baseUrl + self.registerUrl, data = json.dumps(validUser), headers = self.headers)
       decoded = r.json()
       assert decoded['is_error'] == False
@@ -20,7 +20,7 @@ class AuthorizationTestCases(unittest.TestCase):
       assert decoded['error_msg'] == 'Successfully registered'
 
   def test_RegisterInValidUserWithEmailAlreadyTaken(self):
-      validUser = {'email':'admin@admin.com', 'username':'someusername', 'password':'something'}
+      validUser = {'email':'admin@admin.com', 'username':'someusername', 'password':'something', 'should_email':'False'}
       r = requests.post(self.baseUrl + self.registerUrl, data = json.dumps(validUser), headers = self.headers)
       decoded = r.json()
       assert decoded['is_error'] == True
@@ -28,12 +28,12 @@ class AuthorizationTestCases(unittest.TestCase):
       assert decoded['error_msg'] == 'Email already exists'
   
   def test_RegisterInValidUserNoPassword(self):
-      validUser = {'email':'user13@admin.com', 'username':'someusername', 'password':''}
+      validUser = {'email':'user13@admin.com', 'username':'someusername', 'password':'', 'should_email':'False'}
       r = requests.post(self.baseUrl + self.registerUrl, data = json.dumps(validUser), headers = self.headers)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'something about need a password'
+      assert decoded['error_msg'] == 'Password must be between 1 and 250 characters long'
       #update with jiawei's message about min password length
 
   def test_LoginValidUser(self):
