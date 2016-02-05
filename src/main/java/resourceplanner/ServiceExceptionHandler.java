@@ -1,26 +1,39 @@
 package resourceplanner;
 
-import org.springframework.http.HttpHeaders;
+import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import responses.StandardResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by jiaweizhang on 2/4/16.
  */
-/*
 
+@ControllerAdvice
+public class ServiceExceptionHandler {
+    @ExceptionHandler(PSQLException.class)
+    @ResponseBody
+    public StandardResponse psqlException(Exception ex, HttpServletResponse response) {
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return new StandardResponse(true, "Database error");
+    }
+
+    @ExceptionHandler(BadSqlGrammarException.class)
+    @ResponseBody
+    public StandardResponse sqlException(Exception ex, HttpServletResponse response) {
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return new StandardResponse(true, "Database error");
+    }
+
+
+}
+
+/*
 @EnableWebMvc
 @ControllerAdvice
 public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {

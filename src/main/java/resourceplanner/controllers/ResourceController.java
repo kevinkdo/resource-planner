@@ -84,5 +84,6 @@ public class ResourceController extends Controller{
         }
         return resourceService.canDeleteResource(resourceId);
     }
+
 }
 

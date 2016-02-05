@@ -61,5 +61,6 @@ public class UserController extends Controller{
         }
         return userService.deleteUser(userId);
     }
+
 }
 

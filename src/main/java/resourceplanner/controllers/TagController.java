@@ -36,5 +36,6 @@ public class TagController {
                 "SELECT DISTINCT tag FROM resourcetags;", String.class);
         return new StandardResponse(false, "Successfully retrieved tags", new Tags(tags));
     }
+
 }
 

@@ -25,8 +25,8 @@ public class AdminController extends Controller {
             value = "/init",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse init(final HttpServletRequest request) {
-            return adminService.init();
+    public StandardResponse init(final HttpServletRequest request) throws Exception{
+        return adminService.init();
     }
 
 }

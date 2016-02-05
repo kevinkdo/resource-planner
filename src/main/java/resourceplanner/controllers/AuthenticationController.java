@@ -33,7 +33,6 @@ public class AuthenticationController {
         return authenticationService.login(req);
     }
 
-
 }
 
 
