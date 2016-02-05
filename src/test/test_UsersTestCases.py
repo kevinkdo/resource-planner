@@ -4,7 +4,7 @@ import json
 
 class UsersTestCases(unittest.TestCase):
   def setUp(self):
-      self.baseUrl = 'http://localhost:8080/'
+      self.baseUrl = 'http://localhost:80/'
       self.headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
       self.userUrl = 'api/users'
       self.resetUrl = 'admin/init'
