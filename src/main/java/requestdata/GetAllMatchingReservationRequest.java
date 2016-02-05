@@ -9,12 +9,17 @@ public class GetAllMatchingReservationRequest {
     
     private Integer[] resource_ids;
     private Integer[] user_ids;
+    private String[] required_tags;
+    private String[] excluded_tags;
     private Timestamp start;
     private Timestamp end;
 
-    public GetAllMatchingReservationRequest(Integer[] resource_ids, Integer[] user_ids, Timestamp start, Timestamp end){
+    public GetAllMatchingReservationRequest(Integer[] resource_ids, Integer[] user_ids, String[] required_tags, 
+            String[] excluded_tags, Timestamp start, Timestamp end){
         this.resource_ids = resource_ids;
         this.user_ids = user_ids;
+        this.required_tags = required_tags;
+        this.excluded_tags = excluded_tags;
         this.start = start;
         this.end = end;
     }
@@ -25,6 +30,14 @@ public class GetAllMatchingReservationRequest {
 
     public Integer[] getUser_ids(){
         return user_ids;
+    }
+
+    public String[] getRequired_tags(){
+        return required_tags;
+    }
+
+    public String[] getExcluded_tags(){
+        return excluded_tags;
     }
 
     public Timestamp getStart(){
@@ -45,6 +58,14 @@ public class GetAllMatchingReservationRequest {
     //the query needs to check for matching on ID's
     public boolean matchOnIds(){
         return (resource_ids !=null || user_ids != null);
+    }
+
+    public boolean matchOnExcludedTags(){
+        return excluded_tags != null && excluded_tags.length > 0;
+    }
+
+    public boolean matchOnRequiredTags(){
+        return required_tags != null && required_tags.length > 0;
     }
 
 }

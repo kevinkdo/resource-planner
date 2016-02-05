@@ -65,6 +65,14 @@ public class ReservationService{
             getMatchingReservations = appendIDMatchString(getMatchingReservations, req);
             getMatchingReservations = getMatchingReservations + "AND ";
         }
+        if(req.matchOnExcludedTags()){
+        	getMatchingReservations = appendExcludedTagString(getMatchingReservations, req);
+        	getMatchingReservations = getMatchingReservations + "AND ";
+        }
+        if(req.matchOnRequiredTags()){
+        	getMatchingReservations = appendRequiredTagString(getMatchingReservations, req);
+        	getMatchingReservations = getMatchingReservations + "AND ";
+        }
 
         Timestamp startTime = req.getStart();
         Timestamp endTime = req.getEnd();
@@ -147,6 +155,50 @@ public class ReservationService{
         baseQueryString = baseQueryString + ")";
         return baseQueryString;
     }
+
+    public String appendExcludedTagString(String baseQueryString, GetAllMatchingReservationRequest req){
+    	baseQueryString = baseQueryString + "(";
+
+    	String[] excluded_tags = req.getExcluded_tags();
+
+		baseQueryString = baseQueryString + "NOT EXISTS (SELECT * from resourcetags WHERE reservations.resource_id = resourcetags.resource_id AND tag IN (";
+		for(int i = 0; i < excluded_tags.length; i++){
+			baseQueryString = baseQueryString + "'" + excluded_tags[i] + "'";
+			if(i != excluded_tags.length -1){
+				baseQueryString = baseQueryString + ", ";
+			}
+			else{
+				baseQueryString = baseQueryString + ")";
+			}
+		}										
+    	
+    	baseQueryString = baseQueryString + ")) ";
+		return baseQueryString;
+    	//for excluded
+    	//do
+    	//AND NOT EXISTS (SELECT * tagTable WHERE resource_id=resource_id AND tag IN (excluded tags))
+    	//AND EXISTS (SELECT * from tagTable where resource_id = resource_ID and tag = required_tag1)
+    	//AND EXISTS (SELECT * from tagTabe where rsource_ID = resource_ID and tag = required_tag2)
+    }
+
+    public String appendRequiredTagString(String baseQueryString, GetAllMatchingReservationRequest req){
+    	baseQueryString = baseQueryString + "(";
+    	String[] required_tags = req.getRequired_tags();
+
+    	for(int i = 0; i < required_tags.length; i++){
+    		baseQueryString = baseQueryString + "EXISTS (SELECT * FROM resourcetags WHERE reservations.resource_id = resourcetags.resource_id AND tag = '" + required_tags[i] + "') ";
+			if(i != required_tags.length - 1){
+				baseQueryString = baseQueryString + "AND ";
+			}
+			else{
+				baseQueryString = baseQueryString + ")";
+			}
+    	}
+
+    	return baseQueryString;
+
+    }
+
 
 
     public StandardResponse deleteReservationByIdDB(int reservationId){

@@ -43,13 +43,16 @@ public class ReservationController extends Controller{
     @ResponseBody
     public StandardResponse getMatchingReservations(@RequestParam(value = "resource_ids", required = false) Integer[] resource_ids, 
         @RequestParam(value = "user_ids", required = false) Integer[] user_ids,
+        @RequestParam(value = "required_tags", required = false) String[] required_tags,
+        @RequestParam(value = "excluded_tags", required = false) String[] excluded_tags,
         @RequestParam(value = "start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
         @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
         //Cannonical way to convert LocalDateTime to Timestamp
         Timestamp startTimestamp = Timestamp.valueOf(start);
         Timestamp endTimestamp = Timestamp.valueOf(end);
-        GetAllMatchingReservationRequest req = new GetAllMatchingReservationRequest(resource_ids, user_ids, startTimestamp, endTimestamp);
+        GetAllMatchingReservationRequest req = new GetAllMatchingReservationRequest(resource_ids, user_ids, 
+            required_tags, excluded_tags, startTimestamp, endTimestamp);
         if(req.isValid()){
             return reservationService.getMatchingReservations(req);
         }
