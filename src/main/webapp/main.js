@@ -86,6 +86,18 @@ const Router = React.createClass({
   }
 });
 
+const Loader = React.createClass({
+  render() {
+    return (
+      <div className="spinner">
+        <div className="bounce1"></div>
+        <div className="bounce2"></div>
+        <div className="bounce3"></div>
+      </div>
+    )
+  }
+});
+
 const Navbar = React.createClass({
   logout() {
     localStorage.setItem("session", "");
@@ -398,7 +410,7 @@ const ReservationList = React.createClass({
               <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
             <h4>Tags</h4>
-            {this.state.loading_tags ? <div className="loader">Loading...</div> : <div>
+            {this.state.loading_tags ? <Loader /> : <div>
               <ul className="list-group">
                 {this.state.tags.map(x =>
                   <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
@@ -411,7 +423,7 @@ const ReservationList = React.createClass({
           </div>
         </div>
       </div>
-    var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
+    var rightpane = this.state.loading_table ? <Loader /> : (
       <table className="table table-hover">
         <thead>
           <tr>
@@ -557,7 +569,7 @@ const ResourceList = React.createClass({
           <div className="panel-body">
             <button type="button" className="btn btn-primary" onClick={this.refresh}>Load resources</button>
             <h4>Tags</h4>
-            {this.state.loading_tags ? <div className="loader">Loading...</div> :
+            {this.state.loading_tags ? <Loader /> :
               <div>
                 <ul className="list-group">
                   {this.state.tags.map(x =>
@@ -571,7 +583,7 @@ const ResourceList = React.createClass({
           </div>
         </div>
       </div>
-    var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
+    var rightpane = this.state.loading_table ? <Loader /> : (
       <table className="table table-hover">
         <thead>
           <tr>
