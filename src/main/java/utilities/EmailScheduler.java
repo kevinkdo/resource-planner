@@ -27,12 +27,12 @@ public class EmailScheduler implements Runnable{
 	public void run(){
 		String subject;
 		String message;
-		if(alertType == "begin"){
+		if(alertType == BEGIN_ALERT){
 			subject = "Reservation starting";
 			message = "Reservation for resource " + reservation.getResource().getName() + " has started";
 			System.out.println("begin email being sent");
 		}
-		else if(alertType == "end"){
+		else if(alertType == END_ALERT){
 			subject = "Reservation ended";
 			message = "Reservation for resource " + reservation.getResource().getName() + " has ended";
 			System.out.println("end email being sent");
