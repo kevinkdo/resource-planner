@@ -110,7 +110,7 @@ public class ReservationService{
         Integer[] resource_ids = req.getResource_ids();
         Integer[] user_ids = req.getUser_ids();
         //First do an OR over every resource_ID to see if reservation matches
-        if(resource_ids != null){
+        if(resource_ids != null && resource_ids.length > 0){
             baseQueryString = baseQueryString + "(";
             for (int i = 0; i < resource_ids.length; i++){
                 baseQueryString = baseQueryString + "resource_id = " + resource_ids[i];
@@ -124,8 +124,8 @@ public class ReservationService{
         }
         
         //Next, do an OR over every user_id to see if reservation matches
-        if(user_ids != null){
-            if(resource_ids != null){
+        if(user_ids != null && user_ids.length > 0){
+            if(resource_ids != null && resource_ids.length > 0){
                 baseQueryString = baseQueryString + " OR (";
             }
             else{
@@ -202,6 +202,7 @@ public class ReservationService{
     			return new StandardResponse(true, "No reservation with that ID exists");
     		}
             c.close();
+            removeScheduledEmails(reservationId);
     		return new StandardResponse(false, "Reservation successfully deleted");
     	}
     	catch(Exception e){
@@ -458,17 +459,40 @@ public class ReservationService{
         }
     }
 
+
+
+    private void removeScheduledEmails(int reservationId){
+    	if(scheduledEmailMap.containsKey(reservationId)){
+    		List<ScheduledFuture> futures = scheduledEmailMap.get(reservationId);
+    		for(ScheduledFuture f : futures){
+    			f.cancel(true);
+    		}
+    		scheduledEmailMap.remove(reservationId);
+    	}
+    }
+
+
+
     private void scheduleEmailUpdate(ReservationWithIDsData res){
     	Reservation completeReservation = getReservationObjectById(res.getReservation_id());
 
-    	//Check that the date is in the future. 
     	if(completeReservation.getShould_email() && completeReservation.getUser().isShould_email()){
-    		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, "begin");
-			EmailScheduler endReservationEmailScheduler = new EmailScheduler(completeReservation, "end");
+    		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.BEGIN_ALERT);
+			EmailScheduler endReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.END_ALERT);
 
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-			Date dateBegin = sdf.parse(completeReservation.getBegin_time(), new java.text.ParsePosition(0));
-			Date dateEnd = sdf.parse(completeReservation.getEnd_time(), new java.text.ParsePosition(0));
+			Date dateBeginGWT = sdf.parse(completeReservation.getBegin_time(), new java.text.ParsePosition(0));
+			Date dateEndGWT = sdf.parse(completeReservation.getEnd_time(), new java.text.ParsePosition(0));
+
+
+			//Have to adjust dates to not be in GWT
+			Date dateBegin = new Date(dateBeginGWT.getTime() + 5 * 3600 * 1000);
+			Date dateEnd = new Date(dateEndGWT.getTime() + 5 * 3600 * 1000);
+
+			if(!verifyDateInFuture(dateBegin)){
+				return;
+			}
+
 			System.out.println(dateBegin.toString());
 			System.out.println(dateEnd.toString());
 
@@ -491,5 +515,10 @@ public class ReservationService{
     			scheduledEmailMap.put(completeReservation.getReservation_id(), newFutures);
     		}
     	}
+    }
+
+    private boolean verifyDateInFuture(Date date){
+		Date currentDate = new Date();
+		return currentDate.before(date);
     }
 }

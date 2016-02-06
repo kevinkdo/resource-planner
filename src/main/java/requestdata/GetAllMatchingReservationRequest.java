@@ -54,10 +54,9 @@ public class GetAllMatchingReservationRequest {
         return (start != null && end != null && start.before(end));
     }
 
-    //Returns true if either of the id lists are null, indicating that
-    //the query needs to check for matching on ID's
+
     public boolean matchOnIds(){
-        return (resource_ids !=null || user_ids != null);
+        return ((resource_ids !=null  && resource_ids.length > 0) || (user_ids != null && user_ids.length > 0));
     }
 
     public boolean matchOnExcludedTags(){

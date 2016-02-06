@@ -35,6 +35,8 @@ public class EmailUtility{
         message.setSubject(subject);
         message.setText(text);
 
+        System.out.println("Sending Email to: " + to + ", from email " + from);
+
         sender.send(message);
 	}
 
