@@ -315,6 +315,7 @@ public class ReservationService{
             int affectedRows = st.executeUpdate();
             if(affectedRows == 1){
             	ReservationWithIDsData reservationToReturn = new ReservationWithIDsData(existingRes);
+            	rescheduleEmails(reservationToReturn);
                 return new StandardResponse(false, "Successfully updated reservation", reservationToReturn);
             }
             else{
@@ -459,6 +460,10 @@ public class ReservationService{
         }
     }
 
+    private void rescheduleEmails(ReservationWithIDsData reservation){
+    	removeScheduledEmails(reservation.getReservation_id());
+    	scheduleEmailUpdate(reservation);
+    }
 
 
     private void removeScheduledEmails(int reservationId){
