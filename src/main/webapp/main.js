@@ -162,7 +162,8 @@ const AdminConsole = React.createClass({
     return {
       email: "",
       username: "",
-      password: ""
+      password: "",
+      error_msg: ""
     };
   },
 
@@ -176,6 +177,11 @@ const AdminConsole = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               <form>
                 <legend>New user</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="user_creator_email">Email</label>
                   <input type="text" className="form-control" id="user_creator_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
@@ -233,7 +239,8 @@ const Settings = React.createClass({
       email: "",
       username: "",
       password: "",
-      should_email: ""
+      should_email: "",
+      error_msg: ""
     };
   },
 
@@ -245,7 +252,7 @@ const Settings = React.createClass({
         me.setState(obj.data);
       },
       function(obj) {
-        me.setState({initial_load: false});
+        me.setState({initial_load: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -260,6 +267,11 @@ const Settings = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               <form>
                 <legend>User Settings</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="settings_user_id">User ID: {userId()}</label>
                 </div>
@@ -302,7 +314,8 @@ const ReservationList = React.createClass({
       tags: [],
       start: start,
       end: now,
-      reservations: {}
+      reservations: {},
+      error_msg: ""
     };
   },
 
@@ -344,10 +357,11 @@ const ReservationList = React.createClass({
     var me = this;
     send_xhr("DELETE", "/api/reservations/" + id, localStorage.getItem("session"), null,
       function(obj) {
-        me.loadReservations();
+        me.refresh();
       },
       function(obj) {
-        me.loadReservations();
+        me.refresh();
+        me.setState({error_msg: obj.error_msg});
       }
     );
   },
@@ -369,7 +383,8 @@ const ReservationList = React.createClass({
       },
       function(obj) {
         me.setState({
-          loading_table: false
+          loading_table: false,
+          error_msg: obj.error_msg
         });
       }
     );
@@ -382,7 +397,8 @@ const ReservationList = React.createClass({
       },
       function(obj) {
         me.setState({
-          loading_tags: false
+          loading_tags: false,
+          error_msg: obj.error_msg
         });
       }
     );
@@ -402,7 +418,7 @@ const ReservationList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.loadReservations}>Load reservations</button>
+            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
             <h4>Start</h4>
               <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
@@ -466,6 +482,11 @@ const ReservationList = React.createClass({
             <div className="col-md-9">
               <h3>Reservations
               <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
+              {!this.state.error_msg ? <div></div> :
+                <div className="alert alert-danger">
+                  <strong>{this.state.error_msg}</strong>
+                </div>
+              }
               {rightpane}
             </div>
           </div>
@@ -513,6 +534,7 @@ const ResourceList = React.createClass({
       },
       function(obj) {
         me.refresh();
+        me.setState({error_msg: obj.error_msg});
       }
     );
   },
@@ -547,7 +569,8 @@ const ResourceList = React.createClass({
       },
       function(obj) {
         me.setState({
-          loading_tags: false
+          loading_tags: false,
+          error_msg: error_msg
         });
       }
     );
@@ -922,7 +945,7 @@ const ResourceEditor = React.createClass({
         me.setState(obj.data);
       },
       function(obj) {
-        me.setState({initial_load: false});
+        me.setState({initial_load: false, error_msg: obj.error_msg});
       }
     );
   },
