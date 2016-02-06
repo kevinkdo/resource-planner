@@ -330,7 +330,8 @@ const ReservationList = React.createClass({
       start: start,
       end: now,
       reservations: {},
-      error_msg: ""
+      error_msg: "",
+      resource_id: ""
     };
   },
 
@@ -344,6 +345,11 @@ const ReservationList = React.createClass({
       }
     });
     this.setState({tags: tags});
+  },
+
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
   },
 
   setDate(field, str) {
@@ -385,7 +391,7 @@ const ReservationList = React.createClass({
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
-    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str + "&resource_ids=" + this.state.resource_id, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
           obj.data.forEach(function(x) {
@@ -438,8 +444,10 @@ const ReservationList = React.createClass({
               <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
             <h4>End</h4>
-              <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
+              <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
+            <h4>Resource ID</h4>
+              <input type="number" className="form-control" id="reservation_list_resource_id" value={this.state.resource_id} onChange={(evt) => this.set("resource_id", evt.target.value)}/>
             <h4>Tags</h4>
             {this.state.loading_tags ? <Loader /> : <div>
               <ul className="list-group">
