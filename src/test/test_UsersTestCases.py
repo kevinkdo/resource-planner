@@ -29,7 +29,7 @@ class UsersTestCases(unittest.TestCase):
       r = requests.post(self.baseUrl + self.userUrl, data = json.dumps(newUser), headers = nonAdminHeader)
       decoded = r.json()
       assert decoded['is_error'] == True
-      assert decoded['data'] == {u'user'id': 2, u'username': u'newuser', u'should_email': False, u'email': u'newuser@admin.com'}
+      assert decoded['data'] == {u'user_id': 3, u'username': u'newuser', u'should_email': False, u'email': u'newuser@admin.com'}
       assert decoded['error_msg'] == 'You are not authorized'
 
   def test_CreateInvalidUserWithPreexistingUsername(self):
