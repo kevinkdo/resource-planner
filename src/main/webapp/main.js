@@ -74,7 +74,7 @@ const Router = React.createClass({
       case "reservation_creator":
         return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_editor":
-        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
       case "resource_list":
         return <ResourceList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_creator":
@@ -83,6 +83,18 @@ const Router = React.createClass({
         return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
     }
     return <div>ERROR</div>;
+  }
+});
+
+const Loader = React.createClass({
+  render() {
+    return (
+      <div className="spinner">
+        <div className="bounce1"></div>
+        <div className="bounce2"></div>
+        <div className="bounce3"></div>
+      </div>
+    )
   }
 });
 
@@ -137,7 +149,17 @@ const AdminConsole = React.createClass({
   },
 
   createUser() {
-    console.log("creating user");
+    var me = this;
+    this.setState({loading: true});
+    send_xhr("POST", "/api/users", localStorage.getItem("session"),
+      JSON.stringify({username:this.state.username, password:this.state.password, email: this.state.email, should_email: this.state.should_email}),
+      function(obj) {
+        me.props.setPstate({ route: "reservation_list" });
+      },
+      function(obj) {
+        me.setState({loading: false, error_msg: obj.error_msg});
+      }
+    );
   },
 
   cancel() {
@@ -150,7 +172,10 @@ const AdminConsole = React.createClass({
     return {
       email: "",
       username: "",
-      password: ""
+      password: "",
+      should_email: false,
+      loading: false,
+      error_msg: ""
     };
   },
 
@@ -164,9 +189,14 @@ const AdminConsole = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               <form>
                 <legend>New user</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="user_creator_email">Email</label>
-                  <input type="text" className="form-control" id="user_creator_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
+                  <input type="email" className="form-control" id="user_creator_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="user_creator_username">Username</label>
@@ -174,7 +204,10 @@ const AdminConsole = React.createClass({
                 </div>
                 <div className="form-group">
                   <label htmlFor="user_creator_password">Password</label>
-                  <input type="text" className="form-control" id="user_creator_username" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
+                  <input type="password" className="form-control" id="user_creator_username" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
+                </div>
+                <div className="checkbox">
+                  <label htmlFor="user_creator_should_email"><input type="checkbox" id="user_creator_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/>Email reminders</label>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createUser}>Create user</button>
@@ -221,7 +254,8 @@ const Settings = React.createClass({
       email: "",
       username: "",
       password: "",
-      should_email: ""
+      should_email: "",
+      error_msg: ""
     };
   },
 
@@ -233,7 +267,7 @@ const Settings = React.createClass({
         me.setState(obj.data);
       },
       function(obj) {
-        me.setState({initial_load: false});
+        me.setState({initial_load: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -248,6 +282,11 @@ const Settings = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               <form>
                 <legend>User Settings</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
                 <div className="form-group">
                   <label htmlFor="settings_user_id">User ID: {userId()}</label>
                 </div>
@@ -290,7 +329,9 @@ const ReservationList = React.createClass({
       tags: [],
       start: start,
       end: now,
-      reservations: {}
+      reservations: {},
+      error_msg: "",
+      resource_id: ""
     };
   },
 
@@ -304,6 +345,11 @@ const ReservationList = React.createClass({
       }
     });
     this.setState({tags: tags});
+  },
+
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
   },
 
   setDate(field, str) {
@@ -332,19 +378,21 @@ const ReservationList = React.createClass({
     var me = this;
     send_xhr("DELETE", "/api/reservations/" + id, localStorage.getItem("session"), null,
       function(obj) {
-        me.loadReservations();
+        me.refresh();
+        me.setState({error_msg: ""});
       },
       function(obj) {
-        me.loadReservations();
+        me.refresh();
+        me.setState({error_msg: obj.error_msg});
       }
     );
   },
 
-  loadReservations() {
+  refresh() {
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
-    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str + "&resource_ids=" + this.state.resource_id, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
           obj.data.forEach(function(x) {
@@ -352,12 +400,14 @@ const ReservationList = React.createClass({
           });
         me.setState({
           reservations: new_reservations,
-          loading_table: false
+          loading_table: false,
+          error_msg: ""
         });
       },
       function(obj) {
         me.setState({
-          loading_table: false
+          loading_table: false,
+          error_msg: obj.error_msg
         });
       }
     );
@@ -365,6 +415,7 @@ const ReservationList = React.createClass({
 
   componentDidMount() {
     var me = this;
+    this.refresh();
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {
         me.setState({
@@ -374,11 +425,11 @@ const ReservationList = React.createClass({
       },
       function(obj) {
         me.setState({
-          loading_tags: false
+          loading_tags: false,
+          error_msg: obj.error_msg
         });
       }
     );
-    this.loadReservations();
   },
 
   render() {
@@ -391,25 +442,30 @@ const ReservationList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.loadReservations}>Load reservations</button>
+            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
             <h4>Start</h4>
               <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
             <h4>End</h4>
-              <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
+              <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
+            <h4>Resource ID</h4>
+              <input type="number" className="form-control" id="reservation_list_resource_id" value={this.state.resource_id} onChange={(evt) => this.set("resource_id", evt.target.value)}/>
             <h4>Tags</h4>
-            {this.state.loading_tags ? <div className="loader">Loading...</div> : (
+            {this.state.loading_tags ? <Loader /> : <div>
               <ul className="list-group">
                 {this.state.tags.map(x =>
-                  <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={(evt) => {evt.preventDefault(); me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
                 )}
               </ul>
-            )}
+              {Object.keys(me.state.tags).length > 0 ? null :
+                  <div className="lead text-center">No tags to display</div>}
+              </div>
+            }
           </div>
         </div>
       </div>
-    var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
+    var rightpane = this.state.loading_table ? <Loader /> : (
       <table className="table table-hover">
         <thead>
           <tr>
@@ -452,6 +508,11 @@ const ReservationList = React.createClass({
             <div className="col-md-9">
               <h3>Reservations
               <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
+              {!this.state.error_msg ? <div></div> :
+                <div className="alert alert-danger">
+                  <strong>{this.state.error_msg}</strong>
+                </div>
+              }
               {rightpane}
             </div>
           </div>
@@ -466,7 +527,7 @@ const ResourceList = React.createClass({
     return {
       loading_tags: true,
       loading_table: true,
-      tags: [],
+      tags: {},
       resources: {},
       error_msg: ""
     };
@@ -474,11 +535,11 @@ const ResourceList = React.createClass({
 
   cycleState(tag_name) {
     var tags = this.state.tags;
-    tags.forEach(function(x) {
-      if (x.name == tag_name) {
-        if (x.state == "Required") x.state = "Excluded";
-        else if (x.state == "Excluded") x.state = "";
-        else x.state = "Required";
+    Object.keys(tags).forEach(function(tag) {
+      if (tag == tag_name) {
+        if (tags[tag] == "Required") tags[tag] = "Excluded";
+        else if (tags[tag] == "Excluded") tags[tag] = "";
+        else tags[tag] = "Required";
       }
     });
     this.setState({tags: tags});
@@ -495,18 +556,20 @@ const ResourceList = React.createClass({
     var me = this;
     send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
       function(obj) {
-        me.loadResources();
+        me.refresh();
+        me.setState({error_msg: ""});
       },
       function(obj) {
-        me.loadResources();
+        me.refresh();
+        me.setState({error_msg: obj.error_msg});
       }
     );
   },
 
-  loadResources() {
+  refresh() {
     var me = this;
-    var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
-    var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
+    var required_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Required").join(",");
+    var excluded_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Excluded").join(",");
     send_xhr("GET", "/api/resources/?required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
       function(obj) {
         var new_resources = {};
@@ -515,7 +578,8 @@ const ResourceList = React.createClass({
         });
         me.setState({
           resources: new_resources,
-          loading_table: false
+          loading_table: false,
+          error_msg: ""
         });
       },
       function(obj) {
@@ -524,24 +588,28 @@ const ResourceList = React.createClass({
         });
       }
     );
-  },
-
-  componentDidMount() {
-    var me = this;
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {
+        var new_tags = {};
+        obj.data.tags.forEach(function(x) {
+          new_tags[x] = me.state.tags[x] ? me.state.tags[x] : ""
+        });
         me.setState({
-          tags: obj.data.tags.map(x => ({name: x, state: ""})),
+          tags: new_tags,
           loading_tags: false
         });
       },
       function(obj) {
         me.setState({
-          loading_tags: false
+          loading_tags: false,
+          error_msg: error_msg
         });
       }
     );
-    this.loadResources();
+  },
+
+  componentDidMount() {
+    this.refresh();
   },
 
   render() {
@@ -554,19 +622,23 @@ const ResourceList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.loadResources}>Load resources</button>
+            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load resources</button>
             <h4>Tags</h4>
-            {this.state.loading_tags ? <div className="loader">Loading...</div> :
-              <ul className="list-group">
-                {this.state.tags.map(x =>
-                  <a key={"resourcetag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
-                )}
-              </ul>
+            {this.state.loading_tags ? <Loader /> :
+              <div>
+                <ul className="list-group">
+                  {Object.keys(this.state.tags).map(tag =>
+                    <a key={"resourcetag" + tag} href="#" className="list-group-item" onClick={(evt) => {evt.preventDefault(); me.cycleState(tag)}}>{tag}<span className="badge">{this.state.tags[tag]}</span></a>
+                  )}
+                </ul>
+                {Object.keys(me.state.tags).length > 0 ? null :
+                  <div className="lead text-center">No tags to display</div>}
+              </div>
             }
           </div>
         </div>
       </div>
-    var rightpane = this.state.loading_table ? <div className="loader">Loading...</div> : (
+    var rightpane = this.state.loading_table ? <Loader /> : (
       <table className="table table-hover">
         <thead>
           <tr>
@@ -590,6 +662,8 @@ const ResourceList = React.createClass({
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
             </tr>
           })}
+          {Object.keys(me.state.resources).length > 0 ? null :
+            <tr><td className="lead text-center" colSpan="7">No resources to display</td></tr>}
         </tbody>
       </table>
     );
@@ -834,13 +908,125 @@ const ReservationCreator = React.createClass({
 });
 
 const ReservationEditor = React.createClass({
+  editReservation() {
+    var me = this;
+    this.setState({loading: true});
+    send_xhr("PUT", "/api/reservations" + this.props.id, localStorage.getItem("session"),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: this.state.start.toISOString(), end_time: this.state.end.toISOString(), should_email:this.state.should_email}),
+      function(obj) {
+        me.props.setPstate({ route: "reservation_list" });
+      },
+      function(obj) {
+        me.setState({loading: false, error_msg: obj.error_msg});
+      }
+    );
+  },
+
+  cancel() {
+    this.props.setPstate({ route: "reservation_list" });
+  },
+
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
+  },
+
+  setDate(field, str) {
+    var parts = str.split('-');
+    this.state[field].setFullYear(parts[0]);
+    this.state[field].setMonth(parts[1]-1);
+    this.state[field].setDate(parts[2]);
+    this.setState(this.state);
+  },
+
+  setTime(field, str) {
+    var parts = str.split(':');
+    this.state[field].setHours(parts[0]);
+    this.state[field].setMinutes(parts[1]);
+    this.setState(this.state);
+  },
+
+  getInitialState() {
+    return {
+      resource_id: 0,
+      user_id: userId(),
+      start: new Date(),
+      end: new Date(),
+      should_email: false,
+      error_msg: ""
+    };
+  },
+
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/reservations/" + this.props.id, localStorage.getItem("session"), null,
+      function(obj) {
+        obj.data.initial_load = false;
+        // TODO once user ID gets sent back
+        /*me.setState({
+          resource_id: obj.data.resource.resource_id,
+          user_id: obj.data.user.user_id,
+          start: new Date(obj.data.start_time),
+          end: new Date(obj.data.end_time),
+          should_email: obj.data.should_email,
+          error_msg: ""
+        });*/
+      },
+      function(obj) {
+        me.setState({initial_load: false, error_msg: obj.error_msg});
+      }
+    );
+  },
+
   render() {
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-        Reservation editor
+          <div className="row">
+            <div className="col-md-6 col-md-offset-3">
+              <form>
+                <legend>Edit reservation {this.props.id}</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_resource">Resource ID</label>
+                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resourcue_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_user_id">User ID (yours by default)</label>
+                  <input type="number" className="form-control" id="reservation_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={(evt)=>this.set("user_id", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_start_date">Start Date</label>
+                  <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_start_time">Start Time</label>
+                  <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_end_date">End Date</label>
+                  <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_end_time">End Time</label>
+                  <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
+                </div>
+                <div className="checkbox">
+                  <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/> Email reminder</label>
+                </div>
+                <div className="btn-toolbar">
+                  <button type="submit" className="btn btn-primary" onClick={this.editReservation}>Reserve</button>
+                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -903,7 +1089,7 @@ const ResourceEditor = React.createClass({
         me.setState(obj.data);
       },
       function(obj) {
-        me.setState({initial_load: false});
+        me.setState({initial_load: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -925,15 +1111,15 @@ const ResourceEditor = React.createClass({
                   </div>
                 }
                 <div className="form-group">
-                  <label htmlFor="resource_creator_name">Name</label>
+                  <label htmlFor="resource_editor_name">Name</label>
                   <input type="text" className="form-control" id="resource_editor_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="resource_creator_description">Description</label>
+                  <label htmlFor="resource_editor_description">Description</label>
                   <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="resource_creator_tags">Tags</label>
+                  <label htmlFor="resource_editor_tags">Tags</label>
                   <div className="row">
                     <div className="col-md-4">
                       {this.state.tags.slice(0, -1).map((x,i) =>
