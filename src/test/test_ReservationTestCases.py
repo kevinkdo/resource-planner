@@ -53,7 +53,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(self.baseUrl + self.reserveUrl + '/1', headers = self.headers)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00', u'begin_time': u'2011-08-06T10:54:17', u'reservation_id': 1, u'user': {u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}
+      assert decoded['data'] == {u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00', u'begin_time': u'2011-08-06T10:54:17', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}
       assert decoded['error_msg'] == 'Reservation with given ID found'
     
   def test_GetReservationWithInvalidID(self):
@@ -72,7 +72,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00', u'begin_time': u'2011-08-06T10:54:17', u'reservation_id': 1, u'user': {u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}]
+      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00', u'begin_time': u'2011-08-06T10:54:17', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}]
       assert decoded['error_msg'] == 'Matching reservations retrieved'
 
   def test_GetReservationWtihQueryValidTimeRange(self):
@@ -82,7 +82,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00', u'begin_time': u'2011-08-06T10:54:17', u'reservation_id': 1, u'user': {u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}]
+      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00', u'begin_time': u'2011-08-06T10:54:17', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}]
       assert decoded['error_msg'] == 'Matching reservations retrieved'
 
   def test_GetReservationWtihQueryInvalidTimeRange(self):

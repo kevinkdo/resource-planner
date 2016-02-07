@@ -13,6 +13,7 @@ import responses.StandardResponse;
 import responses.data.CanDelete;
 import responses.data.Resource;
 import responses.data.Resources;
+import resourceplanner.services.EmailService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,6 +28,9 @@ import java.util.*;
 @Transactional
 @Service
 public class ResourceService {
+
+    @Autowired
+    EmailService emailService;
 
     @Autowired
     private JdbcTemplate jt;
@@ -379,6 +383,7 @@ public class ResourceService {
             return new StandardResponse(true, "Resource does not exist");
         }
 
+        emailService.cancelEmailsForReservationsWithResource(resourceId);
         jt.update("DELETE FROM reservations WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resources WHERE resource_id = ?;", resourceId);
