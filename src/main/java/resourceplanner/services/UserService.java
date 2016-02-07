@@ -93,7 +93,7 @@ public class UserService {
 
     public List<User> getUsers(int userId) {
         return jt.query(
-                "SELECT email, username, should_email FROM users WHERE user_id = ?;",
+                "SELECT * FROM users WHERE user_id = ?;",
                 new Object[]{userId},
                 new RowMapper<User>() {
                     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -101,6 +101,7 @@ public class UserService {
                         user.setEmail(rs.getString("email"));
                         user.setUsername(rs.getString("username"));
                         user.setShould_email(rs.getBoolean("should_email"));
+                        user.setUser_id(rs.getInt("user_id"));
                         return user;
                     }
                 });

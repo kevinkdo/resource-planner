@@ -52,7 +52,7 @@ class UsersTestCases(unittest.TestCase):
       r = requests.get(self.baseUrl + self.userUrl + '/1', headers = self.headers)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'username': u'admin', u'should_email': False, u'user_id': 0, u'email': u'admin@admin.com'}
+      assert decoded['data'] == {u'username': u'admin', u'should_email': False, u'user_id': 1, u'email': u'admin@admin.com'}
       assert decoded['error_msg'] == 'Successfully retrieved user'
 
   def test_GetUserWithInvalidID(self):
