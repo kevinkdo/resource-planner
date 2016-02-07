@@ -9,6 +9,7 @@ import requestdata.GetAllMatchingReservationRequest;
 import requestdata.ReservationRequest;
 import responses.StandardResponse;
 import responses.data.*;
+import org.springframework.jdbc.core.RowMapper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
@@ -187,7 +188,6 @@ public class ReservationService{
     	return baseQueryString;
 
     }
-
 
 
     public StandardResponse deleteReservationByIdDB(int reservationId){
@@ -432,9 +432,16 @@ public class ReservationService{
         return matchingReservation;
     }
 
+    public ReservationWithIDsData getReservationWithIDsDataObjectById(int reservationId){
+    	return new ReservationWithIDsData(getReservationWithIdsObjectById(reservationId));
+    }
+
     private UserWithID getUserByID(int userID){
     	StandardResponse userResponse = userService.getUserById(userID);
     	User noID = (User) userResponse.getData();
+    	if(noID == null){
+    		return null;
+    	}
     	UserWithID withID = new UserWithID(noID, userID);
     	return withID;
     }
@@ -462,6 +469,32 @@ public class ReservationService{
         }
     }
 
+    private List<Integer> getReservationsOfUser(int userId){
+    	String statement = "SELECT reservation_id FROM reservations WHERE user_id = " + userId +";";
+
+    	List<Integer> reservationIds = jt.query(
+                statement,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("reservation_id");
+                    }
+                });
+    	return reservationIds;
+    }
+
+    private List<Integer> getReservationsWithResource(int resourceId){
+    	String statement = "SELECT reservation_id FROM reservations WHERE resource_id = " + resourceId +";";
+
+    	List<Integer> reservationIds = jt.query(
+                statement,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("reservation_id");
+                    }
+                });
+    	return reservationIds;
+    }
+
     private void rescheduleEmails(ReservationWithIDsData reservation){
     	removeScheduledEmails(reservation.getReservation_id());
     	scheduleEmailUpdate(reservation);
@@ -477,8 +510,6 @@ public class ReservationService{
     		scheduledEmailMap.remove(reservationId);
     	}
     }
-
-
 
     private void scheduleEmailUpdate(ReservationWithIDsData res){
     	Reservation completeReservation = getReservationObjectById(res.getReservation_id());
@@ -524,5 +555,31 @@ public class ReservationService{
     private boolean verifyDateInFuture(Date date){
 		Date currentDate = new Date();
 		return currentDate.before(date);
+    }
+
+    public void upateEmailAfterUserChange(int userId){
+    	List<Integer> reservationIds = getReservationsOfUser(userId);
+    	List<ReservationWithIDsData> reservations = new ArrayList<ReservationWithIDsData>();
+    	for(int i = 0; i < reservationIds.size(); i++){
+    		reservations.add(getReservationWithIDsDataObjectById(reservationIds.get(i)));
+    	}
+    	for(ReservationWithIDsData r : reservations){
+    		System.out.println("Rescheduling emails for " + r.getReservation_id());
+    		rescheduleEmails(r);
+    	}
+    }
+
+    public void cancelEmailsForReservationsOfUser(int userId){
+    	List<Integer> reservationIds = getReservationsOfUser(userId);
+    	for(int i = 0; i < reservationIds.size(); i++){
+    		removeScheduledEmails(reservationIds.get(i));
+    	}
+    }
+
+    public void cancelEmailsForReservationsWithResource(int resourceId){
+    	List<Integer> reservationIds = getReservationsWithResource(resourceId);
+    	for(int i = 0; i < reservationIds.size(); i++){
+    		removeScheduledEmails(reservationIds.get(i));
+    	}
     }
 }

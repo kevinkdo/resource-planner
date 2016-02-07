@@ -29,6 +29,9 @@ import java.util.*;
 public class ResourceService {
 
     @Autowired
+    ReservationService reservationService;
+
+    @Autowired
     private JdbcTemplate jt;
 
     public StandardResponse createRequest(final ResourceRequest req) {
@@ -379,6 +382,7 @@ public class ResourceService {
             return new StandardResponse(true, "Resource does not exist");
         }
 
+        reservationService.cancelEmailsForReservationsWithResource(resourceId);
         jt.update("DELETE FROM reservations WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resources WHERE resource_id = ?;", resourceId);
