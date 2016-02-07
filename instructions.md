@@ -37,6 +37,18 @@ $ ./run.sh
 ```
 App should now be running on the VM's port 443 (forwarded to the host's localhost:8443)
 
+# Running the dev webapp
+[https://127.0.0.1:8443/dev.html](https://127.0.0.1:8443/dev.html)
+
+# Building the webapp for production
+The build system should have Babel and React CLI tools installed:
+```
+sudo npm install --global babel-cli
+npm install babel-preset-react
+```
+
+Then you can run `resource-planner/src/main/webapp/m` to build `main.js` and output `main-build.js`, which is used in the production webapp at `index.html`
+
 # Automated Tests
 `cd src/test` and then one of the following commands:
 
