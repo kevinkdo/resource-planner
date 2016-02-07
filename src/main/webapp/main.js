@@ -74,7 +74,7 @@ const Router = React.createClass({
       case "reservation_creator":
         return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_editor":
-        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
       case "resource_list":
         return <ResourceList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_creator":
@@ -899,13 +899,125 @@ const ReservationCreator = React.createClass({
 });
 
 const ReservationEditor = React.createClass({
+  editReservation() {
+    var me = this;
+    this.setState({loading: true});
+    send_xhr("PUT", "/api/reservations" + this.props.id, localStorage.getItem("session"),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: this.state.start.toISOString(), end_time: this.state.end.toISOString(), should_email:this.state.should_email}),
+      function(obj) {
+        me.props.setPstate({ route: "reservation_list" });
+      },
+      function(obj) {
+        me.setState({loading: false, error_msg: obj.error_msg});
+      }
+    );
+  },
+
+  cancel() {
+    this.props.setPstate({ route: "reservation_list" });
+  },
+
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
+  },
+
+  setDate(field, str) {
+    var parts = str.split('-');
+    this.state[field].setFullYear(parts[0]);
+    this.state[field].setMonth(parts[1]-1);
+    this.state[field].setDate(parts[2]);
+    this.setState(this.state);
+  },
+
+  setTime(field, str) {
+    var parts = str.split(':');
+    this.state[field].setHours(parts[0]);
+    this.state[field].setMinutes(parts[1]);
+    this.setState(this.state);
+  },
+
+  getInitialState() {
+    return {
+      resource_id: 0,
+      user_id: userId(),
+      start: new Date(),
+      end: new Date(),
+      should_email: false,
+      error_msg: ""
+    };
+  },
+
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/reservations/" + this.props.id, localStorage.getItem("session"), null,
+      function(obj) {
+        obj.data.initial_load = false;
+        // TODO once user ID gets sent back
+        /*me.setState({
+          resource_id: obj.data.resource.resource_id,
+          user_id: obj.data.user.user_id,
+          start: new Date(obj.data.start_time),
+          end: new Date(obj.data.end_time),
+          should_email: obj.data.should_email,
+          error_msg: ""
+        });*/
+      },
+      function(obj) {
+        me.setState({initial_load: false, error_msg: obj.error_msg});
+      }
+    );
+  },
+
   render() {
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-        Reservation editor
+          <div className="row">
+            <div className="col-md-6 col-md-offset-3">
+              <form>
+                <legend>Edit reservation {this.props.id}</legend>
+                {!this.state.error_msg ? <div></div> :
+                  <div className="alert alert-danger">
+                    <strong>{this.state.error_msg}</strong>
+                  </div>
+                }
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_resource">Resource ID</label>
+                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resourcue_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_user_id">User ID (yours by default)</label>
+                  <input type="number" className="form-control" id="reservation_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={(evt)=>this.set("user_id", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_start_date">Start Date</label>
+                  <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_start_time">Start Time</label>
+                  <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_end_date">End Date</label>
+                  <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reservation_creator_end_time">End Time</label>
+                  <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
+                </div>
+                <div className="checkbox">
+                  <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/> Email reminder</label>
+                </div>
+                <div className="btn-toolbar">
+                  <button type="submit" className="btn btn-primary" onClick={this.editReservation}>Reserve</button>
+                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -990,15 +1102,15 @@ const ResourceEditor = React.createClass({
                   </div>
                 }
                 <div className="form-group">
-                  <label htmlFor="resource_creator_name">Name</label>
+                  <label htmlFor="resource_editor_name">Name</label>
                   <input type="text" className="form-control" id="resource_editor_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="resource_creator_description">Description</label>
+                  <label htmlFor="resource_editor_description">Description</label>
                   <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="resource_creator_tags">Tags</label>
+                  <label htmlFor="resource_editor_tags">Tags</label>
                   <div className="row">
                     <div className="col-md-4">
                       {this.state.tags.slice(0, -1).map((x,i) =>
