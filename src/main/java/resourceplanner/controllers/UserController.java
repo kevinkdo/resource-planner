@@ -26,7 +26,7 @@ public class UserController extends Controller{
     @ResponseBody
     public StandardResponse createUser(@RequestBody final UserRequest req, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "You are not authorized", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "You are not authorized");
         }
         return userService.createUser(req);
     }

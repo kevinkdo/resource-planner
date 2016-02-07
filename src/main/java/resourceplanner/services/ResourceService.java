@@ -393,7 +393,7 @@ public class ResourceService {
     public StandardResponse canDeleteResource(int resourceId) {
 
         int reservations = jt.queryForObject(
-                "SELECT COUNT(*) FROM reservations WHERE reservation_id = ? AND now() < end_time;", Integer.class, resourceId);
+                "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND now() < end_time;", Integer.class, resourceId);
 
         boolean canDelete = reservations == 0;
         return new StandardResponse(false, "Successful retrieved canDelete status", new CanDelete(canDelete));

@@ -2,7 +2,10 @@ package resourceplanner.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.UserRequest;
@@ -13,6 +16,8 @@ import utilities.PasswordHash;
 import resourceplanner.services.ReservationService;
 import resourceplanner.services.EmailService;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,9 +36,11 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
-    public StandardResponse createUser(UserRequest req) {
+
+    public StandardResponse createUser(final UserRequest req) {
+        
         if (!req.isValid()) {
-            return new StandardResponse(true, "Invalid request", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "Invalid request");
         }
         String passwordHash = null;
         try {
@@ -53,14 +60,25 @@ public class UserService {
             return new StandardResponse(true, "Username already exists");
         }
 
-        int returnedValue = jt.update(
-                "INSERT INTO users (email, passhash, username, should_email, permission) VALUES (?, ?, ?, ?, ?);",
-                req.getEmail(),
-                passwordHash,
-                req.getUsername(),
-                req.isShould_email(),
-                0);
-        User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        final String finalPasswordHash = passwordHash;
+        jt.update(
+                new PreparedStatementCreator() {
+                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                        PreparedStatement ps = connection.prepareStatement(
+                                "INSERT INTO users (email, passhash, username, should_email, permission) VALUES (?, ?, ?, ?, ?);",
+                                new String[] {"user_id"});
+                        ps.setString(1, req.getEmail());
+                        ps.setString(2, finalPasswordHash);
+                        ps.setString(3, req.getUsername());
+                        ps.setBoolean(4, req.isShould_email());
+                        ps.setInt(5, 0);
+                        return ps;
+                    }
+                },
+                keyHolder);
+
+        User committed = new User(keyHolder.getKey().intValue(), req.getEmail(), req.getUsername(), req.isShould_email());
         return new StandardResponse(false, "Successfully registered.", committed);
     }
 
@@ -90,7 +108,7 @@ public class UserService {
 
     public StandardResponse updateUser(UserRequest req, int userId) {
         if (!req.isUpdateValid()) {
-            return new StandardResponse(true, "Invalid request", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "Invalid request", new User(userId, req.getEmail(), req.getUsername(), req.isShould_email()));
         }
         List<User> users = getUsers(userId);
         if (users.size() == 0) {
