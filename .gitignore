@@ -3,6 +3,7 @@
 gradlew
 gradlew.bat
 manifest.yml
+main-build.js
 
 # Created by https://www.gitignore.io/api/gradle,eclipse,intellij
 
