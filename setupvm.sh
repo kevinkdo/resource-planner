@@ -15,3 +15,10 @@ sudo apt-get install oracle-java8-set-default
 sudo add-apt-repository ppa:cwchien/gradle
 sudo apt-get update
 sudo apt-get install gradle
+
+#install frontend stuff
+#sudo apt-get install nodejs
+#sudo apt-get install npm
+#sudo ln -s /usr/bin/nodejs /usr/bin/node
+#sudo npm install --global babel-cli
+#npm install babel-preset-react
