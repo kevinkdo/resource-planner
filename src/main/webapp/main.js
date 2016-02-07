@@ -379,6 +379,7 @@ const ReservationList = React.createClass({
     send_xhr("DELETE", "/api/reservations/" + id, localStorage.getItem("session"), null,
       function(obj) {
         me.refresh();
+        me.setState({error_msg: ""});
       },
       function(obj) {
         me.refresh();
@@ -399,7 +400,8 @@ const ReservationList = React.createClass({
           });
         me.setState({
           reservations: new_reservations,
-          loading_table: false
+          loading_table: false,
+          error_msg: ""
         });
       },
       function(obj) {
@@ -554,6 +556,7 @@ const ResourceList = React.createClass({
     send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
       function(obj) {
         me.refresh();
+        me.setState({error_msg: ""});
       },
       function(obj) {
         me.refresh();
@@ -574,7 +577,8 @@ const ResourceList = React.createClass({
         });
         me.setState({
           resources: new_resources,
-          loading_table: false
+          loading_table: false,
+          error_msg: ""
         });
       },
       function(obj) {
