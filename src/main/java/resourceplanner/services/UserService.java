@@ -11,6 +11,7 @@ import responses.data.User;
 import responses.data.UserUpdate;
 import utilities.PasswordHash;
 import resourceplanner.services.ReservationService;
+import resourceplanner.services.EmailService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +29,7 @@ public class UserService {
     private JdbcTemplate jt;
 
     @Autowired
-    ReservationService reservationService;
+    private EmailService emailService;
 
     public StandardResponse createUser(UserRequest req) {
         if (!req.isValid()) {
@@ -139,12 +140,12 @@ public class UserService {
 
         //User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
         UserUpdate committed = new UserUpdate(req.isShould_email());
-        reservationService.upateEmailAfterUserChange(userId);
+        emailService.upateEmailAfterUserChange(userId);
         return new StandardResponse(false, "Successfully updated email settings", committed);
     }
 
     public StandardResponse deleteUser(int userId) {
-        reservationService.cancelEmailsForReservationsOfUser(userId);
+        emailService.cancelEmailsForReservationsOfUser(userId);
         jt.update("DELETE FROM reservations WHERE user_id = ?;", userId);
         jt.update("DELETE FROM users WHERE user_id = ?;", userId);
         return new StandardResponse(false, "Successfully deleted user");

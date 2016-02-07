@@ -37,6 +37,9 @@ public class ReservationService{
 	private Map<Integer, List<ScheduledFuture>> scheduledEmailMap = new HashMap<Integer, List<ScheduledFuture>>();
 
 	@Autowired
+	private EmailService emailService;
+
+	@Autowired
 	private UserService userService;
 
 	@Autowired
@@ -202,7 +205,7 @@ public class ReservationService{
     			return new StandardResponse(true, "No reservation with that ID exists");
     		}
             c.close();
-            removeScheduledEmails(reservationId);
+            emailService.removeScheduledEmails(reservationId);
     		return new StandardResponse(false, "Reservation successfully deleted");
     	}
     	catch(Exception e){
@@ -261,7 +264,7 @@ public class ReservationService{
         	ReservationWithIDsData newReservation = new ReservationWithIDsData(reservation_id, req.getUser_id(), req.getResource_id(),
         		req.getBegin_time(), req.getEnd_time(), req.getShould_email());
             c.close();
-            scheduleEmailUpdate(newReservation);
+            emailService.scheduleEmailUpdate(newReservation);
         	return new StandardResponse(false, "Reservation inserted successfully", newReservation);
         }
         catch (Exception e){
@@ -315,7 +318,7 @@ public class ReservationService{
             int affectedRows = st.executeUpdate();
             if(affectedRows == 1){
             	ReservationWithIDsData reservationToReturn = new ReservationWithIDsData(existingRes);
-            	rescheduleEmails(reservationToReturn);
+            	emailService.rescheduleEmails(reservationToReturn);
                 return new StandardResponse(false, "Successfully updated reservation", reservationToReturn);
             }
             else{
@@ -379,7 +382,7 @@ public class ReservationService{
     	}
     }
 
-    private Reservation getReservationObjectById(int reservationId){
+    public Reservation getReservationObjectById(int reservationId){
     	Connection c = JDBC.connect();
         PreparedStatement st = null;
         String selectResourcesQuery = "SELECT * FROM reservations WHERE reservation_id = ?;";
@@ -469,7 +472,7 @@ public class ReservationService{
         }
     }
 
-    private List<Integer> getReservationsOfUser(int userId){
+    public List<Integer> getReservationsOfUser(int userId){
     	String statement = "SELECT reservation_id FROM reservations WHERE user_id = " + userId +";";
 
     	List<Integer> reservationIds = jt.query(
@@ -482,7 +485,7 @@ public class ReservationService{
     	return reservationIds;
     }
 
-    private List<Integer> getReservationsWithResource(int resourceId){
+    public List<Integer> getReservationsWithResource(int resourceId){
     	String statement = "SELECT reservation_id FROM reservations WHERE resource_id = " + resourceId +";";
 
     	List<Integer> reservationIds = jt.query(
@@ -495,91 +498,4 @@ public class ReservationService{
     	return reservationIds;
     }
 
-    private void rescheduleEmails(ReservationWithIDsData reservation){
-    	removeScheduledEmails(reservation.getReservation_id());
-    	scheduleEmailUpdate(reservation);
-    }
-
-
-    private void removeScheduledEmails(int reservationId){
-    	if(scheduledEmailMap.containsKey(reservationId)){
-    		List<ScheduledFuture> futures = scheduledEmailMap.get(reservationId);
-    		for(ScheduledFuture f : futures){
-    			f.cancel(true);
-    		}
-    		scheduledEmailMap.remove(reservationId);
-    	}
-    }
-
-    private void scheduleEmailUpdate(ReservationWithIDsData res){
-    	Reservation completeReservation = getReservationObjectById(res.getReservation_id());
-
-    	if(completeReservation.getShould_email() && completeReservation.getUser().isShould_email()){
-    		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.BEGIN_ALERT);
-			EmailScheduler endReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.END_ALERT);
-
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-			Date dateBeginGWT = sdf.parse(completeReservation.getBegin_time(), new java.text.ParsePosition(0));
-			Date dateEndGWT = sdf.parse(completeReservation.getEnd_time(), new java.text.ParsePosition(0));
-
-
-			//Have to adjust dates to not be in GWT
-			Date dateBegin = new Date(dateBeginGWT.getTime() + 5 * 3600 * 1000);
-			Date dateEnd = new Date(dateEndGWT.getTime() + 5 * 3600 * 1000);
-
-			if(!verifyDateInFuture(dateBegin)){
-				return;
-			}
-
-			ScheduledFuture beginEmail = concurrentTaskScheduler.schedule(startReservationEmailScheduler, dateBegin);
-			ScheduledFuture endEmail = concurrentTaskScheduler.schedule(endReservationEmailScheduler, dateEnd);
-    		
-    		if(scheduledEmailMap.containsKey(completeReservation.getReservation_id())){
-    			List<ScheduledFuture> existingFutures = scheduledEmailMap.get(completeReservation.getReservation_id());
-    			for (ScheduledFuture f : existingFutures){
-    				f.cancel(true);
-    			}
-    			existingFutures = new ArrayList<ScheduledFuture>();
-    			existingFutures.add(beginEmail);
-    			existingFutures.add(endEmail);
-    		}
-    		else{
-    			List<ScheduledFuture> newFutures = new ArrayList<ScheduledFuture>();
-    			newFutures.add(beginEmail);
-    			newFutures.add(endEmail);
-    			scheduledEmailMap.put(completeReservation.getReservation_id(), newFutures);
-    		}
-    	}
-    }
-
-    private boolean verifyDateInFuture(Date date){
-		Date currentDate = new Date();
-		return currentDate.before(date);
-    }
-
-    public void upateEmailAfterUserChange(int userId){
-    	List<Integer> reservationIds = getReservationsOfUser(userId);
-    	List<ReservationWithIDsData> reservations = new ArrayList<ReservationWithIDsData>();
-    	for(int i = 0; i < reservationIds.size(); i++){
-    		reservations.add(getReservationWithIDsDataObjectById(reservationIds.get(i)));
-    	}
-    	for(ReservationWithIDsData r : reservations){
-    		System.out.println("Rescheduling emails for " + r.getReservation_id());
-    		rescheduleEmails(r);
-    	}
-    }
-
-    public void cancelEmailsForReservationsOfUser(int userId){
-    	List<Integer> reservationIds = getReservationsOfUser(userId);
-    	for(int i = 0; i < reservationIds.size(); i++){
-    		removeScheduledEmails(reservationIds.get(i));
-    	}
-    }
-
-    public void cancelEmailsForReservationsWithResource(int resourceId){
-    	List<Integer> reservationIds = getReservationsWithResource(resourceId);
-    	for(int i = 0; i < reservationIds.size(); i++){
-    		removeScheduledEmails(reservationIds.get(i));
-    	}
-    }
 }
