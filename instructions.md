@@ -35,18 +35,11 @@ $ su vagrant (password should be 'vagrant')
 $ ch /vagrant
 $ ./run.sh
 ```
-App should now be running on localhost:8080 (from the perspective of the host computer)
+App should now be running on the VM's port 443 (forwarded to the host's localhost:8443)
 
-# To run tests
-```
-cd src/test
-python -m unittest discover -v (runs all tests and gives name and status of each)
-```
-or 
-```
-$ python -m unittest discover (runs all without name and status of each)
-```
-or to run an individual test
-```
-$ python nameoftest.py -v (-v optional does same as above)
-```
+# Automated Tests
+`cd src/test` and then one of the following commands:
+
+1. To run all tests verbosely `python -m unittest discover -v`
+2. To run all tests non-verbosely `python -m unittest discover`
+3. To run an individual test `python nameoftest.py -v`
