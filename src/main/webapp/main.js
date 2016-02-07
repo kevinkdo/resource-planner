@@ -411,6 +411,11 @@ const ReservationList = React.createClass({
         });
       }
     );
+  },
+
+  componentDidMount() {
+    var me = this;
+    this.refresh();
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {
         me.setState({
@@ -425,10 +430,6 @@ const ReservationList = React.createClass({
         });
       }
     );
-  },
-
-  componentDidMount() {
-    this.refresh();
   },
 
   render() {
@@ -454,7 +455,7 @@ const ReservationList = React.createClass({
             {this.state.loading_tags ? <Loader /> : <div>
               <ul className="list-group">
                 {this.state.tags.map(x =>
-                  <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={(evt) => {evt.preventDefault(); me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
                 )}
               </ul>
               {Object.keys(me.state.tags).length > 0 ? null :
@@ -526,7 +527,7 @@ const ResourceList = React.createClass({
     return {
       loading_tags: true,
       loading_table: true,
-      tags: [],
+      tags: {},
       resources: {},
       error_msg: ""
     };
@@ -534,11 +535,11 @@ const ResourceList = React.createClass({
 
   cycleState(tag_name) {
     var tags = this.state.tags;
-    tags.forEach(function(x) {
-      if (x.name == tag_name) {
-        if (x.state == "Required") x.state = "Excluded";
-        else if (x.state == "Excluded") x.state = "";
-        else x.state = "Required";
+    Object.keys(tags).forEach(function(tag) {
+      if (tag == tag_name) {
+        if (tags[tag] == "Required") tags[tag] = "Excluded";
+        else if (tags[tag] == "Excluded") tags[tag] = "";
+        else tags[tag] = "Required";
       }
     });
     this.setState({tags: tags});
@@ -567,8 +568,8 @@ const ResourceList = React.createClass({
 
   refresh() {
     var me = this;
-    var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
-    var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
+    var required_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Required").join(",");
+    var excluded_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Excluded").join(",");
     send_xhr("GET", "/api/resources/?required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
       function(obj) {
         var new_resources = {};
@@ -589,8 +590,12 @@ const ResourceList = React.createClass({
     );
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {
+        var new_tags = {};
+        obj.data.tags.forEach(function(x) {
+          new_tags[x] = me.state.tags[x] ? me.state.tags[x] : ""
+        });
         me.setState({
-          tags: obj.data.tags.map(x => ({name: x, state: ""})),
+          tags: new_tags,
           loading_tags: false
         });
       },
@@ -622,8 +627,8 @@ const ResourceList = React.createClass({
             {this.state.loading_tags ? <Loader /> :
               <div>
                 <ul className="list-group">
-                  {this.state.tags.map(x =>
-                    <a key={"resourcetag" + x.name} href="#" className="list-group-item" onClick={function() {me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  {Object.keys(this.state.tags).map(tag =>
+                    <a key={"resourcetag" + tag} href="#" className="list-group-item" onClick={(evt) => {evt.preventDefault(); me.cycleState(tag)}}>{tag}<span className="badge">{this.state.tags[tag]}</span></a>
                   )}
                 </ul>
                 {Object.keys(me.state.tags).length > 0 ? null :
