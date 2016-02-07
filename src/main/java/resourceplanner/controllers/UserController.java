@@ -26,7 +26,7 @@ public class UserController extends Controller{
     @ResponseBody
     public StandardResponse createUser(@RequestBody final UserRequest req, final HttpServletRequest request) {
         if (!isAdmin(request)) {
-            return new StandardResponse(true, "You are not authorized", new User(req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "You are not authorized");
         }
         return userService.createUser(req);
     }
@@ -35,7 +35,7 @@ public class UserController extends Controller{
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse getUserById(@PathVariable final int userId, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!isAdmin(request) && (userId != getRequesterID(request))) {
             return new StandardResponse(true, "You are not authorized");
         }
         return userService.getUserById(userId);
