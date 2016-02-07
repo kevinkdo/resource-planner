@@ -91,7 +91,7 @@ public class ReservationService{
                 if(newRes == null){
                     return new StandardResponse(true, "Error parsing retrieved reservations");
                 }
-                User user = getUserByID(newRes.getUser_id());
+                UserWithID user = getUserByID(newRes.getUser_id());
                 Resource resource = getResourceById(newRes.getResource_id());
                 reservations.add(new Reservation(newRes, user, resource));
             }
@@ -400,7 +400,7 @@ public class ReservationService{
         }
 
 
-        User user = getUserByID(matchingReservation.getUser_id());
+        UserWithID user = getUserByID(matchingReservation.getUser_id());
         Resource resource = getResourceById(matchingReservation.getResource_id());
         if(user == null || resource == null){
         	return null;
@@ -432,9 +432,11 @@ public class ReservationService{
         return matchingReservation;
     }
 
-    private User getUserByID(int userID){
+    private UserWithID getUserByID(int userID){
     	StandardResponse userResponse = userService.getUserById(userID);
-    	return (User) userResponse.getData();
+    	User noID = (User) userResponse.getData();
+    	UserWithID withID = new UserWithID(noID, userID);
+    	return withID;
     }
 
     private Resource getResourceById(int resourceId) {
@@ -497,9 +499,6 @@ public class ReservationService{
 			if(!verifyDateInFuture(dateBegin)){
 				return;
 			}
-
-			System.out.println(dateBegin.toString());
-			System.out.println(dateEnd.toString());
 
 			ScheduledFuture beginEmail = concurrentTaskScheduler.schedule(startReservationEmailScheduler, dateBegin);
 			ScheduledFuture endEmail = concurrentTaskScheduler.schedule(endReservationEmailScheduler, dateEnd);
