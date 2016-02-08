@@ -508,8 +508,8 @@ const ReservationList = React.createClass({
               <td>{x.reservation_id}</td>
               <td>{x.resource.name}</td>
               <td>{x.user.username}</td>
-              <td>{x.begin_time}</td>
-              <td>{x.end_time}</td>
+              <td>{new Date(x.begin_time).toLocaleString()}</td>
+              <td>{new Date(x.end_time).toLocaleString()}</td>
               <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
             </tr>
