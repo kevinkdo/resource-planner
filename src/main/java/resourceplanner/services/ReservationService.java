@@ -294,7 +294,7 @@ public class ReservationService{
     private Boolean isOverlappingReservation(Timestamp start, Timestamp end, int resource_id, Integer currentReservation_id){
         Connection c = JDBC.connect();
         PreparedStatement st = null;
-        String query = "SELECT * FROM reservations WHERE resource_id = ? AND ((? >= begin_time AND ? <= end_time) OR (? >= begin_time AND ? <= end_time) OR (? <= begin_time AND ? >= end_time))";
+        String query = "SELECT * FROM reservations WHERE resource_id = ? AND ((? >= begin_time AND ? < end_time) OR (? > begin_time AND ? <= end_time) OR (? <= begin_time AND ? >= end_time))";
 
         if(currentReservation_id != null){
             query = query + " AND reservation_id != ?";
