@@ -50,7 +50,7 @@ public class ResourceController extends Controller{
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse getAllResources() {
-        return resourceService.getAllResources();
+        return resourceService.getResource(new String[0], new String[0]);
     }
 
 

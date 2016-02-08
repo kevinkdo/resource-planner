@@ -107,44 +107,24 @@ public class ResourceService {
         if (excludedTags == null) {
             excludedTags = new String[0];
         }
-        if (requiredTags.length == 0 && excludedTags.length == 0) {
-            return getAllResources();
-        }
 
-        if (requiredTags.length == 0) {
-            return getResourcesExcluded(excludedTags);
-        }
+        List<RT> rts = getResourcesWithTags();
+        List<RT> noTagsrts = getResourcesWithoutTags();
 
-        final String statement =
-                "SELECT resources.name, resources.description, resources.resource_id, resourcetags.tag " +
-                        "FROM resourcetags INNER JOIN resources " +
-                        "ON resourcetags.resource_id = resources.resource_id " +
-                        "ORDER BY resourcetags.resource_id ASC ;";
-
-        List<RT> rts = jt.query(
-                statement,
-                new RowMapper<RT>() {
-                    public RT mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        RT rt = new RT();
-                        rt.name = rs.getString("name");
-                        rt.description = rs.getString("description");
-                        rt.resourceId = rs.getInt("resource_id");
-                        rt.tag = rs.getString("tag");
-                        return rt;
-                    }
-                });
+        rts.addAll(noTagsrts);
 
         Map<Integer, Resource> processList = new HashMap<Integer, Resource>();
         Set<String> excluded = new HashSet<String>(Arrays.asList(excludedTags));
         Set<String> required = new HashSet<String>(Arrays.asList(requiredTags));
 
-        for (int i = 0; i < rts.size(); i++) {
-            RT current = rts.get(i);
+        for (RT current : rts) {
             if (processList.keySet().contains(current.resourceId)) {
                 processList.get(current.resourceId).getTags().add(current.tag);
             } else {
                 List<String> tagList = new ArrayList<String>();
-                tagList.add(current.tag);
+                if (current.tag != null) {
+                    tagList.add(current.tag);
+                }
                 Resource r = new Resource(current.resourceId, current.name, current.description, tagList);
                 processList.put(current.resourceId, r);
             }
@@ -152,27 +132,32 @@ public class ResourceService {
 
         Set<Integer> deleteSet = new HashSet<Integer>();
 
-        for (int i : processList.keySet()) {
-            List<String> tags = processList.get(i).getTags();
-            for (String s : required) {
-                boolean doBreak = false;
-                for (int j = 0; j < tags.size(); j++) {
-                    if (!tags.contains(s)) {
-                        deleteSet.add(i);
-                        doBreak = true;
+        if (requiredTags.length != 0) {
+            for (int i : processList.keySet()) {
+                List<String> tags = processList.get(i).getTags();
+                if (tags.size() == 0) {
+                    deleteSet.add(i);
+                    continue;
+                }
+                for (String s : required) {
+                    boolean doBreak = false;
+                    for (int j = 0; j < tags.size(); j++) {
+                        if (!tags.contains(s)) {
+                            deleteSet.add(i);
+                            doBreak = true;
+                            break;
+                        }
+                    }
+                    if (doBreak) {
                         break;
                     }
-                }
-                if (doBreak) {
-                    break;
                 }
             }
         }
 
         for (int i : processList.keySet()) {
             List<String> tags = processList.get(i).getTags();
-            for (int j = 0; j < tags.size(); j++) {
-                String tag = tags.get(j);
+            for (String tag : tags) {
                 if (excluded.contains(tag)) {
                     deleteSet.add(i);
                     break;
@@ -196,11 +181,11 @@ public class ResourceService {
         private String tag;
     }
 
-    public StandardResponse getAllResources() {
+    private List<RT> getResourcesWithTags() {
         final String statement =
                 "SELECT resources.name, resources.description, resources.resource_id, resourcetags.tag " +
-                        "FROM resourcetags, resources " +
-                        "WHERE resourcetags.resource_id = resources.resource_id " +
+                        "FROM resourcetags INNER JOIN resources " +
+                        "ON resourcetags.resource_id = resources.resource_id " +
                         "ORDER BY resourcetags.resource_id ASC ;";
 
         List<RT> rts = jt.query(
@@ -215,70 +200,10 @@ public class ResourceService {
                         return rt;
                     }
                 });
-
-        final String noTagsStatement =
-                "SELECT name, description, resource_id " +
-                        "FROM resources " +
-                        "WHERE NOT EXISTS (SELECT 1 FROM resourcetags WHERE resourcetags.resource_id = resources.resource_id) " +
-                        "ORDER BY resource_id ASC ;";
-
-        List<RT> noTagsrts = jt.query(
-                noTagsStatement,
-                new RowMapper<RT>() {
-                    public RT mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        RT rt = new RT();
-                        rt.name = rs.getString("name");
-                        rt.description = rs.getString("description");
-                        rt.resourceId = rs.getInt("resource_id");
-                        rt.tag = null;
-                        return rt;
-                    }
-                });
-
-        rts.addAll(noTagsrts);
-
-        Map<Integer, Resource> processList = new HashMap<Integer, Resource>();
-
-        for (int i = 0; i < rts.size(); i++) {
-            RT current = rts.get(i);
-            if (processList.keySet().contains(current.resourceId)) {
-                processList.get(current.resourceId).getTags().add(current.tag);
-            } else {
-                List<String> tagList = new ArrayList<String>();
-                if (current.tag != null) {
-                    tagList.add(current.tag);
-                }
-                Resource r = new Resource(current.resourceId, current.name, current.description, tagList);
-                processList.put(current.resourceId, r);
-            }
-        }
-        List<Resource> response = new ArrayList<Resource>();
-        for (int i : processList.keySet()) {
-            response.add(processList.get(i));
-        }
-        return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
+        return rts;
     }
 
-    private StandardResponse getResourcesExcluded(String[] excludedTags) {
-        final String statement =
-                "SELECT resources.name, resources.description, resources.resource_id, resourcetags.tag " +
-                        "FROM resourcetags, resources " +
-                        "WHERE resourcetags.resource_id = resources.resource_id " +
-                        "ORDER BY resourcetags.resource_id ASC ;";
-
-        List<RT> rts = jt.query(
-                statement,
-                new RowMapper<RT>() {
-                    public RT mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        RT rt = new RT();
-                        rt.name = rs.getString("name");
-                        rt.description = rs.getString("description");
-                        rt.resourceId = rs.getInt("resource_id");
-                        rt.tag = rs.getString("tag");
-                        return rt;
-                    }
-                });
-
+    private List<RT> getResourcesWithoutTags() {
         final String noTagsStatement =
                 "SELECT name, description, resource_id " +
                         "FROM resources " +
@@ -297,47 +222,7 @@ public class ResourceService {
                         return rt;
                     }
                 });
-
-        rts.addAll(noTagsrts);
-
-        Map<Integer, Resource> processList = new HashMap<Integer, Resource>();
-
-        Set<String> excluded = new HashSet<String>(Arrays.asList(excludedTags));
-
-        for (int i = 0; i < rts.size(); i++) {
-            RT current = rts.get(i);
-            if (processList.keySet().contains(current.resourceId)) {
-                processList.get(current.resourceId).getTags().add(current.tag);
-            } else {
-                List<String> tagList = new ArrayList<String>();
-                if (current.tag != null) {
-                    tagList.add(current.tag);
-                }
-                Resource r = new Resource(current.resourceId, current.name, current.description, tagList);
-                processList.put(current.resourceId, r);
-            }
-        }
-
-        Set<Integer> deleteSet = new HashSet<Integer>();
-
-        for (int i : processList.keySet()) {
-            List<String> tags = processList.get(i).getTags();
-            for (int j = 0; j < tags.size(); j++) {
-                String tag = tags.get(j);
-                if (excluded.contains(tag)) {
-                    deleteSet.add(i);
-                    break;
-                }
-            }
-        }
-
-        processList.keySet().removeAll(deleteSet);
-
-        List<Resource> response = new ArrayList<Resource>();
-        for (int i : processList.keySet()) {
-            response.add(processList.get(i));
-        }
-        return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
+        return noTagsrts;
     }
 
     public StandardResponse updateResource(ResourceRequest req, int resourceId) {
