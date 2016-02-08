@@ -757,14 +757,14 @@ const TagInput = React.createClass({
 const ResourceCreator = React.createClass({
   createResource() {
     var me = this;
-    this.setState({loading: true});
+    this.setState({sending: true});
     send_xhr("POST", "/api/resources", localStorage.getItem("session"),
       JSON.stringify({name:this.state.name, description:this.state.description, tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({ route: "resource_list" });
       },
       function(obj) {
-        me.setState({loading: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -836,7 +836,7 @@ const ResourceCreator = React.createClass({
                   </div>
                 </div>
                 <div className="btn-toolbar">
-                  <button type="submit" className={"btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.createResource}>Create resource</button>
+                  <button type="submit" className="btn btn-primary" onClick={this.createResource} disabled={this.state.sending}>Create resource</button>
                   <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
@@ -851,14 +851,14 @@ const ResourceCreator = React.createClass({
 const ReservationCreator = React.createClass({
   createReservation() {
     var me = this;
-    this.setState({loading: true});
+    this.setState({sending: true});
     send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
       JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.state.start).toISOString(), end_time: round(this.state.end).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
       function(obj) {
-        me.setState({loading: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -889,6 +889,7 @@ const ReservationCreator = React.createClass({
 
   getInitialState() {
     return {
+      sending: false,
       resource_id: 0,
       user_id: userId(),
       start: new Date(),
@@ -941,7 +942,7 @@ const ReservationCreator = React.createClass({
                   <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
                 </div>
                 <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.createReservation}>Reserve</button>
+                  <button type="submit" className="btn btn-primary" onClick={this.createReservation} disabled={this.state.sending}>Reserve</button>
                   <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
