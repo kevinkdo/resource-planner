@@ -41,6 +41,14 @@ public class ResourceService {
             return new StandardResponse(true, "Resource name required");
         }
 
+        final String tagRegex = "^[^,]*[^ ,][^,]*$";
+
+        for (String tag : req.getTags()) {
+            if (!tag.matches(tagRegex)) {
+                return new StandardResponse(true, "Tag name " + tag + " is invalid");
+            }
+        }
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
                 new PreparedStatementCreator() {

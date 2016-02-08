@@ -40,6 +40,34 @@ public class UserService {
         if (!req.isValid()) {
             return new StandardResponse(true, "Invalid request");
         }
+
+        if (req.getEmail().length() < 5 || req.getEmail().length() > 250) {
+            return new StandardResponse(true, "Email must be between 5 and 250 characters long");
+        }
+
+        if (req.getUsername().length() < 1 || req.getUsername().length() > 250) {
+            return new StandardResponse(true, "Username must be between 1 and 250 characters long");
+        }
+
+        if (req.getPassword().length < 1 || req.getPassword().length > 250) {
+            return new StandardResponse(true, "Password must be between 1 and 250 characters long");
+        }
+
+
+        final String EMAIL_PATTERN =
+                "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" +
+                        "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+        final String USERNAME_PATTERN = "[^@]+";
+
+        if (!req.getEmail().matches(EMAIL_PATTERN)) {
+            return new StandardResponse(true, "Invalid email");
+        }
+
+        if (!req.getUsername().matches(USERNAME_PATTERN)) {
+            return new StandardResponse(true, "Invalid username");
+        }
+
         String passwordHash = null;
         try {
             passwordHash = PasswordHash.createHash(req.getPassword());
