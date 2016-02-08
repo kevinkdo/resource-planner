@@ -31,4 +31,11 @@ public class TimeUtility {
         return dateFormatGmt.format(ts);
     }
 
+    public static String prettyEST(String str) {
+        Timestamp utcTime = stringToTimestamp(str);
+        SimpleDateFormat dateFormatEst = new SimpleDateFormat("EEEE, MMMM d, yyyy 'at' hh:mm a z");
+        dateFormatEst.setTimeZone(TimeZone.getTimeZone("EST"));
+        return dateFormatEst.format(utcTime);
+    }
+
 }
