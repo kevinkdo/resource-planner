@@ -47,11 +47,11 @@ def addReservations():
 	resourceUrl = 'api/resources'
 	reserveUrl = 'api/reservations'
 
-	reservation1 = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:17Z", "end_time": "2011-08-06T11:00:00Z", "should_email": "true"}
-	reservation2 = {"user_id": "2", "resource_id": "2", "begin_time": "2010-08-06T10:54:17Z", "end_time": "2010-08-06T11:54:17Z", "should_email": "false"}
-	reservation3 = {"user_id": "3", "resource_id": "3", "begin_time": "2009-08-06T10:54:17Z", "end_time": "2009-08-06T11:54:17Z", "should_email": "false"}
-	reservation4 = {"user_id": "1", "resource_id": "4", "begin_time": "2008-08-06T10:54:17Z", "end_time": "2008-08-06T11:54:17Z", "should_email": "false"}
-	reservation5 = {"user_id": "2", "resource_id": "5", "begin_time": "2000-08-06T10:54:17Z", "end_time": "2005-08-06T11:54:17Z", "should_email": "true"}
+	reservation1 = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:17.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+	reservation2 = {"user_id": "2", "resource_id": "2", "begin_time": "2010-08-06T10:54:17.000Z", "end_time": "2010-08-06T11:54:17.000Z", "should_email": "false"}
+	reservation3 = {"user_id": "3", "resource_id": "3", "begin_time": "2009-08-06T10:54:17.000Z", "end_time": "2009-08-06T11:54:17.000Z", "should_email": "false"}
+	reservation4 = {"user_id": "1", "resource_id": "4", "begin_time": "2008-08-06T10:54:17.000Z", "end_time": "2008-08-06T11:54:17.000Z", "should_email": "false"}
+	reservation5 = {"user_id": "2", "resource_id": "5", "begin_time": "2000-08-06T10:54:17.000Z", "end_time": "2005-08-06T11:54:17.000Z", "should_email": "true"}
 
 	r = requests.post(baseUrl + reserveUrl, data = json.dumps(reservation1), headers = headers)
 	r = requests.post(baseUrl + reserveUrl, data = json.dumps(reservation2), headers = headers)
