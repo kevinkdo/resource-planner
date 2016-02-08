@@ -24,9 +24,6 @@ import java.util.concurrent.ScheduledFuture;
 @Service
 public class ReservationService{
 
-	private ConcurrentTaskScheduler concurrentTaskScheduler = new ConcurrentTaskScheduler();
-	private Map<Integer, List<ScheduledFuture>> scheduledEmailMap = new HashMap<Integer, List<ScheduledFuture>>();
-
 	@Autowired
 	private EmailService emailService;
 
@@ -39,8 +36,6 @@ public class ReservationService{
 	@Autowired
 	private JdbcTemplate jt;
 
-	// Matches all reservations from ANY of the supplied users or ANY of the supplied resources, if
-    // they overlap with the start-end times
     public StandardResponse getMatchingReservations(GetAllMatchingReservationRequest req){
         String getMatchingReservations = "SELECT * FROM reservations WHERE ";
 
@@ -61,42 +56,26 @@ public class ReservationService{
         Timestamp startTime = req.getStart();
         Timestamp endTime = req.getEnd();
 
-        //Two cases where it overlaps. 
-        //1. Start time between other reservations start/end
-        //2. End time between other reservations start/end
         getMatchingReservations = getMatchingReservations + "((begin_time <= ? AND begin_time >= ?) OR (end_time <=? AND end_time >= ?) OR (begin_time <= ?  AND end_time >= ?));";
 
-        Connection c = JDBC.connect();
-        PreparedStatement st = null;
+        List<Reservation> reservations  = jt.query(getMatchingReservations,
+        	new Object[]{req.getEnd(), req.getStart(), req.getEnd(), req.getStart(), req.getStart(), req.getEnd()},
+        	new RowMapper<Reservation>(){
+        		public Reservation mapRow(ResultSet rs, int rowNum) throws SQLException{
+        			ReservationWithIDs newRes = extractReservationFromResultSet(rs);
+        			User user = getUserByID(newRes.getUser_id());
+        			Resource resource = getResourceById(newRes.getResource_id());
+        			return new Reservation(newRes, user, resource);
+        		}
+        	}
 
-        try{
-            st = c.prepareStatement(getMatchingReservations);
-            st.setTimestamp(1, req.getEnd());
-            st.setTimestamp(2, req.getStart());
-            st.setTimestamp(3, req.getEnd());
-            st.setTimestamp(4, req.getStart());
-            st.setTimestamp(5, req.getStart());
-            st.setTimestamp(6, req.getEnd());
-            System.out.println(st);
-            ResultSet rs = st.executeQuery();
-            
-            List<Reservation> reservations = new ArrayList<Reservation>();
-            while (rs.next()){
-                ReservationWithIDs newRes = extractReservationFromResultSet(rs);
-                if(newRes == null){
-                    return new StandardResponse(true, "Error parsing retrieved reservations");
-                }
-                UserWithID user = getUserByID(newRes.getUser_id());
-                Resource resource = getResourceById(newRes.getResource_id());
-                reservations.add(new Reservation(newRes, user, resource));
-            }
-            c.close();
-            return new StandardResponse(false, "Matching reservations retrieved", reservations);
-        }
-        catch(Exception e){
-            return new StandardResponse(true, "Failed to retrieve reservations. SQL Query failed." + e);
-        }
+        );
+		
+		if(reservations == null){
+			return new StandardResponse(true, "Error retrieving reservations");
+		}
 
+		return new StandardResponse(false, "Matching reservations retrieved", reservations);
     }
 
     private String appendIDMatchString(String baseQueryString, GetAllMatchingReservationRequest req){
@@ -140,6 +119,7 @@ public class ReservationService{
         return baseQueryString;
     }
 
+    //Adding a string of the form (AND NOT EXISTS(SELECT * WHERE resource_id=resource_id AND tag IN (excluded tags)))
     public String appendExcludedTagString(String baseQueryString, GetAllMatchingReservationRequest req){
     	baseQueryString = baseQueryString + "(";
 
@@ -158,13 +138,9 @@ public class ReservationService{
     	
     	baseQueryString = baseQueryString + ")) ";
 		return baseQueryString;
-    	//for excluded
-    	//do
-    	//AND NOT EXISTS (SELECT * tagTable WHERE resource_id=resource_id AND tag IN (excluded tags))
-    	//AND EXISTS (SELECT * from tagTable where resource_id = resource_ID and tag = required_tag1)
-    	//AND EXISTS (SELECT * from tagTabe where rsource_ID = resource_ID and tag = required_tag2)
     }
 
+    //Adding a string of strings of the form (AND EXISTS (SELECT * from tagTable where resource_id = resource_ID and tag = required_tag1))
     public String appendRequiredTagString(String baseQueryString, GetAllMatchingReservationRequest req){
     	baseQueryString = baseQueryString + "(";
     	String[] required_tags = req.getRequired_tags();
@@ -185,22 +161,15 @@ public class ReservationService{
 
 
     public StandardResponse deleteReservationByIdDB(int reservationId){
-    	Connection c = JDBC.connect();
-    	PreparedStatement st = null;
     	String deleteReservation = "DELETE FROM reservations WHERE reservation_id = ?;";
-    	try{
-    		st = c.prepareStatement(deleteReservation);
-    		st.setInt(1, reservationId);
-    		int affectedRows = st.executeUpdate();
-    		if(affectedRows == 0){
-    			return new StandardResponse(true, "No reservation with that ID exists");
-    		}
-            c.close();
-            emailService.removeScheduledEmails(reservationId);
-    		return new StandardResponse(false, "Reservation successfully deleted");
+
+    	int rows = jt.update(deleteReservation, new Object[]{reservationId});
+    	if(rows == 0){
+    		return new StandardResponse(true, "No reservation with that ID exists");
     	}
-    	catch(Exception e){
-    		return new StandardResponse(true, "Failed to delete reservation");
+    	else{
+    		emailService.removeScheduledEmails(reservationId);
+    		return new StandardResponse(false, "Reservation successfully deleted");
     	}
     }
 
@@ -374,70 +343,55 @@ public class ReservationService{
     }
 
     public Reservation getReservationObjectById(int reservationId){
-    	Connection c = JDBC.connect();
-        PreparedStatement st = null;
-        String selectResourcesQuery = "SELECT * FROM reservations WHERE reservation_id = ?;";
-        ReservationWithIDs matchingReservation;
+        String selectReservationsQuery = "SELECT * FROM reservations WHERE reservation_id = ?;";
 
-        try {
-            st = c.prepareStatement(selectResourcesQuery);
-            st.setInt(1, reservationId);
-            ResultSet rs = st.executeQuery();
-            if (rs.next()) {
-                matchingReservation = extractReservationFromResultSet(rs);
-            } else {
-                return null;
-            }
-            c.close();
-        } catch (Exception f) {
-            return null;
-        }
+        List<Reservation> reservations  = jt.query(selectReservationsQuery,
+        	new Object[]{reservationId},
+        	new RowMapper<Reservation>(){
+        		public Reservation mapRow(ResultSet rs, int rowNum) throws SQLException{
+        			ReservationWithIDs newRes = extractReservationFromResultSet(rs);
+        			User user = getUserByID(newRes.getUser_id());
+        			Resource resource = getResourceById(newRes.getResource_id());
+        			return new Reservation(newRes, user, resource);
+        		}
+        	}
 
+        );
 
-        UserWithID user = getUserByID(matchingReservation.getUser_id());
-        Resource resource = getResourceById(matchingReservation.getResource_id());
-        if(user == null || resource == null){
+        if(reservations.isEmpty()){
         	return null;
         }
-
-        Reservation reservation = new Reservation(matchingReservation, user, resource);
-        return reservation;
+        return reservations.get(0);
     }
 
     public ReservationWithIDs getReservationWithIdsObjectById(int reservationId){
-    	Connection c = JDBC.connect();
-        PreparedStatement st = null;
-        String selectResourcesQuery = "SELECT * FROM reservations WHERE reservation_id = ?;";
-        ReservationWithIDs matchingReservation;
+        String selectReservationsQuery = "SELECT * FROM reservations WHERE reservation_id = ?;";
 
-        try {
-            st = c.prepareStatement(selectResourcesQuery);
-            st.setInt(1, reservationId);
-            ResultSet rs = st.executeQuery();
-            if (rs.next()) {
-                matchingReservation = extractReservationFromResultSet(rs);
-            } else {
-                return null;
-            }
-            c.close();
-        } catch (Exception f) {
-            return null;
+        List<ReservationWithIDs> reservations  = jt.query(selectReservationsQuery,
+        	new Object[]{reservationId},
+        	new RowMapper<ReservationWithIDs>(){
+        		public ReservationWithIDs mapRow(ResultSet rs, int rowNum) throws SQLException{
+        			ReservationWithIDs newRes = extractReservationFromResultSet(rs);
+        			return newRes;
+        		}
+        	}
+
+        );
+
+        if(reservations.isEmpty()){
+        	return null;
         }
-        return matchingReservation;
+        return reservations.get(0);
     }
 
     public ReservationWithIDsData getReservationWithIDsDataObjectById(int reservationId){
     	return new ReservationWithIDsData(getReservationWithIdsObjectById(reservationId));
     }
 
-    private UserWithID getUserByID(int userID){
+    private User getUserByID(int userID){
     	StandardResponse userResponse = userService.getUserById(userID);
-    	User noID = (User) userResponse.getData();
-    	if(noID == null){
-    		return null;
-    	}
-    	UserWithID withID = new UserWithID(noID, userID);
-    	return withID;
+    	User user = (User) userResponse.getData();
+    	return user;
     }
 
     private Resource getResourceById(int resourceId) {

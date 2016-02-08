@@ -9,13 +9,13 @@ import java.sql.Timestamp;
  */
 public class Reservation {
     private int reservation_id;
-    private UserWithID user;
+    private User user;
     private Resource resource;
     private String begin_time;
     private String end_time;
     private boolean should_email;
 
-    public Reservation(int reservation_id, UserWithID user, Resource resource, Timestamp begin_time,
+    public Reservation(int reservation_id, User user, Resource resource, Timestamp begin_time,
         Timestamp end_time, boolean should_email) {
         this.reservation_id = reservation_id;
         this.user = user;
@@ -25,7 +25,7 @@ public class Reservation {
         this.should_email = should_email;
     }
 
-    public Reservation(ReservationWithIDs reservation, UserWithID user, Resource resource){
+    public Reservation(ReservationWithIDs reservation, User user, Resource resource){
         this.reservation_id = reservation.getReservation_id();
         this.user = user;
         this.resource = resource;
@@ -39,7 +39,7 @@ public class Reservation {
         return reservation_id;
     }
 
-    public UserWithID getUser(){
+    public User getUser(){
         return user;
     }
 
