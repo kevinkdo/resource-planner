@@ -47,7 +47,7 @@ var formatTime = function(d) {
   return h + ":" + m;
 };
 
-//Rounds a date to the nearest minute
+//Rounds a date down to the nearest minute
 var round = function(d) {
   d.setMilliseconds(0);
   d.setSeconds(0);
