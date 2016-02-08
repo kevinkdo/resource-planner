@@ -30,6 +30,16 @@ class ReservationTestCases(unittest.TestCase):
       assert decoded['is_error'] == True
       assert decoded['data'] == None
       assert decoded['error_msg'] == 'User does not exist'
+
+  def test_CreateTouchingReservations(self):
+      reservation1 = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation2 = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T11:00:00.000Z", "end_time": "2012-08-06T11:00:00.000Z", "should_email": "true"}
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation1), headers = self.headers)
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation2), headers = self.headers)
+      decoded = r.json()
+      assert decoded['is_error'] == False
+      assert decoded['data'] == {u'should_email': True, u'user_id': 1, u'resource_id': 1, u'end_time': u'2012-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T11:00:00.000Z', u'reservation_id': 2}
+      assert decoded['error_msg'] == 'Reservation inserted successfully'
     
   def test_CreateInvalidReservationWithInvalidResourceID(self):
       reservation = {"user_id": "1", "resource_id": "3", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
