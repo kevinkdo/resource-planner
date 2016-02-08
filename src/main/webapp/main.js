@@ -1012,10 +1012,10 @@ const ReservationEditor = React.createClass({
                 }
                 <div className="form-group">
                   <label htmlFor="reservation_creator_resource">Resource ID</label>
-                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resourcue_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
+                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resource_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="reservation_creator_user_id">User ID (yours by default)</label>
+                  <label htmlFor="reservation_creator_user_id">User ID</label>
                   <input type="number" className="form-control" id="reservation_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={(evt)=>this.set("user_id", evt.target.value)}/>
                 </div>
                 <div className="form-group">
@@ -1038,7 +1038,7 @@ const ReservationEditor = React.createClass({
                   <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
                 </div>
                 <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.editReservation}>Reserve</button>
+                  <button type="submit" className="btn btn-primary" onClick={this.editReservation}>Edit reservation</button>
                   <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
