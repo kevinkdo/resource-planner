@@ -343,13 +343,15 @@ const ReservationList = React.createClass({
   getInitialState() {
     var now = new Date();
     var start = new Date();
+    var end = new Date();
     start.setMonth(now.getMonth() - 1);
+    end.setMonth(now.getMonth() + 1);
     return {
       loading_tags: true,
       loading_table: true,
       tags: [],
       start: start,
-      end: now,
+      end: end,
       reservations: {},
       error_msg: "",
       resource_id: ""
