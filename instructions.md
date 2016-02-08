@@ -46,6 +46,16 @@ Follow the frontend section of `setupvm.sh` (it might be commented out).
 Then you can run `resource-planner/src/main/webapp/m1` to build `main.js` and output `main-build.js`, which is used in the production webapp at `index.html`. If you're developing the frontend, then you may want `resource-planner/src/main/webapp/m`, which starts a daemon that watches `main.js` and automatically rebuilds `main-build.js` when it sees changes.
 
 # Automated Tests
+
+## Automatic testing
+
+```
+chmod +x test.sh # set permissions
+./test.sh        # run from resource-planner directory
+```
+
+## Manual testing
+
 `cd src/test` and then one of the following commands:
 
 1. To run all tests verbosely `python -m unittest discover -v`
