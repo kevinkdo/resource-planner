@@ -19,14 +19,14 @@ public class TimeUtility {
     }
 
     public static Timestamp stringToTimestamp(String str) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
         ZoneId zoneId = ZoneId.of("UTC");
         return Timestamp.from(ldt.atZone(zoneId).toInstant());
     }
 
     public static String timestampToString(Timestamp ts) {
-        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         dateFormatGmt.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormatGmt.format(ts);
     }
