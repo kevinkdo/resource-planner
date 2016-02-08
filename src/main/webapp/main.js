@@ -173,7 +173,8 @@ const AdminConsole = React.createClass({
     this.setState(this.state);
   },
 
-  createUser() {
+  createUser(evt) {
+    evt.preventDefault();
     var me = this;
     this.setState({loading: true});
     send_xhr("POST", "/api/users", localStorage.getItem("session"),
@@ -236,7 +237,7 @@ const AdminConsole = React.createClass({
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createUser}>Create user</button>
-                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
             </div>
@@ -253,7 +254,8 @@ const Settings = React.createClass({
     this.setState(this.state);
   },
 
-  editSettings() {
+  editSettings(evt) {
+    evt.preventDefault();
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/users/" + userId(), localStorage.getItem("session"),
@@ -755,7 +757,8 @@ const TagInput = React.createClass({
 });
 
 const ResourceCreator = React.createClass({
-  createResource() {
+  createResource(evt) {
+    evt.preventDefault();
     var me = this;
     this.setState({sending: true});
     send_xhr("POST", "/api/resources", localStorage.getItem("session"),
@@ -837,7 +840,7 @@ const ResourceCreator = React.createClass({
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createResource} disabled={this.state.sending}>Create resource</button>
-                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
             </div>
@@ -849,7 +852,8 @@ const ResourceCreator = React.createClass({
 });
 
 const ReservationCreator = React.createClass({
-  createReservation() {
+  createReservation(evt) {
+    evt.preventDefault();
     var me = this;
     this.setState({sending: true});
     send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
@@ -943,7 +947,7 @@ const ReservationCreator = React.createClass({
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createReservation} disabled={this.state.sending}>Reserve</button>
-                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                 </div>
               </form>
             </div>
@@ -955,7 +959,8 @@ const ReservationCreator = React.createClass({
 });
 
 const ReservationEditor = React.createClass({
-  editReservation() {
+  editReservation(evt) {
+    evt.preventDefault();
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/reservations/" + this.props.id, localStorage.getItem("session"),
@@ -1071,7 +1076,7 @@ const ReservationEditor = React.createClass({
                   </div>
                   <div className="btn-toolbar">
                     <button type="submit" className="btn btn-primary" onClick={this.editReservation} disabled={this.state.sending}>Edit reservation</button>
-                    <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                   </div>
                 </form>
               }
@@ -1084,7 +1089,8 @@ const ReservationEditor = React.createClass({
 });
 
 const ResourceEditor = React.createClass({
-  editResource() {
+  editResource(evt) {
+    evt.preventDefault();
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/resources/" + this.props.id, localStorage.getItem("session"),
@@ -1182,7 +1188,7 @@ const ResourceEditor = React.createClass({
                   </div>
                   <div className="btn-toolbar">
                     <button type="submit" className="btn btn-primary" onClick={this.editResource} disabled={this.state.sending}>Edit resource</button>
-                    <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                   </div>
                 </form>
               }
