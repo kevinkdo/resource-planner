@@ -56,7 +56,6 @@ const Router = React.createClass({
     var session = localStorage.getItem("session");
     return {
       route: session ? "reservation_list" : "login",
-      username: "kevinkdo",
       view_id: 0
     };
   },
@@ -104,6 +103,25 @@ const Navbar = React.createClass({
     this.props.setPstate({ route: "login" });
   },
 
+  getInitialState() {
+    return {
+      username: ""
+    };
+  },
+
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/users/" + userId(), localStorage.getItem("session"), null,
+      function(obj) {
+        obj.data.initial_load = false;
+        me.setState({username: obj.data.username});
+      },
+      function(obj) {
+        me.setState({initial_load: false, error_msg: obj.error_msg});
+      }
+    );
+  },
+
   render() {
     return (
       <nav className="navbar navbar-default">
@@ -124,7 +142,7 @@ const Navbar = React.createClass({
               <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "reservation_list"})}>Reservations</a></li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
-              <li><p className="navbar-text">{this.props.pstate.username}</p></li>
+              <li><p className="navbar-text">{this.state.username}</p></li>
               <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
@@ -962,15 +980,14 @@ const ReservationEditor = React.createClass({
     send_xhr("GET", "/api/reservations/" + this.props.id, localStorage.getItem("session"), null,
       function(obj) {
         obj.data.initial_load = false;
-        // TODO once user ID gets sent back
-        /*me.setState({
+        me.setState({
           resource_id: obj.data.resource.resource_id,
           user_id: obj.data.user.user_id,
           start: new Date(obj.data.start_time),
           end: new Date(obj.data.end_time),
           should_email: obj.data.should_email,
           error_msg: ""
-        });*/
+        });
       },
       function(obj) {
         me.setState({initial_load: false, error_msg: obj.error_msg});
