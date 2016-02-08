@@ -51,16 +51,6 @@ public class EmailService {
     		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.BEGIN_ALERT);
 			EmailScheduler endReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.END_ALERT);
 
-			/*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-			Date dateBeginGWT = sdf.parse(completeReservation.getBegin_time(), new java.text.ParsePosition(0));
-			Date dateEndGWT = sdf.parse(completeReservation.getEnd_time(), new java.text.ParsePosition(0));
-
-
-			//Have to adjust dates to not be in GWT
-			Date dateBegin = new Date(dateBeginGWT.getTime() + 5 * 3600 * 1000);
-			Date dateEnd = new Date(dateEndGWT.getTime() + 5 * 3600 * 1000);
-			*/
-
 			System.out.println("Begin time: "+completeReservation.getBegin_time());
 			System.out.println("End   time: "+completeReservation.getEnd_time());
 
