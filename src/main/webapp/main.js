@@ -47,6 +47,13 @@ var formatTime = function(d) {
   return h + ":" + m;
 };
 
+//Rounds a date to the nearest minute
+var round = function(d) {
+  d.setMilliseconds(0);
+  d.setSeconds(0);
+  return d;
+}
+
 var userId = function() {
   return jwt_decode(localStorage.getItem("session")).user_id;
 };
@@ -415,7 +422,7 @@ const ReservationList = React.createClass({
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
-    send_xhr("GET", "/api/reservations/?start=" + this.state.start.toISOString() + "&end=" + this.state.end.toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str + "&resource_ids=" + this.state.resource_id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/reservations/?start=" + round(this.state.start).toISOString() + "&end=" + round(this.state.end).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str + "&resource_ids=" + this.state.resource_id, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
           obj.data.forEach(function(x) {
@@ -846,7 +853,7 @@ const ReservationCreator = React.createClass({
     var me = this;
     this.setState({loading: true});
     send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
-      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: this.state.start.toISOString(), end_time: this.state.end.toISOString(), should_email:this.state.should_email}),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.state.start).toISOString(), end_time: round(this.state.end).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
@@ -951,7 +958,7 @@ const ReservationEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/reservations/" + this.props.id, localStorage.getItem("session"),
-      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: this.state.start.toISOString(), end_time: this.state.end.toISOString(), should_email:this.state.should_email}),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.state.start).toISOString(), end_time: round(this.state.end).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
