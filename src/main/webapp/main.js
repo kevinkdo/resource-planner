@@ -250,7 +250,7 @@ const Settings = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/users/" + userId(), localStorage.getItem("session"),
-      JSON.stringify({email:this.state.email, username:this.state.username, password:this.state.password, should_email: this.state.should_email}),
+      JSON.stringify({/*email:this.state.email, username:this.state.username, password:this.state.password, */should_email: this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
@@ -312,16 +312,16 @@ const Settings = React.createClass({
                   </div>
                   <div className="form-group">
                     <label htmlFor="settings_email">Email</label>
-                    <input type="email" className="form-control" id="settings_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
+                    <input type="email" className="form-control" id="settings_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)} disabled/>
                   </div>
                   <div className="form-group">
                     <label htmlFor="settings_username">Username</label>
-                    <input type="text" className="form-control" id="settings_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)}/>
+                    <input type="text" className="form-control" id="settings_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)} disabled/>
                   </div>
-                  <div className="form-group">
+                  {/*<div className="form-group">
                     <label htmlFor="settings_password">Password</label>
-                    <input type="password" className="form-control" id="settings_password" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
-                  </div>
+                    <input type="password" className="form-control" id="settings_password" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)} disabled/>
+                  </div>*/}
                   <div className="checkbox">
                     <label htmlFor="settings_should_email"><input type="checkbox" id="settings_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Enable email reminders</label>
                   </div>
@@ -950,7 +950,7 @@ const ReservationEditor = React.createClass({
   editReservation() {
     var me = this;
     this.setState({sending: true});
-    send_xhr("PUT", "/api/reservations" + this.props.id, localStorage.getItem("session"),
+    send_xhr("PUT", "/api/reservations/" + this.props.id, localStorage.getItem("session"),
       JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: this.state.start.toISOString(), end_time: this.state.end.toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
