@@ -1142,6 +1142,7 @@ const ResourceEditor = React.createClass({
     send_xhr("GET", "/api/resources/" + this.props.id, localStorage.getItem("session"), null,
       function(obj) {
         obj.data.initial_load = false;
+        obj.data.tags.push("");
         me.setState(obj.data);
       },
       function(obj) {
