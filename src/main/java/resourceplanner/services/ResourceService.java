@@ -15,10 +15,9 @@ import responses.data.Resource;
 import responses.data.Resources;
 import resourceplanner.services.EmailService;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -392,8 +391,12 @@ public class ResourceService {
 
     public StandardResponse canDeleteResource(int resourceId) {
 
+        LocalDateTime ldt = LocalDateTime.now();
+        ZoneId zoneId = ZoneId.of("Etc/UTC");
+        Timestamp currentTime = Timestamp.from(ldt.atZone(zoneId).toInstant());
+
         int reservations = jt.queryForObject(
-                "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND now() < end_time;", Integer.class, resourceId);
+                "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND ? < end_time;", Integer.class, resourceId, currentTime);
 
         boolean canDelete = reservations == 0;
         return new StandardResponse(false, "Successful retrieved canDelete status", new CanDelete(canDelete));
