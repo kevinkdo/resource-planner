@@ -2,6 +2,7 @@ package responses.data;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
  * Created by jiaweizhang on 2/2/16.
@@ -19,8 +20,14 @@ public class ReservationWithIDsData {
         this.reservation_id = reservation_id;
         this.user_id = user_id;
         this.resource_id = resource_id;
-        String beg = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(begin_time);
-        String end = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(end_time);
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String beg = df.format(begin_time);
+        String end = df.format(end_time);
+
+        //String beg = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(begin_time);
+        //String end = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(end_time);
         this.begin_time = beg;
         this.end_time = end;
         this.should_email = should_email;
@@ -30,8 +37,15 @@ public class ReservationWithIDsData {
         this.reservation_id = reservationWithIDs.getReservation_id();
         this.user_id = reservationWithIDs.getUser_id();
         this.resource_id = reservationWithIDs.getResource_id();
-        this.begin_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(reservationWithIDs.getBegin_time());
-        this.end_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(reservationWithIDs.getEnd_time());
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(TimeZone.getTimeZone("GMT"));
+        this.begin_time = df.format(reservationWithIDs.getBegin_time());
+        this.end_time = df.format(reservationWithIDs.getEnd_time());
+
+
+        //this.begin_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(reservationWithIDs.getBegin_time());
+        //this.end_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(reservationWithIDs.getEnd_time());
         this.should_email = reservationWithIDs.getShould_email();
     }
 
