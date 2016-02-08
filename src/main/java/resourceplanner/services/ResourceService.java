@@ -1,5 +1,6 @@
 package resourceplanner.services;
 
+import ch.qos.logback.core.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -14,6 +15,7 @@ import responses.data.CanDelete;
 import responses.data.Resource;
 import responses.data.Resources;
 import resourceplanner.services.EmailService;
+import utilities.TimeUtility;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -391,9 +393,7 @@ public class ResourceService {
 
     public StandardResponse canDeleteResource(int resourceId) {
 
-        LocalDateTime ldt = LocalDateTime.now();
-        ZoneId zoneId = ZoneId.of("Etc/UTC");
-        Timestamp currentTime = Timestamp.from(ldt.atZone(zoneId).toInstant());
+        Timestamp currentTime = TimeUtility.currentUTCTimestamp();
 
         int reservations = jt.queryForObject(
                 "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND ? < end_time;", Integer.class, resourceId, currentTime);

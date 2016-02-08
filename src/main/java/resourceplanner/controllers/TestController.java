@@ -5,19 +5,25 @@ package resourceplanner.controllers;
  */
 
 import org.springframework.web.bind.annotation.*;
+import requestdata.TimeRequest;
 import responses.StandardResponse;
+import utilities.TimeUtility;
 
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/test")
 public class TestController {
 
-    @RequestMapping(value = "/test",
+    @RequestMapping(value = "/timezone",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse register(@RequestBody final Object rd, final HttpServletRequest request) {
+    public StandardResponse register(@RequestBody final TimeRequest rd, final HttpServletRequest request) {
+        String response = TimeUtility.timestampToString(rd.getTime());
+        String response2 = TimeUtility.timestampToString(rd.getTime2());
+        System.out.println(response);
+        System.out.println(response2);
         return new StandardResponse(false, "Successful POST request test", rd);
     }
 
@@ -28,5 +34,4 @@ public class TestController {
         return new StandardResponse(false, "successful GET request test");
     }
 }
-
 
