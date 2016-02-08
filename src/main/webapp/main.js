@@ -225,7 +225,7 @@ const AdminConsole = React.createClass({
                   <input type="password" className="form-control" id="user_creator_username" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
                 </div>
                 <div className="checkbox">
-                  <label htmlFor="user_creator_should_email"><input type="checkbox" id="user_creator_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/>Email reminders</label>
+                  <label htmlFor="user_creator_should_email"><input type="checkbox" id="user_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/>Email reminders</label>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createUser}>Create user</button>
@@ -321,7 +321,7 @@ const Settings = React.createClass({
                   <input type="password" className="form-control" id="settings_password" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
                 </div>
                 <div className="checkbox">
-                  <label htmlFor="settings_should_email"><input type="checkbox" id="settings_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/> Enable email reminders</label>
+                  <label htmlFor="settings_should_email"><input type="checkbox" id="settings_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Enable email reminders</label>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.editSettings}>Edit user</button>
@@ -910,7 +910,7 @@ const ReservationCreator = React.createClass({
                   <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
                 </div>
                 <div className="checkbox">
-                  <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/> Email reminder</label>
+                  <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createReservation}>Reserve</button>
@@ -983,7 +983,7 @@ const ReservationEditor = React.createClass({
         me.setState({
           resource_id: obj.data.resource.resource_id,
           user_id: obj.data.user.user_id,
-          start: new Date(obj.data.start_time),
+          start: new Date(obj.data.begin_time),
           end: new Date(obj.data.end_time),
           should_email: obj.data.should_email,
           error_msg: ""
@@ -1035,7 +1035,7 @@ const ReservationEditor = React.createClass({
                   <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
                 </div>
                 <div className="checkbox">
-                  <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" value={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.value)}/> Email reminder</label>
+                  <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.editReservation}>Reserve</button>
