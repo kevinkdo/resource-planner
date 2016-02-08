@@ -17,17 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-
-import org.springframework.mail.*;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import java.util.Properties;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
-import utilities.EmailUtility;
-
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController extends Controller{

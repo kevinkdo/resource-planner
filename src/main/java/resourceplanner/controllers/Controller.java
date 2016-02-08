@@ -1,15 +1,8 @@
 package resourceplanner.controllers;
 
 import io.jsonwebtoken.Claims;
-import org.postgresql.util.PSQLException;
-import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import responses.StandardResponse;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class Controller {
 	public boolean isAdmin(HttpServletRequest request){

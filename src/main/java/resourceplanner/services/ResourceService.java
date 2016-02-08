@@ -1,6 +1,5 @@
 package resourceplanner.services;
 
-import ch.qos.logback.core.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -14,12 +13,9 @@ import responses.StandardResponse;
 import responses.data.CanDelete;
 import responses.data.Resource;
 import responses.data.Resources;
-import resourceplanner.services.EmailService;
 import utilities.TimeUtility;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 /**

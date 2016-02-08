@@ -1,10 +1,8 @@
 package requestdata;
-import java.sql.Timestamp;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+
 import utilities.TimeUtility;
+
+import java.sql.Timestamp;
 
 /**
  * Created by Davis Treybig on 1/24/2016.

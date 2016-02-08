@@ -1,10 +1,8 @@
 package utilities;
 
-import org.springframework.mail.*;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+
 import java.util.Properties;
 
 /**

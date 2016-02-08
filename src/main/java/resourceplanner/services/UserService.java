@@ -13,8 +13,6 @@ import responses.StandardResponse;
 import responses.data.User;
 import responses.data.UserUpdate;
 import utilities.PasswordHash;
-import resourceplanner.services.ReservationService;
-import resourceplanner.services.EmailService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

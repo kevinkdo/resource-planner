@@ -1,9 +1,8 @@
 package responses.data;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.text.DateFormat;
-import java.util.TimeZone;
+
 import utilities.TimeUtility;
+
+import java.sql.Timestamp;
 
 /**
  * Created by Davis Treybig on 1/24/2016.

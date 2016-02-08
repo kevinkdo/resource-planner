@@ -3,31 +3,22 @@ package resourceplanner.services;
 import databases.JDBC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.GetAllMatchingReservationRequest;
 import requestdata.ReservationRequest;
 import responses.StandardResponse;
 import responses.data.*;
-import org.springframework.jdbc.core.RowMapper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Date;
-import resourceplanner.services.ReservationService;
-import resourceplanner.controllers.Controller;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import utilities.EmailScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
-import java.text.SimpleDateFormat;
 
 @Transactional
 @Service

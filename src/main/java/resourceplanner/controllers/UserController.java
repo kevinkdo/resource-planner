@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import requestdata.UserRequest;
 import resourceplanner.services.UserService;
 import responses.StandardResponse;
-import responses.data.User;
 
 import javax.servlet.http.HttpServletRequest;
 

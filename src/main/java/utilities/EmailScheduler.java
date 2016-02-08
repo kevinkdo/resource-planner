@@ -1,6 +1,5 @@
 package utilities;
-import utilities.EmailUtility;
-import responses.data.ReservationWithIDsData;
+
 import responses.data.Reservation;
 
 /**
