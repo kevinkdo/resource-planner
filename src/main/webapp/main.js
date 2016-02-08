@@ -248,14 +248,14 @@ const Settings = React.createClass({
 
   editSettings() {
     var me = this;
-    this.setState({loading: true});
+    this.setState({sending: true});
     send_xhr("PUT", "/api/users/" + userId(), localStorage.getItem("session"),
       JSON.stringify({email:this.state.email, username:this.state.username, password:this.state.password, should_email: this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
       function(obj) {
-        me.setState({loading: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -269,6 +269,7 @@ const Settings = React.createClass({
   getInitialState() {
     return {
       initial_load: true,
+      sending: false,
       email: "",
       username: "",
       password: "",
@@ -298,36 +299,38 @@ const Settings = React.createClass({
         <div className="container">
           <div className="row">
             <div className="col-md-6 col-md-offset-3">
-              <form>
-                <legend>User Settings</legend>
-                {!this.state.error_msg ? <div></div> :
-                  <div className="alert alert-danger">
-                    <strong>{this.state.error_msg}</strong>
+              {this.state.initial_load ? <Loader /> :
+                <form>
+                  <legend>User Settings</legend>
+                  {!this.state.error_msg ? <div></div> :
+                    <div className="alert alert-danger">
+                      <strong>{this.state.error_msg}</strong>
+                    </div>
+                  }
+                  <div className="form-group">
+                    <label htmlFor="settings_user_id">User ID: {userId()}</label>
                   </div>
-                }
-                <div className="form-group">
-                  <label htmlFor="settings_user_id">User ID: {userId()}</label>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="settings_email">Email</label>
-                  <input type="email" className="form-control" id="settings_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="settings_username">Username</label>
-                  <input type="text" className="form-control" id="settings_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="settings_password">Password</label>
-                  <input type="password" className="form-control" id="settings_password" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
-                </div>
-                <div className="checkbox">
-                  <label htmlFor="settings_should_email"><input type="checkbox" id="settings_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Enable email reminders</label>
-                </div>
-                <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.editSettings}>Edit user</button>
-                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
-                </div>
-              </form>
+                  <div className="form-group">
+                    <label htmlFor="settings_email">Email</label>
+                    <input type="email" className="form-control" id="settings_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="settings_username">Username</label>
+                    <input type="text" className="form-control" id="settings_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)}/>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="settings_password">Password</label>
+                    <input type="password" className="form-control" id="settings_password" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
+                  </div>
+                  <div className="checkbox">
+                    <label htmlFor="settings_should_email"><input type="checkbox" id="settings_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Enable email reminders</label>
+                  </div>
+                  <div className="btn-toolbar">
+                    <button type="submit" className="btn btn-primary" onClick={this.editSettings} disabled={this.state.sending}>Edit user</button>
+                    <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  </div>
+                </form>
+              }
             </div>
           </div>
         </div>
@@ -944,14 +947,14 @@ const ReservationCreator = React.createClass({
 const ReservationEditor = React.createClass({
   editReservation() {
     var me = this;
-    this.setState({loading: true});
+    this.setState({sending: true});
     send_xhr("PUT", "/api/reservations" + this.props.id, localStorage.getItem("session"),
       JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: this.state.start.toISOString(), end_time: this.state.end.toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
       function(obj) {
-        me.setState({loading: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -982,6 +985,8 @@ const ReservationEditor = React.createClass({
 
   getInitialState() {
     return {
+      initial_load: true,
+      sending: false,
       resource_id: 0,
       user_id: userId(),
       start: new Date(),
@@ -995,14 +1000,14 @@ const ReservationEditor = React.createClass({
     var me = this;
     send_xhr("GET", "/api/reservations/" + this.props.id, localStorage.getItem("session"), null,
       function(obj) {
-        obj.data.initial_load = false;
         me.setState({
           resource_id: obj.data.resource.resource_id,
           user_id: obj.data.user.user_id,
           start: new Date(obj.data.begin_time),
           end: new Date(obj.data.end_time),
           should_email: obj.data.should_email,
-          error_msg: ""
+          error_msg: "",
+          initial_load: false
         });
       },
       function(obj) {
@@ -1019,45 +1024,47 @@ const ReservationEditor = React.createClass({
         <div className="container">
           <div className="row">
             <div className="col-md-6 col-md-offset-3">
-              <form>
-                <legend>Edit reservation {this.props.id}</legend>
-                {!this.state.error_msg ? <div></div> :
-                  <div className="alert alert-danger">
-                    <strong>{this.state.error_msg}</strong>
+              {this.state.initial_load ? <Loader /> :
+                <form>
+                  <legend>Edit reservation {this.props.id}</legend>
+                  {!this.state.error_msg ? <div></div> :
+                    <div className="alert alert-danger">
+                      <strong>{this.state.error_msg}</strong>
+                    </div>
+                  }
+                  <div className="form-group">
+                    <label htmlFor="reservation_creator_resource">Resource ID</label>
+                    <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resource_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
                   </div>
-                }
-                <div className="form-group">
-                  <label htmlFor="reservation_creator_resource">Resource ID</label>
-                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resource_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="reservation_creator_user_id">User ID</label>
-                  <input type="number" className="form-control" id="reservation_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={(evt)=>this.set("user_id", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="reservation_creator_start_date">Start Date</label>
-                  <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="reservation_creator_start_time">Start Time</label>
-                  <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="reservation_creator_end_date">End Date</label>
-                  <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="reservation_creator_end_time">End Time</label>
-                  <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
-                </div>
-                <div className="checkbox">
-                  <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
-                </div>
-                <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.editReservation}>Edit reservation</button>
-                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
-                </div>
-              </form>
+                  <div className="form-group">
+                    <label htmlFor="reservation_creator_user_id">User ID</label>
+                    <input type="number" className="form-control" id="reservation_creator_user_id" placeholder="User ID" value={this.state.user_id} onChange={(evt)=>this.set("user_id", evt.target.value)}/>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="reservation_creator_start_date">Start Date</label>
+                    <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="reservation_creator_start_time">Start Time</label>
+                    <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="reservation_creator_end_date">End Date</label>
+                    <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="reservation_creator_end_time">End Time</label>
+                    <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
+                  </div>
+                  <div className="checkbox">
+                    <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
+                  </div>
+                  <div className="btn-toolbar">
+                    <button type="submit" className="btn btn-primary" onClick={this.editReservation} disabled={this.state.sending}>Edit reservation</button>
+                    <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  </div>
+                </form>
+              }
             </div>
           </div>
         </div>
@@ -1069,14 +1076,14 @@ const ReservationEditor = React.createClass({
 const ResourceEditor = React.createClass({
   editResource() {
     var me = this;
-    this.setState({loading: true});
+    this.setState({sending: true});
     send_xhr("PUT", "/api/resources/" + this.props.id, localStorage.getItem("session"),
       JSON.stringify({name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({ route: "resource_list" });
       },
       function(obj) {
-        me.setState({loading: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg});
       }
     );
   },
@@ -1106,7 +1113,7 @@ const ResourceEditor = React.createClass({
   getInitialState() {
     return {
       initial_load: true,
-      loading: false,
+      sending: false,
       name: "",
       description: "",
       tags: [""],
@@ -1136,37 +1143,39 @@ const ResourceEditor = React.createClass({
         <div className="container">
           <div className="row">
             <div className="col-md-6 col-md-offset-3">
-              <form>
-                <legend>Edit resource {this.props.id}</legend>
-                {!this.state.error_msg ? <div></div> :
-                  <div className="alert alert-danger">
-                    <strong>{this.state.error_msg}</strong>
+              {this.state.initial_load ? <Loader /> :
+                <form>
+                  <legend>Edit resource {this.props.id}</legend>
+                  {!this.state.error_msg ? <div></div> :
+                    <div className="alert alert-danger">
+                      <strong>{this.state.error_msg}</strong>
+                    </div>
+                  }
+                  <div className="form-group">
+                    <label htmlFor="resource_editor_name">Name</label>
+                    <input type="text" className="form-control" id="resource_editor_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
                   </div>
-                }
-                <div className="form-group">
-                  <label htmlFor="resource_editor_name">Name</label>
-                  <input type="text" className="form-control" id="resource_editor_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="resource_editor_description">Description</label>
-                  <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="resource_editor_tags">Tags</label>
-                  <div className="row">
-                    <div className="col-md-4">
-                      {this.state.tags.slice(0, -1).map((x,i) =>
-                        <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
-                      )}
-                      <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
+                  <div className="form-group">
+                    <label htmlFor="resource_editor_description">Description</label>
+                    <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="resource_editor_tags">Tags</label>
+                    <div className="row">
+                      <div className="col-md-4">
+                        {this.state.tags.slice(0, -1).map((x,i) =>
+                          <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                        )}
+                        <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="btn-toolbar">
-                  <button type="submit" className={"btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.editResource}>Edit resource</button>
-                  <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
-                </div>
-              </form>
+                  <div className="btn-toolbar">
+                    <button type="submit" className="btn btn-primary" onClick={this.editResource} disabled={this.state.sending}>Edit resource</button>
+                    <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  </div>
+                </form>
+              }
             </div>
           </div>
         </div>
