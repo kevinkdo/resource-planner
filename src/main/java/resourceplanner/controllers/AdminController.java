@@ -26,7 +26,10 @@ public class AdminController extends Controller {
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse init(final HttpServletRequest request) throws Exception{
-        return adminService.init();
+        if (isAdmin(request)) {
+            return adminService.init();
+        }
+        return new StandardResponse(true, "You are not authorized to access this functionality");
     }
 
 }

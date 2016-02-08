@@ -28,6 +28,7 @@ public class Application {
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new JwtFilter());
         registrationBean.addUrlPatterns("/api/*");
+        registrationBean.addUrlPatterns("/admin/*");
 
         return registrationBean;
     }
