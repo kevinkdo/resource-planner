@@ -11,6 +11,7 @@ import utilities.TimeUtility;
 
 import javax.servlet.http.HttpServletRequest;
 
+/*
 @RestController
 @RequestMapping("/test")
 public class TestController {
@@ -34,4 +35,4 @@ public class TestController {
         return new StandardResponse(false, "successful GET request test");
     }
 }
-
+*/
