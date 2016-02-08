@@ -41,9 +41,9 @@ App should now be running on the VM's port 443 (forwarded to the host's localhos
 [https://127.0.0.1:8443/dev.html](https://127.0.0.1:8443/dev.html)
 
 # Building the webapp for production
-Follow the frontend section of `instructions.md` (it might be commented out).
+Follow the frontend section of `setupvm.sh` (it might be commented out).
 
-Then you can run `resource-planner/src/main/webapp/m1` to build `main.js` and output `main-build.js`, which is used in the production webapp at `index.html`
+Then you can run `resource-planner/src/main/webapp/m1` to build `main.js` and output `main-build.js`, which is used in the production webapp at `index.html`. If you're developing the frontend, then you may want `resource-planner/src/main/webapp/m`, which starts a daemon that watches `main.js` and automatically rebuilds `main-build.js` when it sees changes.
 
 # Automated Tests
 `cd src/test` and then one of the following commands:
