@@ -572,10 +572,26 @@ const ResourceList = React.createClass({
 
   deleteResource(id) {
     var me = this;
-    send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/" + id + "/candelete", localStorage.getItem("session"), null,
       function(obj) {
-        me.refresh();
-        me.setState({error_msg: ""});
+        var confirmed_delete = obj.data.canDelete;
+
+        if (!confirmed_delete) {
+          confirmed_delete = confirm("Resource " + id + " has current and/or future reservations. Really delete?");
+        }
+
+        if (confirmed_delete) {
+          send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
+            function(obj) {
+              me.refresh();
+              me.setState({error_msg: ""});
+            },
+            function(obj) {
+              me.refresh();
+              me.setState({error_msg: obj.error_msg});
+            }
+          );
+        }
       },
       function(obj) {
         me.refresh();
