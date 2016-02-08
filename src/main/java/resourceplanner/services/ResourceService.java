@@ -1,5 +1,6 @@
 package resourceplanner.services;
 
+import ch.qos.logback.core.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -14,11 +15,11 @@ import responses.data.CanDelete;
 import responses.data.Resource;
 import responses.data.Resources;
 import resourceplanner.services.EmailService;
+import utilities.TimeUtility;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -392,8 +393,10 @@ public class ResourceService {
 
     public StandardResponse canDeleteResource(int resourceId) {
 
+        Timestamp currentTime = TimeUtility.currentUTCTimestamp();
+
         int reservations = jt.queryForObject(
-                "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND now() < end_time;", Integer.class, resourceId);
+                "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND ? < end_time;", Integer.class, resourceId, currentTime);
 
         boolean canDelete = reservations == 0;
         return new StandardResponse(false, "Successful retrieved canDelete status", new CanDelete(canDelete));
