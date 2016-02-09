@@ -50,7 +50,7 @@ The backend consists of the parts of the software system that run on a VPS (Virt
 \subsection{Java}
 The majority of the backend is written in Java. We chose java for a few key reasons:
 \begin{enumerate}
-    \item It is statically typed. We did not want to deal with the complexity and ambiguity of non-statically typed languages in a group setting where each of us routinely has to read and modify other people’s code. 
+    \item It is statically typed. We did not want to deal with the complexity and ambiguity of non-statically typed languages in a group setting where each of us routinely has to read and modify other people's code. 
     \item We found Spring (our Java server framework) to be easy to use and simple to understand, with a huge amount of documentation and support. It is also very powerful and used in many enterprise applications. 
     \item Our whole team is intimately familiar with Java. 
     \item Java has good cross-platform support across all potential server-hosts (particularly in contrast to C\#, another language we considered). Java also has a large standard library and many community libraries, further easing the development process. 
@@ -86,7 +86,7 @@ Our testing script currently tests only the API contract, and not any internals 
 We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the time assurance that they can quickly make changes to the backend without having to thoroughly, manually test after every change. In this way, it speeds up our development cycle. In addition, because automated tests perform the same steps every time, the expected results are consistent which is not always the case with manual testing
 
 \section{REST API}
-Communication between the frontend and the backend is done through a REST API with JSON (Appendix). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
+Communication between the frontend and the backend is done through a REST API with JSON (Appendix \ref{appendix:apispec}). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
 
 However, there are weaknesses as well. The REST API is based on a request-response paradigm, which means that no data transfer occurs unless it is initiated by the client. In other words, the server has no mechanism to ``push'' updates to the client. Furthermore, JSON is a structured as a tree of values (i.e. there are no pointers or objects). Therefore, relationships between objects have to be hacked together on top of the JSON format (especially many-to-many relationships, which are typically represented in our JSON as subobject relationships).
 
@@ -370,6 +370,6 @@ Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty st
 
 \section{DB Design}
 \label{appendix:DBDesign}
-\includegraphics[height=10in]{Evolution1DB.pdf}
+\includegraphics[width=6in]{Evolution1DB_cropped.pdf}
 
 \end{document}

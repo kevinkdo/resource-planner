@@ -8,6 +8,7 @@ main-build.js
 *.aux
 *.log
 *.synctex.gz
+*.out
 
 # Created by https://www.gitignore.io/api/gradle,eclipse,intellij
 
