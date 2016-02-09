@@ -77,7 +77,9 @@ PostgreSQL is an open-source object-relational database management system.
 
 We chose Postgres over competing relational databases (MySQL) because we were familiar with it from prior experience, and because the small differences between SQL database types are mostly irrelavent for the scope of application we need to develop. 
 
-We chose Postgres over NoSQL databases (MongoDB) because we felt that a relational database could sufficiently store the structured data a resource manager can generate. In addition, we will not be handling live data and we do not need our data to be persistent across evolutions. As such, even if our DB schema changes between evolutions, we will not need to do any sort of schema update to large amounts of existing data. This negates the primary issue of SQL-based databases. Our current DB design can be found in Appendix \ref{appendix:DBDesign}.
+We chose Postgres over NoSQL databases (MongoDB) because we felt that a relational database could sufficiently store the structured data a resource manager can generate. In addition, we will not be handling live data and we do not need our data to be persistent across evolutions. As such, even if our DB schema changes between evolutions, we will not need to do any sort of schema update to large amounts of existing data. This negates the primary issue of SQL-based databases. 
+
+Our current DB design can be found in Appendix \ref{appendix:DBDesign}. In designing the DB schema, we did not attempt to prematurely guess what changes might be made to the requirements in the future (for instance, it is conceivable that in the future a reservation could have multiple resources, which would alter the schema quite a lot). We felt like trying to do so would add a lot of work, but potentially offer minimal reward, particularly if we guessed incorrectly. As such, we instead focused on creating a simple schema that would approrpriately handle the current set of requirements we know we must fulfill.  
 
 
 \subsection{Encryption}
@@ -93,6 +95,17 @@ For backend testing, we wrote automated tests using Python (Appendix \ref{append
 Our testing script currently tests only the API contract, and not any internals of the backend. This was done for two reasons. First, the API contract is ultimately the layer that must be working for our front-end application to work, and thus if it works, it is highly likely that there are no significant issues or bugs in our backend code. To some extent, if the application is working from the perspective of the end-user, then it is working correctly. Secondly, it is much harder to test the internals of the back-end, mostly because of our issues using Spring's testing paradigm. That being said, it may be in our best interest to add unit tests in the future if we can figure out how. 
 
 We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the time assurance that they can quickly make changes to the backend without having to thoroughly, manually test after every change. In this way, it speeds up our development cycle. 
+
+\subsection{Code Structure}
+Our backend code is primarily divided into Filters, Controllers, Services, and Utilities. These components have the following responsibilities: 
+\begin{enumerate}
+    \item There are some checks you want to apply to all or nearly all incoming requests. For instance, we must verify that, for all API requests except for login, the sender has an appropriate authorization token. Filters are used to do this. 
+    \item Assuming a request makes it past our filters, the request is then routed to the appropriate method in the appropriate Controller (based on the request's API endpoint). This ensures that each API endpoint has a single starting point, unrelated to the actual logic of the request itself. 
+    \item Services handle the actual logic of each request, interacting with the database as needed. 
+    \item Finally, each Service may call on 1 or more Utility classes, which contain common functionality used across multiple services, such as converting time data structures or hashing passwords. 
+\end{enumerate}
+
+The above structure allows our backend to be flexible in the face of requirement changes. Because we separate out request filtering (Filters), request routing (Controllers), request logic (Services), and common functionalities used across multiple request types (Utilities), we are easily able to add new filters, add or change API endpoints, or modify our backend logic for individual requests without having to change multiple classes or methods. 
 
 \section{REST API}
 \label{sec:REST}
