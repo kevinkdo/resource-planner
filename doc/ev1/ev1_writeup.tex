@@ -115,6 +115,8 @@ One alternative is to perform automated UI testing. We are aware of two differen
 \section{Member contributions}
 Kevin Do designed the initial version of the REST API and implemented the frontend.
 
+Davis Treybig helped write the backend, particularly the Reservation system as well as the Email system. 
+
 \clearpage
 \appendix
 \section{Backend Test Plan}
@@ -242,12 +244,6 @@ Kevin Do designed the initial version of the REST API and implemented the fronte
 \clearpage
 \section{API Specification}
 \label{appendix:apispec}
-<<<<<<< HEAD
-
-\section{DB Design}
-\label{appendix:DBDesign}
-\includegraphics[height=10in]{Evolution1DB.pdf}
-=======
 \begin{enumerate}
 \item POST /auth/register
 Creates an account with specified email and password
@@ -370,5 +366,8 @@ Error Check: verify that the user with the given ID exists
 Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
 \end{enumerate}
 
->>>>>>> 155be407c05b9eaed357c1844ea1a790ed2bca68
+\section{DB Design}
+\label{appendix:DBDesign}
+\includegraphics[height=10in]{Evolution1DB.pdf}
+
 \end{document}
