@@ -41,7 +41,8 @@
 \caption{Diagram of system architecture}
 \label{fig:design}
 \end{figure}
-TODO davis
+
+TODO: Davis
 
 \section{Backend}
 The backend consists of the parts of the software system that run on a VPS (Virtual Private Server) using Ubuntu Linux 14.04. Our software uses PostgreSQL 9.5 for persistent data storage and the Java Spring Framework as the container for a Tomcat web server. If the backend were viewed as an MVC (Model-View-Controller), PostgreSQL would be the model while Java Spring both handles the interface of the REST API (view) and the controller that processes requests, communicates with the database, and returns responses. 
@@ -62,11 +63,13 @@ There are a number of open-source application frameworks for Java. Some of the p
     \item The most common criticism of Spring is that it is too heavy duty and tries to do too much even in simple applications. We personally felt like this was not the case after setting up a sample application.
 \end{enumerate}
 
-
 \subsection{PostgreSQL}
 PostgreSQL is an open-source object-relational database management system. 
 
-We chose Postgres over competing relational databases (MySQL) because we were familiar with it from prior experience. We chose Postgres over NoSQL databases (MongoDB) because we felt that a relational database could sufficiently store the structured data a resource manager can generate. 
+We chose Postgres over competing relational databases (MySQL) because we were familiar with it from prior experience, and because the small differences between SQL database types are mostly irrelavent for the scope of application we need to develop. 
+
+We chose Postgres over NoSQL databases (MongoDB) because we felt that a relational database could sufficiently store the structured data a resource manager can generate. In addition, we will not be handling live data and we do not need our data to be persistent across evolutions. As such, even if our DB schema changes between evolutions, we will not need to do any sort of schema update to large amounts of existing data. This negates the primary issue of SQL-based databases. Our current DB design can be found in Appendix \ref{appendix:DBDesign}.
+
 
 \subsection{Encryption}
 SSL vs other encryption
@@ -76,13 +79,11 @@ keystore using built in java key tool
 jiawei - salt + hash password storage
 
 \subsection{Testing}
-For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because, after many
- 
-why we picked python
+For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. 
 
-why we need automated tests and why it's good 
+Our testing script currently tests only the API contract, and not any internals of the backend. This was done for two reasons. First, the API contract is ultimately the layer that must be working for our front-end application to work, and thus if it works, it is highly likely that there are no significant issues or bugs in our backend code. To some extent, if the application is working from the perspective of the end-user, then it is working correctly. Secondly, it is much harder to test the internals of the back-end, mostly because of our issues using Spring's testing paradigm. That being said, it may be in our best interest to add unit tests in the future if we can figure out how. 
 
-tests only api contract 
+We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the time assurance that they can quickly make changes to the backend without having to thoroughly, manually test after every change. In this way, it speeds up our development cycle. 
 
 \section{REST API}
 Communication between the frontend and the backend is done through a REST API with JSON (Appendix). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
@@ -240,4 +241,8 @@ Kevin Do designed the initial version of the REST API and implemented the fronte
 
 \section{API Specification}
 \label{appendix:apispec}
+
+\section{DB Design}
+\label{appendix:DBDesign}
+\includegraphics[height=10in]{Evolution1DB.pdf}
 \end{document}
