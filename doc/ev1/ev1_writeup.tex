@@ -72,9 +72,7 @@ We chose Postgres over NoSQL databases (MongoDB) because we felt that a relation
 
 
 \subsection{Encryption}
-SSL vs other encryption
-spring built in 
-keystore using built in java key tool 
+For encrypting the communication between the clients and server, we decided to go with SSL as Spring provided support for it. We used Java's built in keytool to generate a Java keystore and self-signed certificate. We used a self-signed certificate rather than one signed by a legitimate CA because it was free. We also made it so that it can run on both HTTP and HTTPS at the same time for ease of testing. This can easily be altered to only run on HTTPS through a boolean.
 
 jiawei - salt + hash password storage
 
