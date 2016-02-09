@@ -239,10 +239,136 @@ Kevin Do designed the initial version of the REST API and implemented the fronte
 	\end{enumerate}
 \end{enumerate}
 
+\clearpage
 \section{API Specification}
 \label{appendix:apispec}
+<<<<<<< HEAD
 
 \section{DB Design}
 \label{appendix:DBDesign}
 \includegraphics[height=10in]{Evolution1DB.pdf}
+=======
+\begin{enumerate}
+\item POST /auth/register
+Creates an account with specified email and password
+
+Common errors: email taken
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string)
+
+\item POST /auth/login
+Logs into an account with specified email and password
+
+Common errors: invalid email or password
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns the session token
+
+
+\item POST /resources
+Creates a resource with the specified name, description, and tags, and assigns it a new unique ID
+
+Common errors: empty name
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns a resource subobject with all the fields that were actually committed (ideally, the same as the values that were passed in)
+
+\item GET /resources/<ID>
+Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
+
+Common errors: Resource with the specified ID does not exist
+
+If is\_error is false, also returns a ``resource'' subobject with all the fields of the resource with the supplied ID
+
+\item GET /resources/
+Runs the specified query on the set of all resources and returns those that match
+
+Queries are specified by a URL parameters with a ``required\_tags'' object (list of strings) and ``excluded\_tags'' specifying the tags that the resources in the search results should all have
+
+Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
+
+If is\_error is false, also returns a ``resources'' subobject, a list of resources (including ID and all fields) that match the query
+
+\item PUT /resources/<ID>
+Updates a resource with the supplied ID. Only changes the supplied fields and leaves the rest alone
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns a resource subobject with all the fields that were actually committed (ideally, the same as the values that were passed in)
+
+\item DELETE /resources/<ID>
+Deletes the resource with the given ID, if it exists, AND deletes all associated reservations
+
+Common error: resource with the specified ID does not exist
+
+Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
+
+\item POST /reservations
+Creates a reservation with data specified by the payload's ``resource\_id'' (int), ``start\_timestamp'' (string), ``user\_id'' (int), and ``end\_timestamp'' (string), ``should\_email'' (boolean) fields and assigns it a new unique ID
+
+Validates the user ID for the reservation based on the currently authenticated user
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns a reservation subobject with all the fields that were actually committed (ideally, the same as the values that were passed in)
+
+\item GET /reservations/<ID>
+Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
+
+If is\_error is false, also returns a ``reservation'' subobject with all the fields of the resource with the supplied ID
+
+\item GET /reservations/
+Runs the specified query on the set of all reservations and returns those that match
+
+Queries are specified by URL parameters with one or more of the following: ``resource\_ids'' field (list of ints) specifying the desired resource IDs of the reservations (ANY), ``user\_ids'' (list of ints) (ANY), ``start'' (string, ISO 8601), ``end'' (string, ISO 8601)
+
+return anything that overlaps with time range. If no user\_ids or resource\_ids are specified, return ALL reservations in time range. 
+
+Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
+
+If is\_error is false, also returns a ``reservations'' subobject (list of objects), a list of reservations (including ID and all fields) that match the query, ``resources'' subobjects (list of resource objects used in reservations), and ``users'' subobject (list of users objects used in reservations)
+
+\item PUT /reservations/<ID>
+Updates a reservation with the supplied ID. Only changes the supplied fields and leaves the rest alone
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns a reservation subobject with all the fields that were actually committed (ideally, the same as the values that were passed in)
+
+\item DELETE /reservations/<ID>
+Deletes the reservation with the given ID, if it exists
+
+Common error: no reservation with specified ID
+
+Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
+
+
+\item GET /tags
+Returns a JSON object with ``tags'' (list of strings), a list of all tags
+
+\item GET /resources/<ID>/canDelete
+Returns whether future/current reservations exist relating to a resource, in order to see whether we want to delete. This should return true if and only if (any reservations overlap the current time or start after the current time).
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns a boolean ``can\_delete'' with the answer
+
+\item POST /users
+Creates a given user with data specified by the payload's ``email'' (string), ``password'' (string), ``username'' (string), ``should\_email'' (bool), A unique ID is automatically assigned by the DB. 
+
+Error cases: must check that no user already exists with the given username. Must also verify that the admin is the one doing this (only admin can create users)
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns the user subobject that was created
+
+\item GET /users/<ID>
+Retrieves the user with a given ID, if such a user exists. 
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns the user subobject. 
+
+\item PUT /users/<ID>
+Updates a user with the supplied ID. Only changes the supplied fields and leaves the rest alone
+
+Error Check: If username changes, must verify the new username is not already taken. Must also verify that the admin is the one doing this (only admin can modify users)
+
+Returns a JSON object with is\_error (boolean), error\_msg (possibly empty string). If is\_error is false, also returns the full, updated user subobject. 
+
+\item DELETE /users/<ID>
+Deletes the user with the supplied ID. 
+
+Error Check: verify that the user with the given ID exists
+
+Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
+\end{enumerate}
+
+>>>>>>> 155be407c05b9eaed357c1844ea1a790ed2bca68
 \end{document}
