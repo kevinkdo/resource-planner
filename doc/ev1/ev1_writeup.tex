@@ -1,0 +1,229 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage[parfill]{parskip}
+\usepackage{amsmath}
+\usepackage{graphicx}
+%\usepackage{listings}   % allows lstlisting environment
+%\usepackage{moreverb}   % allows listinginput environment
+\usepackage{siunitx}
+\usepackage{enumerate}
+%\usepackage{epstopdf}
+%\usepackage{booktabs}
+%\usepackage{float}
+%\usepackage{enumerate}
+%\usepackage{multirow}
+%\usepackage{mhchem}
+%\usepackage{lscape}
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\newcommand\mytitle{Evolution 1\\Compsci 458}
+\title{\horrule{5pt}\\\vspace{0.4cm}{\bf \mytitle}\\}
+\author{Jiawei Zhang, Davis Treybig, Michael Han, and Kevin Do}
+\date{\horrule{1pt}}
+
+\begin{document}
+\maketitle{}
+\section{Summary}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[height=4in]{design_cropped.pdf}
+\end{center}
+\caption{Diagram of system architecture}
+\label{fig:design}
+\end{figure}
+TODO davis
+
+\section{Backend}
+The backend consists of the parts of the software system that run on a VPS (Virtual Private Server) using Ubuntu Linux 14.04. Our software uses PostgreSQL 9.5 for persistent data storage and the Java Spring Framework as the container for a Tomcat web server. If the backend were viewed as an MVC (Model-View-Controller), PostgreSQL would be the model while Java Spring both handles the interface of the REST API (view) and the controller that processes requests, communicates with the database, and returns responses. 
+
+\subsection{Java}
+The majority of the backend is written in Java. 
+
+We chose this language over C\# because we wanted good cross-platform support across all potential server-hosts. All four members were familiar with the language, allowing for rapid initial development. The language also provides a large standard library and community libraries, allowing us to avoid unnecessary implementations. 
+
+\subsection{Java Spring}
+Java Spring is an open-source application framework popular for building web applications. 
+
+We chose this framework over competing frameworks for its maturity and the large number of supporting libraries. 
+
+\subsection{PostgreSQL}
+PostgreSQL is an open-source object-relational database management system. 
+
+We chose Postgres over competing relational databases (MySQL) because we were familiar with it from prior experience. We chose Postgres over NoSQL databases (MongoDB) because we felt that a relational database could sufficiently store the structured data a resource manager can generate. 
+
+\subsection{Encryption}
+SSL vs other encryption
+spring built in 
+keystore using built in java key tool 
+
+jiawei - salt + hash password storage
+
+\subsection{Testing}
+For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because, after many
+ 
+why we picked python
+
+why we need automated tests and why it's good 
+
+tests only api contract 
+
+\section{REST API}
+Communication between the frontend and the backend is done through a REST API with JSON (Appendix). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
+
+However, there are weaknesses as well. The REST API is based on a request-response paradigm, which means that no data transfer occurs unless it is initiated by the client. In other words, the server has no mechanism to ``push'' updates to the client. Furthermore, JSON is a structured as a tree of values (i.e. there are no pointers or objects). Therefore, relationships between objects have to be hacked together on top of the JSON format (especially many-to-many relationships, which are typically represented in our JSON as subobject relationships).
+
+\section{Frontend}
+The frontend consists of the parts of the software system that are transferred to the user's computer and are run in the user's browser. The officially supported browser is the latest version of Google Chrome, but other modern browsers should work as well. We use the third-party libraries React.js, Bootstrap, and JQuery, but React.js has the most implications for the code design.
+
+\subsection{React.js}
+The frontend is written in React.js. React is a library written at Facebook for building user interfaces (UIs). The primary paradigm of React is a one-way data flow from ``state'' to a UI. Business logic that wishes to modify the user interface does so by modifying the state. React will then take care of re-rendering the user interface. (React has many performance optimizations, but the general mental model is that the user interface is always an up-to-date rendering of the ``state'').
+
+We chose this framework because we believe that this paradigm is a very natural way of thinking about user interfaces. By thinking of state and how to render this state, we do not worry about performing manual UI updates outside of the React framework. One major advantage of this approach is that we can trivially avoid an inconsistent UI, since the UI always reflects the most recent state. Furthermore, because the UI is a pure function of the state, we can trivially change the way the state is displayed without changing the dataflow plumbing.
+
+\subsection{React components}
+Within the React framework, we designed components to express the desired UI in a natural way. At the top level of the HTML body is a Router component. This Router's state includes a route and other state to mediate communication between views. The route is a string that indicates which part of the application the user is in (e.g. ``reservation\_list'').
+
+The Router, depending on its route state, will render one of either a Login, AdminConsole, ReservationList, ReservationCreator, ReservationEditor, ResourceList, ResourceCreator, or ResourceEditor. All of these views are themselves just HTML renders of their state. Each of these subcomponents contains their own state. We considered having a global datastore of resources and reservations, but decided that the simplest way to maintain correctness across views was to simply redownload the data each time.
+
+There is not much to say about the structure of the simple views that are essentially just forms, like Login, AdminConsole, and the creator and editor views. These views maintain their own state (the user input) and send it to the appropriate endpoints when the user submits the form.
+
+The ReservationList and ResourceList views maintain both state about the user's desired display settings (i.e. which tags are required or excluded) and state about what has been downloaded from the server (i.e. which reservations/resources to display). When the user changes display settings, the view then scraps the second state about what has been downloaded, makes a request, and repopulates the state from the JSON response from the server.
+
+\subsection{Testing}
+For frontend testing, we decided to write a test plan (Appendix \ref{appendix:frontendtest}) that is intended to be performed manually. Testers can load the application and execute actions that are intended to exercise most of the code paths in the application. This manual testing has the advantage that it has a low upfront cost and it is easy to implement. The disadvantage is that it is slow and takes a lot of human time and energy.
+
+One alternative is to perform automated UI testing. We are aware of two different types automated UI testing: 1) programmatic access to the application and 2) simulation of mouse/keyboard events and screenshots. We decided against 1) because the UI is still in an infantile stage, and the intended DOM changes quite frequently. We decided that programmatically testing for the presence of, say, a certain <div> tag would be prohibitively expensive. We decided against 2) for the same reason that the intended DOM changes quite frequently, but also because we decided that such an approach seemed very fragile.
+
+\section{Member contributions}
+Kevin Do designed the initial version of the REST API and implemented the frontend.
+
+\clearpage
+\appendix
+\section{Backend Test Plan}
+\label{appendix:backendtest}
+\begin{enumerate}
+	\item Authorization Tests
+	\begin{enumerate}
+		\item Registering a valid user
+		\item Registering an invalid user with preexisting email
+		\item Registering an invalid user without a password
+		\item Logging in as valid user
+		\item Logging in with wrong password
+		\item Logging in with wrong email, correct username and password
+		\item Logging in with wrong username, correct email and password
+	\end{enumerate}
+	\item Resource Tests
+	\begin{enumerate}
+		\item Create valid resource with no tags
+		\item Create valid resource with tags
+		\item Create invalid resource with no name
+		\item Create valid resource with no description 
+		\item Get resource with valid ID
+		\item Get resource with invalid ID
+		\item Get resources with valid query
+		\item Get resources with query with non existing tags
+		\item Put resource with valid ID with all fields updated
+		\item Put resource with valid ID no fields updated
+		\item Put resource with invalid ID
+		\item Delete resource with valid ID
+		\item Delete resource with invalid ID
+		\item Get resources canDelete with valid ID
+		\item Get resources canDelete with invalid ID
+	\end{enumerate}
+	\item Reservation Tests
+	\begin{enumerate}
+		\item Create valid reservation with valid user ID
+		\item Create valid reservation with invalid user ID
+		\item Create reservation with touching time intervals
+		\item Create invalid reservation with invalid resource ID
+		\item Create invalid reservation with invalid time range
+		\item Get reservation with valid ID
+		\item Get reservation with invalid ID
+		\item Get reservation with valid query with resource and user lists
+		\item Get reservation with valid query with valid time range
+		\item Get reservation with valid query with invalid time range
+		\item Put reservation with valid ID update all fields
+		\item Put reservation with valid ID update no fields
+		\item Put reservation with invalid ID
+		\item Delete reservation with valid ID
+		\item Delete reservation with invalid ID
+	\end{enumerate}
+	\item Tags Tests
+	\begin{enumerate}
+		\item Get all tags
+	\end{enumerate}
+	\item User Tests
+	\begin{enumerate}
+		\item Check only admin can create users
+		\item Check that non admin cannot create users
+		\item Create invalid user with preexisting username
+		\item Create invalid user with preexisting email 
+		\item Get user with valid ID
+		\item Get user with invalid ID
+		\item Put User with invalid ID
+		\item Put user not as admin
+		\item Delete user with valid ID
+		\item Delete user with invalid ID
+	\end{enumerate}
+\end{enumerate}
+
+\clearpage
+\section{Frontend Test Plan}
+\label{appendix:frontendtest}
+\begin{enumerate}
+	\item Login
+	\begin{enumerate}
+		\item Logging in as the admin works
+		\item Logging in as a normal user works
+		\item Entering the wrong credentials -> useful message
+	\end{enumerate}
+	\item Navbar
+	\begin{enumerate}
+		\item Resources -> resources list
+		\item Reservations -> reservations list
+		\item Admin console works
+		\item Log out works
+	\end{enumerate}
+	\item Reservations List
+	\begin{enumerate}
+		\item Start+end can correctly filter reservations shown
+		\item Tags can correctly filter reservations shown
+		\item Can properly go to the ``New reservation'' view
+		\item Can properly go to the ``Edit reservation'' view
+		\item Normal user can delete reservations own reservations
+		\item Normal user can NOT delete others' reservations
+		\item Admin can delete any reservation
+	\end{enumerate}
+	\item Resources list
+	\begin{enumerate}
+		\item Tags can correctly filter resources shown
+		\item Can properly go to the ``New resource'' view
+		\item Normal user can not edit/delete anything
+		\item Admin user can edit/delete anything
+		\item Deleting a resource with a future reservation shows a warning
+	\end{enumerate}
+	\item New resource
+	\begin{enumerate}
+		\item Admin can make new resource
+		\item Normal user can't make new resource
+		\item Displays error messages when invalid
+	\end{enumerate}
+	\item New reservation
+	\begin{enumerate}
+		\item Normal user can make new reservation with their own user ID
+		\item Normal user can't make new reservation with another user ID
+		\item admin can make new reservation with any user ID
+	\end{enumerate}
+	\item Admin console
+	\begin{enumerate}
+		\item Admin can make new user
+		\item Normal user can't make new user
+	\end{enumerate}
+\end{enumerate}
+
+\section{API Specification}
+\label{appendix:apispec}
+\end{document}

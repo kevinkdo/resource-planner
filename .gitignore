@@ -4,6 +4,10 @@ gradlew
 gradlew.bat
 manifest.yml
 main-build.js
+*.pdf
+*.aux
+*.log
+*.synctex.gz
 
 # Created by https://www.gitignore.io/api/gradle,eclipse,intellij
 
