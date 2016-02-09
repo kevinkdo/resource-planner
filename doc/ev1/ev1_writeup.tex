@@ -42,15 +42,24 @@
 \label{fig:design}
 \end{figure}
 
-TODO: Davis
+Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostreSQL database. In addition, we use Python scripts to automate the testing of our API. 
+
+At a high level, our program flow is as follows. As a user interacts with the frontend, a React.js Router component manages which views to show the user, such as a Login view or a ReservationCreator view. If the user interacts with a given view in a way that would require the database to be queried or modified, such as if the user attempts to create a reservation or add a tag to a resource, the frontend communicates with the backend via a JSON REST API. 
+
+At this point, the request first goes through a set of filters which check for proper authentication and proper formatting, after which the request is routed to a specific API Controller based on the endpoint of the request. From here, the API Controller routes the request to the proper Service, for instance the ReservationService, which handles the internal logic behind processing a request of a certain type. These Services interact with the PostreSQL database as needed to modify, create, or delete stored data. Finally, the server returns a JSON object to the frontend, specifying whether the original request was successfully completed. 
+    
+For further information about the architecture of the backend, the backend code, and our automated testing philosophy, see the \hyperref[sec:Backend]{backend section}. For further information about our choice to use a REST API, see the \hyperref[sec:REST]{REST API section}. For further information about the architecture of the frontend and the frontend code, see the \hyperref[sec:Frontend]{frontend section}. Finally, see appendix \ref{appendix:backendtest} for our backend test strategy, appendix \ref{appendix:frontendtest} for our frontend test strategy, appendix \ref{appendix:apispec} for our API specification, and appendix \ref{appendix:DBDesign} for our database design. 
+
+
 
 \section{Backend}
+\label{sec:Backend}
 The backend consists of the parts of the software system that run on a VPS (Virtual Private Server) using Ubuntu Linux 14.04. Our software uses PostgreSQL 9.5 for persistent data storage and the Java Spring Framework as the container for a Tomcat web server. If the backend were viewed as an MVC (Model-View-Controller), PostgreSQL would be the model while Java Spring both handles the interface of the REST API (view) and the controller that processes requests, communicates with the database, and returns responses. 
 
 \subsection{Java}
 The majority of the backend is written in Java. We chose java for a few key reasons:
 \begin{enumerate}
-    \item It is statically typed. We did not want to deal with the complexity and ambiguity of non-statically typed languages in a group setting where each of us routinely has to read and modify other people's code. 
+    \item It is statically typed. We did not want to deal with the complexity and ambiguity of non-statically typed languages in a group setting where each of us routinely has to read and modify other people’s code. 
     \item We found Spring (our Java server framework) to be easy to use and simple to understand, with a huge amount of documentation and support. It is also very powerful and used in many enterprise applications. 
     \item Our whole team is intimately familiar with Java. 
     \item Java has good cross-platform support across all potential server-hosts (particularly in contrast to C\#, another language we considered). Java also has a large standard library and many community libraries, further easing the development process. 
@@ -72,23 +81,27 @@ We chose Postgres over NoSQL databases (MongoDB) because we felt that a relation
 
 
 \subsection{Encryption}
-For encrypting the communication between the clients and server, we decided to go with SSL as Spring provided support for it. We used Java's built in keytool to generate a Java keystore and self-signed certificate. We used a self-signed certificate rather than one signed by a legitimate CA because it was free. We also made it so that it can run on both HTTP and HTTPS at the same time for ease of testing. This can easily be altered to only run on HTTPS through a boolean.
+SSL vs other encryption
+spring built in 
+keystore using built in java key tool 
 
 jiawei - salt + hash password storage
 
 \subsection{Testing}
-For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. Python's testing framework unittest also has a test discovery function which runs every test with `test' in the function name. This means that we do not have to manually update a separate testing script whenever we add a new test thus improving our design.
+For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. 
 
 Our testing script currently tests only the API contract, and not any internals of the backend. This was done for two reasons. First, the API contract is ultimately the layer that must be working for our front-end application to work, and thus if it works, it is highly likely that there are no significant issues or bugs in our backend code. To some extent, if the application is working from the perspective of the end-user, then it is working correctly. Secondly, it is much harder to test the internals of the back-end, mostly because of our issues using Spring's testing paradigm. That being said, it may be in our best interest to add unit tests in the future if we can figure out how. 
 
-We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the time assurance that they can quickly make changes to the backend without having to thoroughly, manually test after every change. In this way, it speeds up our development cycle. In addition, because automated tests perform the same steps every time, the expected results are consistent which is not always the case with manual testing.
+We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the time assurance that they can quickly make changes to the backend without having to thoroughly, manually test after every change. In this way, it speeds up our development cycle. 
 
 \section{REST API}
-Communication between the frontend and the backend is done through a REST API with JSON (Appendix \ref{appendix:apispec}). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
+\label{sec:REST}
+Communication between the frontend and the backend is done through a REST API with JSON (Appendix). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
 
 However, there are weaknesses as well. The REST API is based on a request-response paradigm, which means that no data transfer occurs unless it is initiated by the client. In other words, the server has no mechanism to ``push'' updates to the client. Furthermore, JSON is a structured as a tree of values (i.e. there are no pointers or objects). Therefore, relationships between objects have to be hacked together on top of the JSON format (especially many-to-many relationships, which are typically represented in our JSON as subobject relationships).
 
 \section{Frontend}
+\label{sec:Frontend}
 The frontend consists of the parts of the software system that are transferred to the user's computer and are run in the user's browser. The officially supported browser is the latest version of Google Chrome, but other modern browsers should work as well. We use the third-party libraries React.js, Bootstrap, and JQuery, but React.js has the most implications for the code design.
 
 \subsection{React.js}
@@ -114,8 +127,6 @@ One alternative is to perform automated UI testing. We are aware of two differen
 Kevin Do designed the initial version of the REST API and implemented the frontend.
 
 Davis Treybig helped write the backend, particularly the Reservation system as well as the Email system. 
-
-Michael Han configured the SSL encryption and wrote the automated tests.
 
 \clearpage
 \appendix
@@ -368,6 +379,6 @@ Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty st
 
 \section{DB Design}
 \label{appendix:DBDesign}
-\includegraphics[width=6in]{Evolution1DB_cropped.pdf}
+\includegraphics[height=10in]{Evolution1DB.pdf}
 
 \end{document}
