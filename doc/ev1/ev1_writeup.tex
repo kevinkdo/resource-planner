@@ -59,7 +59,7 @@ The backend consists of the parts of the software system that run on a VPS (Virt
 \subsection{Java}
 The majority of the backend is written in Java. We chose java for a few key reasons:
 \begin{enumerate}
-    \item It is statically typed. We did not want to deal with the complexity and ambiguity of non-statically typed languages in a group setting where each of us routinely has to read and modify other people’s code. 
+    \item It is statically typed. We did not want to deal with the complexity and ambiguity of non-statically typed languages in a group setting where each of us routinely has to read and modify other people's code. 
     \item We found Spring (our Java server framework) to be easy to use and simple to understand, with a huge amount of documentation and support. It is also very powerful and used in many enterprise applications. 
     \item Our whole team is intimately familiar with Java. 
     \item Java has good cross-platform support across all potential server-hosts (particularly in contrast to C\#, another language we considered). Java also has a large standard library and many community libraries, further easing the development process. 
@@ -80,12 +80,16 @@ We chose Postgres over competing relational databases (MySQL) because we were fa
 We chose Postgres over NoSQL databases (MongoDB) because we felt that a relational database could sufficiently store the structured data a resource manager can generate. In addition, we will not be handling live data and we do not need our data to be persistent across evolutions. As such, even if our DB schema changes between evolutions, we will not need to do any sort of schema update to large amounts of existing data. This negates the primary issue of SQL-based databases. Our current DB design can be found in Appendix \ref{appendix:DBDesign}.
 
 
-\subsection{Encryption}
+\subsection{Security}
+The application has multiple layers of protection. When a user is created by the admin, a random salt is generated and appended to the password, which is the SHA1 hashed. Upon login, the salt is appended to the entered password, hashed. and compared to the stored hash. 
+
+Upon login, a JWT (JSON Web Token) is generated, which stores the User ID and permission level of the logged-in user. This JWT, which is signed by a secret key only known to the server, allows for future API calls to not require the user to re-authorize himself or herself, thereby preventing a potential database bottleneck. Instead of a database lookup, the authenticity of the JWT is confirmed using the secret key and the User ID and permission level stored in the JWT can be used directly. 
+
+Michael talk about SSL and HTTPS and encryption
+
 SSL vs other encryption
 spring built in 
 keystore using built in java key tool 
-
-jiawei - salt + hash password storage
 
 \subsection{Testing}
 For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. 
@@ -127,6 +131,8 @@ One alternative is to perform automated UI testing. We are aware of two differen
 Kevin Do designed the initial version of the REST API and implemented the frontend.
 
 Davis Treybig helped write the backend, particularly the Reservation system as well as the Email system. 
+
+Jiawei Zhang designed the backend, implemented the User and Resource systems, and implemented back-end security. 
 
 \clearpage
 \appendix
