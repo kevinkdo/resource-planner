@@ -137,6 +137,7 @@ public class UserService {
         if (!req.isUpdateValid()) {
             return new StandardResponse(true, "Invalid request", new User(userId, req.getEmail(), req.getUsername(), req.isShould_email()));
         }
+
         List<User> users = getUsers(userId);
         if (users.size() == 0) {
             return new StandardResponse(true, "User not found");

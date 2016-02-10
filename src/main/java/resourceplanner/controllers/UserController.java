@@ -45,7 +45,7 @@ public class UserController extends Controller{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse updateUser(@PathVariable final int userId, @RequestBody final UserRequest req, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (userId != getRequesterID(request) && !isAdmin(request)) {
             return new StandardResponse(true, "You are not authorized");
         }
         return userService.updateUser(req, userId);
