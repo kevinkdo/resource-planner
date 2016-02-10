@@ -433,7 +433,7 @@ const ReservationList = React.createClass({
         me.setState({
           reservations: new_reservations,
           loading_table: false,
-          error_msg: ""
+          //error_msg: ""
         });
       },
       function(obj) {
@@ -627,7 +627,7 @@ const ResourceList = React.createClass({
         me.setState({
           resources: new_resources,
           loading_table: false,
-          error_msg: ""
+          //error_msg: ""
         });
       },
       function(obj) {
