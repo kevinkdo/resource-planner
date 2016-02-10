@@ -288,6 +288,7 @@ public class ResourceService {
                 "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND ? < end_time;", Integer.class, resourceId, currentTime);
 
         boolean canDelete = reservations == 0;
+
         return new StandardResponse(false, "Successful retrieved canDelete status", new CanDelete(canDelete));
     }
 }

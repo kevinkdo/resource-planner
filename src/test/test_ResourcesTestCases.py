@@ -159,7 +159,16 @@ class AuthorizationTestCases(unittest.TestCase):
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'canDelete': True}
       assert decoded['error_msg'] == 'Successful retrieved canDelete status'
-      #change the error message if you try to get candelete status of resource that doesn't exist 
-      
+      #change the error message if you try to get candelete status of resource that doesn't exist
+
+  def test_GetResourcesCanDeleteWithInvalidUserHeaders(self):
+      userHeaders = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwidXNlcl9pZCI6MiwicGVybWlzc2lvbiI6MH0.5Br_NG0u_Kg2u11xyKqTGZAifyFHd19ca_HRRhu4j9Q", "Content-Type": "application/json" }
+      canDeleteUrl = '/2/candelete'
+      r = requests.get(self.baseUrl + self.resourceUrl + canDeleteUrl, headers = userHeaders)
+      decoded = r.json()
+      assert decoded['is_error'] == True
+      #print decoded
+
+
 if __name__ == '__main__':
     unittest.main()
