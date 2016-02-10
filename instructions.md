@@ -45,6 +45,14 @@ Follow the frontend section of `setupvm.sh` (it might be commented out).
 
 Then you can run `resource-planner/src/main/webapp/m1` to build `main.js` and output `main-build.js`, which is used in the production webapp at `index.html`. If you're developing the frontend, then you may want `resource-planner/src/main/webapp/m`, which starts a daemon that watches `main.js` and automatically rebuilds `main-build.js` when it sees changes.
 
+# Scripts for Simplicity
+
+```
+./dbsetup.sh         # imports some data into the database for testing
+./frontendrebuilt.sh # rebuilds frontend for production
+./run                # builds and runs
+```
+
 # Automated Tests
 
 ## Automatic testing
