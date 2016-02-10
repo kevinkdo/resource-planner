@@ -42,76 +42,78 @@
 \label{fig:design}
 \end{figure}
 
-Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostreSQL database. In addition, we use Python scripts to automate the testing of our API. 
+Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. 
 
-At a high level, our program flow is as follows. As a user interacts with the frontend, a React.js Router component manages which views to show the user, such as a Login view or a ReservationCreator view. If the user interacts with a given view in a way that would require the database to be queried or modified, such as if the user attempts to create a reservation or add a tag to a resource, the frontend communicates with the backend via a JSON REST API. 
+At a high level, our program flow is as follows. As a user interacts with the frontend, a React.js Router component manages which views to show the user, such as a Login view or a ReservationCreator view. If the user interacts with a given view in a way that would require the database to be queried or modified (e.g. creating a reservation), the frontend communicates with the backend via a JSON REST API. 
 
-At this point, the request first goes through a set of filters which check for proper authentication and proper formatting, after which the request is routed to a specific API Controller based on the endpoint of the request. From here, the API Controller routes the request to the proper Service, for instance the ReservationService, which handles the internal logic behind processing a request of a certain type. These Services interact with the PostreSQL database as needed to modify, create, or delete stored data. Finally, the server returns a JSON object to the frontend, specifying whether the original request was successfully completed. 
+On the server, a request first goes through a set of filters which check for proper authentication and proper formatting. The request is then routed to a specific API Controller based on the request URL. From here, the API Controller routes the request to the proper Service (e.g. ReservationService), which handles the internal logic behind processing a request of a certain type. These Services interact with the PostgreSQL database as needed to modify, create, or delete stored data. Finally, the server returns a JSON object to the frontend, specifying whether the original request was successfully completed. 
     
-For further information about the backend architecture, the backend code, and our automated testing philosophy, see the \hyperref[sec:Backend]{backend section}. For further information about our choice to use a REST API, see the \hyperref[sec:REST]{REST API section}. For further information about the frontend architecture and the frontend code, see the \hyperref[sec:Frontend]{frontend section}. Finally, see appendix \ref{appendix:backendtest} for our backend test strategy, appendix \ref{appendix:frontendtest} for our frontend test strategy, appendix \ref{appendix:apispec} for our API specification, and appendix \ref{appendix:DBDesign} for our database design. 
+For further information about the backend architecture, the backend code, and our automated testing philosophy, see the \hyperref[sec:Backend]{backend section}. For further information about our choice to use a REST API, see the \hyperref[sec:REST]{REST API section}. For further information about the frontend architecture and the frontend code, see the \hyperref[sec:Frontend]{frontend section}. Finally, see \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for our backend test strategy,  \hyperref[appendix:frontendtest]{Appendix \ref{appendix:frontendtest}} for our frontend test strategy, \hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}} for our API specification, and \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}} for our database design. 
 
 
 
 \section{Backend}
 \label{sec:Backend}
-The backend consists of the parts of the software system that run on a VPS (Virtual Private Server) using Ubuntu Linux 14.04. Our software uses PostgreSQL 9.5 for persistent data storage and the Java Spring Framework as the container for a Tomcat web server. If the backend were viewed as an MVC (Model-View-Controller), PostgreSQL would be the model while Java Spring both handles the interface of the REST API (view) and the controller that processes requests, communicates with the database, and returns responses. 
+The backend consists of the parts of the software system that run on a VPS (Virtual Private Server) using Ubuntu Linux 14.04. Our software uses PostgreSQL 9.5 for persistent data storage and the Java Spring Framework as the container for a Tomcat web server. If the backend were viewed as an MVC (Model-View-Controller), PostgreSQL would be the model and Java Spring would be the view (REST API) and the controller (request processing, database communication, and response creation). 
 
 \subsection{Java}
-The majority of the backend is written in Java. We chose java for a few key reasons:
+The majority of the backend is written in Java. We chose Java for a few key reasons:
 \begin{enumerate}
-    \item It is statically typed. We did not want to deal with the complexity and ambiguity of non-statically typed languages in a group setting where each of us routinely has to read and modify other people's code. 
+    \item It is statically typed. A common class of bugs is caused by an interface mismatch between two pieces of code. Static typing can help enforce interfaces and therefore prevent these types of bugs.
     \item We found Spring (our Java server framework) to be easy to use and simple to understand, with a huge amount of documentation and support. It is also very powerful and used in many enterprise applications. 
     \item Our whole team is intimately familiar with Java. 
-    \item Java has good cross-platform support across all potential server-hosts (particularly in contrast to C\#, another language we considered). Java also has a large standard library and many community libraries, further easing the development process. 
+    \item Java has good cross-platform support across all potential server operating systems offered by Duke OIT's VM service. By contrast, we were not confident in Ubuntu's C\# support through the Mono runtime. Java also has a large standard library and many community libraries, further easing the development process. 
 \end{enumerate}
 
 \subsection{Java Spring}
-There are a number of open-source application frameworks for Java. Some of the prominent ones that our team looked into are \href{https://www.playframework.com/}{Play}, \href{https://jax-rs-spec.java.net/}{JAX-RS}, \href{http://sparkjava.com}{Spark}, \href{https://spring.io/}{Spring}. Ultimately, we chose to use Spring, for the following reasons:
+There are a number of open-source application frameworks for Java. Some of the prominent ones that our team looked into are \href{https://www.playframework.com/}{Play}, \href{https://jax-rs-spec.java.net/}{JAX-RS}, \href{http://sparkjava.com}{Spark}, and \href{https://spring.io/}{Spring}. Ultimately, we chose to use Spring, for the following reasons:
 \begin{enumerate}
-    \item Spring is the most oldest, most mature Java web framework. It thus has fantastic documentation and support, as well as a large number of supporting libraries.  These factors make Spring easy to learn, which is vital in the context of a class project where we have to get started developing right away. 
-    \item The most common criticism of Spring is that it is too heavy duty and tries to do too much even in simple applications. We personally felt like this was not the case after setting up a sample application.
+    \item Spring is the oldest, most mature Java web framework. It thus has fantastic documentation and support, as well as a large number of supporting libraries.  These factors make Spring easy to learn, which is vital in the context of a class project where we have to get started developing right away. 
+    \item The most common criticism of Spring is that it is too heavy-duty for simple applications. We built a sample application to evaluate this criticism and decided it was overstated.
 \end{enumerate}
 
 \subsection{PostgreSQL}
 PostgreSQL is an open-source object-relational database management system. 
 
-We chose Postgres over competing relational databases (MySQL) because we were familiar with it from prior experience, and because the small differences between SQL database types are mostly irrelavent for the scope of application we need to develop. 
+We chose Postgres over other free, open-source relational databases like MySQL because we were familiar with it. Furthermore, we were swayed by PostgreSQL's focus on compliance and predictability, which was more important to us than MySQL's raw performance.
 
-We chose Postgres over NoSQL databases (MongoDB) because we felt that a relational database could sufficiently store the structured data a resource manager can generate. In addition, we will not be handling live data and we do not need our data to be persistent across evolutions. As such, even if our DB schema changes between evolutions, we will not need to do any sort of schema update to large amounts of existing data. This negates the primary issue of SQL-based databases. 
+We chose PostgreSQL over non-relational databases (e.g. MongoDB, Cassandra, CouchDB) because we wanted our data to be structured, which, like static typing, helps reduce bugs. One drawback to relational databases is that costly and complicated database migrations may need to be run when making changes to the database schema. However, given that we don't need to persist data across evolutions, this drawback is moot.
 
-Our current DB design can be found in Appendix \ref{appendix:DBDesign}. In designing the DB schema, we did not attempt to prematurely guess what changes might be made to the requirements in the future (for instance, it is conceivable that in the future a reservation could have multiple resources, which would alter the schema quite a lot). We felt like trying to do so would add a lot of work, but potentially offer minimal reward, particularly if we guessed incorrectly. As such, we instead focused on creating a simple schema that would approrpriately handle the current set of requirements we know we must fulfill.  
+In designing the DB schema, we did not attempt to prematurely guess what changes might be made to the requirements in the future (for instance, it is conceivable that in the future a reservation could have multiple resources, which would alter the schema quite a lot). We felt like trying to do so would add a lot of work, but potentially offer minimal reward, particularly if we guessed incorrectly. As such, we instead focused on creating a simple schema that would appropriately handle the current set of requirements.
 
 
 \subsection{Security}
-The application has multiple layers of protection. When a user is created by the admin, a random salt is generated and appended to the password, which is the SHA1 hashed. Upon login, the salt is appended to the entered password, hashed. and compared to the stored hash. 
+The application has multiple layers of protection. When a user is created by the admin, a random salt is generated and appended to the password, which is then SHA-1 hashed. Upon login, the salt is appended to the entered password, hashed, and compared to the stored hash. 
 
-Upon login, a JWT (JSON Web Token) is generated, which stores the User ID and permission level of the logged-in user. This JWT, which is signed by a secret key only known to the server, allows for future API calls to not require the user to re-authorize himself or herself, thereby preventing a potential database bottleneck. Instead of a database lookup, the authenticity of the JWT is confirmed using the secret key and the User ID and permission level stored in the JWT can be used directly. 
+Upon login, a JSON Web Token (JWT) is generated, which stores the User ID and permission level of the logged-in user. This JWT, which is signed by a secret key known only to the server, authenticates future API calls without accessing the database. Instead of a database lookup, the authenticity of the JWT is confirmed using the secret key, and the User ID and permission level stored in the JWT can be used directly. 
 
-For encrypting the communication between the clients and server, we decided to go with SSL as Spring provided support for it. We used Java's built in keytool to generate a Java keystore and self-signed certificate using RSA algorithm. We used a self-signed certificate rather than one signed by a legitimate CA because it was free. We also made it so that it can run on both HTTP and HTTPS at the same time for ease of testing. This can easily be altered to only run on HTTPS through a boolean.
+For encrypting the communication between the client and the server, we decided to go with SSL as Spring provided support for it. We used Java's built in keytool to generate a Java keystore and self-signed certificate using RSA algorithm. We used a self-signed certificate rather than one signed by a legitimate CA because it was free. We also made it so that it can run on both HTTP and HTTPS at the same time for ease of testing. Non-SSL HTTP support can easily be disabled with a global switch.
 
 \subsection{Testing}
-For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. 
+For backend testing, we wrote automated tests using Python (\hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}}). We chose not to use Spring's built-in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. Python's testing framework \texttt{unittest} also has a test discovery function which runs every test with ``test'' in the function name. This feature means that we do not have to manually update a separate testing script whenever we add a new test, thus improving our design.
 
-Our testing script currently tests only the API contract, and not any internals of the backend. This was done for two reasons. First, the API contract is ultimately the layer that must be working for our front-end application to work, and thus if it works, it is highly likely that there are no significant issues or bugs in our backend code. To some extent, if the application is working from the perspective of the end-user, then it is working correctly. Secondly, it is much harder to test the internals of the back-end, mostly because of our issues using Spring's testing paradigm. That being said, it may be in our best interest to add unit tests in the future if we can figure out how. 
+Our testing script currently tests only the API contract, and not any internals of the backend. This choice is for two reasons. First, the API contract is ultimately the layer that must be working for our front-end application to work, and thus if it works, it is highly likely that there are no significant issues or bugs in our backend code. To some extent, if the application is working from the perspective of the end-user, then it is working correctly. Secondly, it is much harder to test the internals of the back-end, mostly because of our issues using Spring's testing paradigm. That being said, it may be in our best interest to add unit tests in the future if we can figure out how. 
 
-We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the time assurance that they can quickly make changes to the backend without having to thoroughly, manually test after every change. In this way, it speeds up our development cycle. 
+We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the team assurance that they can quickly make changes to the backend without having to manually test after every change. This assurance speeds up our development cycle. In addition, because automated tests perform the same steps every time, the expected results are consistent which is not always the case with manual testing.
 
 \subsection{Code Structure}
 Our backend code is primarily divided into Filters, Controllers, Services, and Utilities. These components have the following responsibilities: 
 \begin{enumerate}
-    \item There are some checks you want to apply to all or nearly all incoming requests. For instance, we must verify that, for all API requests except for login, the sender has an appropriate authorization token. Filters are used to do this. 
-    \item Assuming a request makes it past our filters, the request is then routed to the appropriate method in the appropriate Controller (based on the request's API endpoint). This ensures that each API endpoint has a single starting point, unrelated to the actual logic of the request itself. 
+    \item Filters act upon nearly all incoming requests. For instance, we must verify that most API requests contain an appropriate authorization token. 
+    \item Requests are then routed to the appropriate method in the appropriate Controller based on the request's URL.
     \item Services handle the actual logic of each request, interacting with the database as needed. 
-    \item Finally, each Service may call on 1 or more Utility classes, which contain common functionality used across multiple services, such as converting time data structures or hashing passwords. 
+    \item Finally, each Service may call on one or more Utility classes, which contain common functionality used across multiple services, such as converting time data structures or hashing passwords. 
 \end{enumerate}
 
 The above structure allows our backend to be flexible in the face of requirement changes. Because we separate out request filtering (Filters), request routing (Controllers), request logic (Services), and common functionalities used across multiple request types (Utilities), we are easily able to add new filters, add or change API endpoints, or modify our backend logic for individual requests without having to change multiple classes or methods. 
 
 \section{REST API}
 \label{sec:REST}
-Communication between the frontend and the backend is done through a REST API with JSON (Appendix). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
+Communication between the frontend and the backend is done through a REST API with JSON (\hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}}). There are several advantages to this approach. RESTful APIs that pass JSON back and forth are well-understood and implemented. The different verbs and endpoints allow for a fairly rich state transfer between the server and the client.
 
-However, there are weaknesses as well. The REST API is based on a request-response paradigm, which means that no data transfer occurs unless it is initiated by the client. In other words, the server has no mechanism to ``push'' updates to the client. Furthermore, JSON is a structured as a tree of values (i.e. there are no pointers or objects). Therefore, relationships between objects have to be hacked together on top of the JSON format (especially many-to-many relationships, which are typically represented in our JSON as subobject relationships).
+However, there are weaknesses as well. The REST API is based on a request-response paradigm, which means that no data transfer occurs unless it is initiated by the client. In other words, the server has no mechanism to ``push'' updates to the client. Furthermore, JSON is structured as a tree of values (i.e. there are no pointers or objects). Therefore, relationships between objects have to be hacked together on top of the JSON format (especially many-to-many relationships, which are typically represented in our JSON as subobject relationships).
+
+We chose to make our API mostly RESTful because we believe that using semantic verbs like GET and POST improve the API. However, we also occasionally deviated from REST principles. For example, \texttt{GET /api/reservations} also returns some resource and user data so that the client does not need to make an excessive number of calls.
 
 \section{Frontend}
 \label{sec:Frontend}
@@ -125,14 +127,14 @@ We chose this framework because we believe that this paradigm is a very natural 
 \subsection{React components}
 Within the React framework, we designed components to express the desired UI in a natural way. At the top level of the HTML body is a Router component. This Router's state includes a route and other state to mediate communication between views. The route is a string that indicates which part of the application the user is in (e.g. ``reservation\_list'').
 
-The Router, depending on its route state, will render one of either a Login, AdminConsole, ReservationList, ReservationCreator, ReservationEditor, ResourceList, ResourceCreator, or ResourceEditor. All of these views are themselves just HTML renders of their state. Each of these subcomponents contains their own state. We considered having a global datastore of resources and reservations, but decided that the simplest way to maintain correctness across views was to simply redownload the data each time.
+The Router, depending on its route state, will render one of either a Login, AdminConsole, ReservationList, ReservationCreator, ReservationEditor, ResourceList, ResourceCreator, or ResourceEditor. All of these views are themselves just HTML renderings of their state. Each of these subcomponents contains their own state. We considered having a global datastore of resources and reservations, but decided that the simplest way to maintain correctness across views was to simply redownload the data each time.
 
 There is not much to say about the structure of the simple views that are essentially just forms, like Login, AdminConsole, and the creator and editor views. These views maintain their own state (the user input) and send it to the appropriate endpoints when the user submits the form.
 
 The ReservationList and ResourceList views maintain both state about the user's desired display settings (i.e. which tags are required or excluded) and state about what has been downloaded from the server (i.e. which reservations/resources to display). When the user changes display settings, the view then scraps the second state about what has been downloaded, makes a request, and repopulates the state from the JSON response from the server.
 
 \subsection{Testing}
-For frontend testing, we decided to write a test plan (Appendix \ref{appendix:frontendtest}) that is intended to be performed manually. Testers can load the application and execute actions that are intended to exercise most of the code paths in the application. This manual testing has the advantage that it has a low upfront cost and it is easy to implement. The disadvantage is that it is slow and takes a lot of human time and energy.
+For frontend testing, we decided to write a test plan (\hyperref[appendix:frontendtest]{Appendix \ref{appendix:frontendtest}}) that is intended to be performed manually. Testers can load the application and execute actions that are intended to exercise most of the code paths in the application. This manual testing has the advantage that it has a low upfront cost and it is easy to implement. The disadvantage is that it is slow and takes a lot of human time and energy.
 
 One alternative is to perform automated UI testing. We are aware of two different types automated UI testing: 1) programmatic access to the application and 2) simulation of mouse/keyboard events and screenshots. We decided against 1) because the UI is still in an infantile stage, and the intended DOM changes quite frequently. We decided that programmatically testing for the presence of, say, a certain <div> tag would be prohibitively expensive. We decided against 2) for the same reason that the intended DOM changes quite frequently, but also because we decided that such an approach seemed very fragile.
 
@@ -394,8 +396,16 @@ Error Check: verify that the user with the given ID exists
 Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty string)
 \end{enumerate}
 
+\clearpage
 \section{DB Design}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=6in]{Evolution1DB_cropped.pdf}
+\end{center}
+\caption{Database design}
+\label{fig:design}
+\end{figure}
 \label{appendix:DBDesign}
-\includegraphics[height=10in]{Evolution1DB.pdf}
+
 
 \end{document}
