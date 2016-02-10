@@ -88,7 +88,6 @@ The application has multiple layers of protection. When a user is created by the
 Upon login, a JWT (JSON Web Token) is generated, which stores the User ID and permission level of the logged-in user. This JWT, which is signed by a secret key only known to the server, allows for future API calls to not require the user to re-authorize himself or herself, thereby preventing a potential database bottleneck. Instead of a database lookup, the authenticity of the JWT is confirmed using the secret key and the User ID and permission level stored in the JWT can be used directly. 
 
 For encrypting the communication between the clients and server, we decided to go with SSL as Spring provided support for it. We used Java's built in keytool to generate a Java keystore and self-signed certificate using RSA algorithm. We used a self-signed certificate rather than one signed by a legitimate CA because it was free. We also made it so that it can run on both HTTP and HTTPS at the same time for ease of testing. This can easily be altered to only run on HTTPS through a boolean.
-RSA
 
 \subsection{Testing}
 For backend testing, we wrote automated tests using Python (Appendix \ref{appendix:backendtest}). We chose not to use Spring's built in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. 
