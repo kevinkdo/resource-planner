@@ -21,7 +21,7 @@ import resourceplanner.filters.JwtFilter;
 @Configuration
 @SpringBootApplication
 public class Application {
-    boolean production = true;
+    boolean production = True;
 
     @Bean
     public FilterRegistrationBean jwtFilter() {

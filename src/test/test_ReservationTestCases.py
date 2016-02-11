@@ -4,20 +4,20 @@ import json
 
 class ReservationTestCases(unittest.TestCase):
   def setUp(self):
-      self.baseUrl = 'http://localhost:80/'
+      self.baseUrl = 'https://localhost:443/'
       self.headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
       self.reserveUrl = 'api/reservations'
       self.resourceUrl = 'api/resources'
       self.resetUrl = '/admin/init'
-      r = requests.get(self.baseUrl + self.resetUrl, headers = self.headers)
+      r = requests.get(self.baseUrl + self.resetUrl, headers = self.headers, verify = False)
       validResource = {'name':'some resource', 'description':'some resource description', 'tags':[]}
       validResource2 = {'name':'some resource2', 'description':'some resource2 description', 'tags':[]}
-      r = requests.post(self.baseUrl + self.resourceUrl, data = json.dumps(validResource), headers = self.headers)
-      r = requests.post(self.baseUrl + self.resourceUrl, data = json.dumps(validResource2), headers = self.headers)
+      r = requests.post(self.baseUrl + self.resourceUrl, data = json.dumps(validResource), headers = self.headers, verify = False)
+      r = requests.post(self.baseUrl + self.resourceUrl, data = json.dumps(validResource2), headers = self.headers, verify = False)
 
   def test_CreateValidReservationWithValidUserID(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'should_email': True, u'user_id': 1, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
@@ -25,7 +25,7 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_CreateValidReservationWithInvalidUserID(self):
       reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
@@ -34,8 +34,8 @@ class ReservationTestCases(unittest.TestCase):
   def test_CreateTouchingReservations(self):
       reservation1 = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       reservation2 = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T11:00:00.000Z", "end_time": "2012-08-06T11:00:00.000Z", "should_email": "true"}
-      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation1), headers = self.headers)
-      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation2), headers = self.headers)
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation1), headers = self.headers, verify = False)
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation2), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'should_email': True, u'user_id': 1, u'resource_id': 1, u'end_time': u'2012-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T11:00:00.000Z', u'reservation_id': 2}
@@ -43,7 +43,7 @@ class ReservationTestCases(unittest.TestCase):
     
   def test_CreateInvalidReservationWithInvalidResourceID(self):
       reservation = {"user_id": "1", "resource_id": "3", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
@@ -51,7 +51,7 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_CreateInvalidReservationInvalidTimeRange(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2012-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      r = requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
@@ -59,8 +59,8 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_GetReservationWithValidID(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
-      r = requests.get(self.baseUrl + self.reserveUrl + '/1', headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
+      r = requests.get(self.baseUrl + self.reserveUrl + '/1', headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}
@@ -68,8 +68,8 @@ class ReservationTestCases(unittest.TestCase):
     
   def test_GetReservationWithInvalidID(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
-      r = requests.get(self.baseUrl + self.reserveUrl + '/2', headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
+      r = requests.get(self.baseUrl + self.reserveUrl + '/2', headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
@@ -77,9 +77,9 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_GetReservationWithValidQueryWithResourceAndUserLists(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       queryUrl = '/?start=2008-08-06T10:54:17Z&end=2015-08-06T10:54:17Z&user_ids=1,2&resource_ids=1'
-      r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers)
+      r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}]
@@ -87,9 +87,9 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_GetReservationWithQueryValidTimeRange(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       queryUrl = '/?start=2008-08-06T10:54:17Z&end=2015-08-06T10:54:17Z'
-      r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers)
+      r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'admin', u'should_email': False, u'user_id': 1, u'email': u'admin@admin.com'}}]
@@ -97,9 +97,9 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_GetReservationWithQueryInvalidTimeRange(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       queryUrl = '/?start=2015-08-06T10:54:17Z&end=2008-08-06T10:54:17Z'
-      r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers)
+      r = requests.get(self.baseUrl + self.reserveUrl + queryUrl, headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
@@ -107,9 +107,9 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_PutReservationWithValidIDUpdateAllFields(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       update = {'resource_id':'2', 'should_email':'false'}
-      r = requests.put(self.baseUrl + self.reserveUrl + '/1', data = json.dumps(update), headers = self.headers)
+      r = requests.put(self.baseUrl + self.reserveUrl + '/1', data = json.dumps(update), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'should_email': False, u'user_id': 1, u'resource_id': 2, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
@@ -117,9 +117,9 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_PutReservationWithValidIDUpdateNoFields(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       update = {}
-      r = requests.put(self.baseUrl + self.reserveUrl + '/1', data = json.dumps(update), headers = self.headers)
+      r = requests.put(self.baseUrl + self.reserveUrl + '/1', data = json.dumps(update), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == {u'should_email': True, u'user_id': 1, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
@@ -127,9 +127,9 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_PutReservationWithInvalidID(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
       update = {}
-      r = requests.put(self.baseUrl + self.reserveUrl + '/2', data = json.dumps(update), headers = self.headers)
+      r = requests.put(self.baseUrl + self.reserveUrl + '/2', data = json.dumps(update), headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
@@ -137,8 +137,8 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_DeleteReservationWithValidID(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
-      r = requests.delete(self.baseUrl + self.reserveUrl + '/1', headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
+      r = requests.delete(self.baseUrl + self.reserveUrl + '/1', headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == None
@@ -146,8 +146,8 @@ class ReservationTestCases(unittest.TestCase):
 
   def test_DeleteReservationWithInvalidID(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers)
-      r = requests.delete(self.baseUrl + self.reserveUrl + '/2', headers = self.headers)
+      requests.post(self.baseUrl + self.reserveUrl, data = json.dumps(reservation), headers = self.headers, verify = False)
+      r = requests.delete(self.baseUrl + self.reserveUrl + '/2', headers = self.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
