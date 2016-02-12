@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS groupmembers;
+DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS resourcetags;
 DROP TABLE IF EXISTS resources;
@@ -21,7 +23,8 @@ VALUES ('admin@admin.com', 'admin',
 CREATE TABLE resources (
   resource_id SERIAL PRIMARY KEY NOT NULL,
   name        VARCHAR(255)       NOT NULL,
-  description VARCHAR(2000)
+  description VARCHAR(2000),
+  resource_p  INT
 );
 
 CREATE TABLE resourcetags (
@@ -38,3 +41,16 @@ CREATE TABLE reservations (
   should_email   BOOLEAN            NOT NULL
 );
 
+CREATE TABLE groups (
+  group_id      SERIAL PRIMARY KEY NOT NULL,
+  group_name    VARCHAR(255)       NOT NULL,
+  resource_p    BOOLEAN            NOT NULL,
+  reservation_p BOOLEAN            NOT NULL,
+  user_p        BOOLEAN            NOT NULL
+);
+
+CREATE TABLE groupmembers (
+  group_id INT NOT NULL REFERENCES groups (group_id) ON DELETE CASCADE,
+  user_id  INT NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+  UNIQUE (group_id, user_id)
+);
