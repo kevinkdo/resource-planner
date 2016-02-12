@@ -26,7 +26,7 @@ public class GroupController extends Controller{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse createGroup(@RequestBody final GroupRequest req, final HttpServletRequest request) {
-        if(!isAdmin(request)){
+        if(!hasUserP(request)){
             return new StandardResponse(true, "You are not authorized.", req);
         }
         return groupService.createGroup(req);
@@ -44,7 +44,7 @@ public class GroupController extends Controller{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse updateGroup(@PathVariable final int groupId, @RequestBody final GroupRequest req, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!hasUserP(request)) {
             return new StandardResponse(true, "You are not authorized", req);
         }
         return groupService.updateGroup(req, groupId);
@@ -54,7 +54,7 @@ public class GroupController extends Controller{
             method = RequestMethod.DELETE)
     @ResponseBody
     public StandardResponse deleteGroup(@PathVariable final int groupId, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!hasUserP(request)) {
             return new StandardResponse(true, "You are not authorized");
         }
         return groupService.deleteGroup(groupId);

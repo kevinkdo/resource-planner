@@ -7,24 +7,26 @@ DROP TABLE IF EXISTS users;
 
 
 CREATE TABLE users (
-  user_id      SERIAL PRIMARY KEY  NOT NULL,
-  email        VARCHAR(255) UNIQUE NOT NULL,
-  passhash     VARCHAR(255)        NOT NULL,
-  username     VARCHAR(255) UNIQUE NOT NULL,
-  permission   INT                 NOT NULL,
-  should_email BOOLEAN             NOT NULL
+  user_id       SERIAL PRIMARY KEY  NOT NULL,
+  email         VARCHAR(255) UNIQUE NOT NULL,
+  passhash      VARCHAR(255)        NOT NULL,
+  username      VARCHAR(255) UNIQUE NOT NULL,
+  resource_p    BOOLEAN             NOT NULL,
+  reservation_p BOOLEAN             NOT NULL,
+  user_p        BOOLEAN             NOT NULL,
+  should_email  BOOLEAN             NOT NULL
 );
 
-INSERT INTO users (email, username, passhash, permission, should_email)
+INSERT INTO users (email, username, passhash, resource_p, reservation_p, user_p, should_email)
 VALUES ('admin@admin.com', 'admin',
         '1000:9816dd56235c68a566b1f50a1815ab96761ebf7ad33d84cd:5b209a5f9b1628fbd80cdffb0aa50b7ec58f07e93f9b18fc',
-        1, FALSE);
+        TRUE, TRUE, TRUE, FALSE);
 
 CREATE TABLE resources (
-  resource_id SERIAL PRIMARY KEY NOT NULL,
-  name        VARCHAR(255)       NOT NULL,
-  description VARCHAR(2000),
-  resource_p  INT
+  resource_id     SERIAL PRIMARY KEY NOT NULL,
+  name            VARCHAR(255)       NOT NULL,
+  description     VARCHAR(2000),
+  resource_access INT                NOT NULL
 );
 
 CREATE TABLE resourcetags (

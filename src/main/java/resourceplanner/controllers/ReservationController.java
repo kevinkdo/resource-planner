@@ -67,7 +67,7 @@ public class ReservationController extends Controller{
             return new StandardResponse(true, "Begin time after end time");
         }
 
-    	if(isAdmin(request) || getRequesterID(request) == req.getUser_id()){
+    	if(hasReservationP(request) || getRequesterID(request) == req.getUser_id()){
     		return reservationService.createReservationDB(req);
     	}
     	else{
@@ -85,7 +85,7 @@ public class ReservationController extends Controller{
         if(existingRes == null){
             return new StandardResponse(true, "No reservation with given ID exists");
         }
-        if(getRequesterID(request) != existingRes.getUser_id() && !isAdmin(request)){
+        if(getRequesterID(request) != existingRes.getUser_id() && !hasReservationP(request)){
             return new StandardResponse(true, "Non-admin trying to alter another user's reservation");
         }
 
@@ -102,7 +102,7 @@ public class ReservationController extends Controller{
             return new StandardResponse(true, "No reservation with given ID exists");
         }
         //Admin can delete ANY reservation, user can only delete his/her own
-    	if(isAdmin(request) || getRequesterID(request) == reservation.getUser_id()){
+    	if(hasReservationP(request) || getRequesterID(request) == reservation.getUser_id()){
     		return reservationService.deleteReservationByIdDB(reservationId);
     	}
     	else{
