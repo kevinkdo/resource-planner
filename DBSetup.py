@@ -4,7 +4,7 @@ import json
 
 
 def addUsers():
-	baseUrl = 'http://localhost:8080/'
+	baseUrl = 'https://localhost:8443/'
 	headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
 	userUrl = 'api/users'
 	resourceUrl = 'api/resources'
@@ -22,7 +22,7 @@ def addUsers():
 	
 
 def addResources():
-	baseUrl = 'http://localhost:8080/'
+	baseUrl = 'https://localhost:8443/'
 	headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
 	userUrl = 'api/users'
 	resourceUrl = 'api/resources'
@@ -41,7 +41,7 @@ def addResources():
 	r5 = requests.post(baseUrl + resourceUrl, data = json.dumps(validResource5), headers = headers)
 
 def addReservations():
-	baseUrl = 'http://localhost:8080/'
+	baseUrl = 'https://localhost:8443/'
 	headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
 	userUrl = 'api/users'
 	resourceUrl = 'api/resources'
@@ -60,7 +60,7 @@ def addReservations():
 	r = requests.post(baseUrl + reserveUrl, data = json.dumps(reservation5), headers = headers)
 
 if __name__ == '__main__':
-	baseUrl = 'http://localhost:8080/'
+	baseUrl = 'https://localhost:8443/'
 	headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
 	resetUrl = '/admin/init'
 	requests.get(baseUrl + resetUrl, headers = headers)
