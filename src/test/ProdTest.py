@@ -18,6 +18,7 @@ userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'admin'}
 
 error = False
 req = []
+errMsg = []
 #login
 req.append(requests.post(baseUrl + loginUrl, data = json.dumps(userLogin), headers = headers, verify = False))
 
@@ -30,16 +31,17 @@ req.append(requests.get(baseUrl + resourceUrl + '/1', headers = headers, verify 
 for r in req:
   if r.status_code != 200:
     error = True
+    errMsg.append(r.json())
 
 if error:
   #http://stackoverflow.com/questions/10147455/how-to-send-an-email-with-gmail-as-provider-using-python
   gmail_user = 'ResourceManagerAlerts@gmail.com'
   gmail_pwd = 'resourcemanager'
   FROM = gmail_user
-  recipient = 'mh291@duke.edu; kkd10@duke.edu; davis.treybig@duke.edu; jiawei.zhang@duke.edu '
+  recipient = 'mh291@duke.edu'#; kkd10@duke.edu; davis.treybig@duke.edu; jiawei.zhang@duke.edu '
   TO = recipient if type(recipient) is list else [recipient]
   SUBJECT = 'PROD ERROR'
-  TEXT = 'ONE OF THE GET REQUESTS DID NOT RETURN STATUS 200'
+  TEXT = reduce(lambda x, y: str(x) + '\n' + str(y), errMsg)
 
   # Prepare actual message
   message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
