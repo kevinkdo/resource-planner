@@ -1,12 +1,12 @@
 import requests
 import json
 import smtplib
+import datetime
 
 protocol = 'https' # change to http for non SSL
 #host = '://localhost' 
 host = '://easywebapi.com'
 baseUrl = protocol + host
-resetUrl = '/admin/init' 
 tagUrl = '/api/tags'
 resourceUrl = '/api/resources'
 registerUrl = '/auth/register'
@@ -19,6 +19,9 @@ userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'admin'}
 error = False
 req = []
 errMsg = []
+logMsg = []
+logMsg.append(str(datetime.datetime.now()))
+
 #login
 req.append(requests.post(baseUrl + loginUrl, data = json.dumps(userLogin), headers = headers, verify = False))
 
@@ -29,9 +32,15 @@ req.append(requests.get(baseUrl + reserveUrl + '/1', headers = headers, verify =
 req.append(requests.get(baseUrl + resourceUrl + '/1', headers = headers, verify = False))
 
 for r in req:
+  logMsg.append((r.status_code, (r.json())))
   if r.status_code != 200:
     error = True
     errMsg.append(r.json())
+
+#log to errorLog.text
+f = open('errorLog.txt', 'w')
+f.write(reduce(lambda x, y: str(x) + '\n' + str(y), logMsg))
+f.close()
 
 if error:
   #http://stackoverflow.com/questions/10147455/how-to-send-an-email-with-gmail-as-provider-using-python
