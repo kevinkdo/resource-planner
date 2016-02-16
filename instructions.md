@@ -20,14 +20,16 @@ Setting up DB:
 $ sudo -u postgres -i
 $ createdb rp
 $ psql rp < setup.sql
-$ ***Run following two commands to test it worked. You should see all 4 tables and the 1 default admin user***
-$ \dt
-$ SELECT * FROM user;
-$ ***Next, we want to make sure that your postgres password matches what is listed in our Spring code***
-$ ALTER USER Postgres WITH PASSWORD 'password';
-$ *** Now we return to normal shell user ***
-$ \q
-$ su vagrant (password should be 'vagrant')
+$ psql rp
+rp=# ***Run following two commands from a psql rp shell to test it worked. You should see all 4 tables and the 1 default admin user***
+rp=# \dt
+rp=# SELECT * FROM users;
+rp=# ***Next, we want to make sure that your postgres password matches what is listed in our Spring code***
+rp=# ALTER USER Postgres WITH PASSWORD 'password';
+rp=# *** Now we return to normal shell user ***
+rp=# \q
+$ # Now we exit the postgres user
+$ <CTRL-D>
 ```
 
 # Run
