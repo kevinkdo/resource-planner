@@ -5,14 +5,40 @@ import io.jsonwebtoken.Claims;
 import javax.servlet.http.HttpServletRequest;
 
 public class Controller {
-	public boolean isAdmin(HttpServletRequest request){
+
+	public boolean isSuperAdmin(HttpServletRequest request){
 		final Claims claims = (Claims) request.getAttribute("claims");
-		if (claims.get("permission") == null) {
+        boolean resourceP = Boolean.parseBoolean(claims.get("resource_p").toString());
+		boolean reservationP = Boolean.parseBoolean(claims.get("reservation_p").toString());
+		boolean userP = Boolean.parseBoolean(claims.get("user_p").toString());
+		return resourceP && reservationP && userP;
+	}
+
+
+	public boolean hasResourceP(HttpServletRequest request){
+		final Claims claims = (Claims) request.getAttribute("claims");
+		if (claims.get("resource_p") == null) {
 			return false;
 		}
-        int permission = Integer.parseInt(claims.get("permission").toString());
-        return permission == 1;
+		return Boolean.parseBoolean(claims.get("resource_p").toString());
 	}
+
+	public boolean hasReservationP(HttpServletRequest request){
+		final Claims claims = (Claims) request.getAttribute("claims");
+		if (claims.get("reservation_p") == null) {
+			return false;
+		}
+		return Boolean.parseBoolean(claims.get("reservation_p").toString());
+	}
+
+	public boolean hasUserP(HttpServletRequest request){
+		final Claims claims = (Claims) request.getAttribute("claims");
+		if (claims.get("user_p") == null) {
+			return false;
+		}
+		return Boolean.parseBoolean(claims.get("user_p").toString());
+	}
+
 
 	public int getRequesterID(HttpServletRequest request){
 		final Claims claims = (Claims) request.getAttribute("claims");

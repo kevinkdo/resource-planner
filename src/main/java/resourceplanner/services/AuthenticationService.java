@@ -26,6 +26,7 @@ public class AuthenticationService {
     @Autowired
     private JdbcTemplate jt;
 
+    /*
     public StandardResponse register(UserRequest req) {
         if (!req.isValid()) {
             return new StandardResponse(true, "Request is not valid");
@@ -64,17 +65,20 @@ public class AuthenticationService {
                 req.getEmail(), req.getUsername(), passwordHash);
         return new StandardResponse(false, "Successfully registered");
     }
+    */
 
     public StandardResponse login(UserRequest req) {
         List<AuthUser> users = jt.query(
-                "SELECT user_id, passhash, permission FROM users WHERE email = ? OR username = ?;",
+                "SELECT user_id, passhash, resource_p, reservation_p, user_p FROM users WHERE email = ? OR username = ?;",
                 new Object[]{req.getEmail(), req.getUsername()},
                 new RowMapper<AuthUser>() {
                     public AuthUser mapRow(ResultSet rs, int rowNum) throws SQLException {
                         AuthUser user = new AuthUser();
                         user.setUser_id(rs.getInt("user_id"));
                         user.setPasshash(rs.getString("passhash"));
-                        user.setPermission(rs.getInt("permission"));
+                        user.setResource_p(rs.getBoolean("resource_p"));
+                        user.setReservation_p(rs.getBoolean("reservation_p"));
+                        user.setUser_p(rs.getBoolean("user_p"));
                         return user;
                     }
                 });
@@ -83,7 +87,7 @@ public class AuthenticationService {
         }
         try {
             if (PasswordHash.validatePassword(req.getPassword(), users.get(0).getPasshash())) {
-                String token = TokenCreator.generateToken(users.get(0).getUser_id(), users.get(0).getPermission());
+                String token = TokenCreator.generateToken(users.get(0));
                 Login login = new Login(token, users.get(0).getUser_id());
                 return new StandardResponse(false, "Successfully authenticated", login);
             }
