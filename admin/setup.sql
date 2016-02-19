@@ -1,11 +1,12 @@
 DROP TABLE IF EXISTS groupmembers;
+DROP TABLE IF EXISTS groupResourcePermissions;
+DROP TABLE IF EXISTS userResourcePermissions;
 DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS resourcetags;
 DROP TABLE IF EXISTS resources;
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS groupResourcePermissions;
-DROP TABLE IF EXISTS userResourcePermissions;
+
 
 CREATE TABLE users (
   user_id       SERIAL PRIMARY KEY  NOT NULL,
