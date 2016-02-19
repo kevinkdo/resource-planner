@@ -1,0 +1,6 @@
+2016-02-15 22:31:59.110060
+(200, {u'is_error': False, u'data': {u'token': u'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI', u'userId': 1}, u'error_msg': u'Successfully authenticated'})
+(200, {u'is_error': False, u'data': {u'tags': []}, u'error_msg': u'Successfully retrieved tags'})
+(200, {u'is_error': False, u'data': {u'username': u'admin', u'should_email': False, u'user_id': 1, u'email': u'admin@admin.com'}, u'error_msg': u'Successfully retrieved user'})
+(200, {u'is_error': True, u'data': None, u'error_msg': u'Reservation with given ID not found'})
+(200, {u'is_error': True, u'data': None, u'error_msg': u'Resource does not exist'})

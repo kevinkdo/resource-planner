@@ -1,3 +1,0 @@
-# Primitive JS build system; intended to be run from shell as ./m1
-# Like ./m, but builds only once and quits
-babel --presets react main.js -o main-build.js
