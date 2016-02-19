@@ -1,2 +1,0 @@
-# Primitive JS build system; intended to be run from shell as ./m
-babel --presets react main.js --watch -o main-build.js
