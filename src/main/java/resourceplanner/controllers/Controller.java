@@ -16,27 +16,36 @@ public class Controller {
 
 
 	public boolean hasResourceP(HttpServletRequest request){
+		return true;
+		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		if (claims.get("resource_p") == null) {
 			return false;
 		}
 		return Boolean.parseBoolean(claims.get("resource_p").toString());
+		*/
 	}
 
 	public boolean hasReservationP(HttpServletRequest request){
+		return true;
+		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		if (claims.get("reservation_p") == null) {
 			return false;
 		}
 		return Boolean.parseBoolean(claims.get("reservation_p").toString());
+		*/
 	}
 
 	public boolean hasUserP(HttpServletRequest request){
+		return true;
+		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		if (claims.get("user_p") == null) {
 			return false;
 		}
 		return Boolean.parseBoolean(claims.get("user_p").toString());
+		*/
 	}
 
 

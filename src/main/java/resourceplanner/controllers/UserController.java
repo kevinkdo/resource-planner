@@ -61,5 +61,20 @@ public class UserController extends Controller{
         return userService.deleteUser(userId);
     }
 
+    @RequestMapping(value = "/{userId}/editablePermissions",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
+        //TODO
+        return new StandResponse(false, "does endpoint work?");
+    }
+
+    @RequestMapping(value = "/{userId}/editablePermissions",
+            method = RequestMethod.PUT)
+    @ResponseBody
+    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
+        //TODO
+        return new StandResponse(false, "does endpoint work??");
+    }
 }
 
