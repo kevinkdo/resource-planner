@@ -4,17 +4,20 @@ package resourceplanner.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.GroupRequest;
 import responses.StandardResponse;
+import responses.data.Group;
 import responses.data.Resource;
 import responses.data.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +67,32 @@ public class GroupService {
     }
 
     public StandardResponse getGroupById(int groupId) {
-        return null;
+        List<String> groups = jt.query(
+                "SELECT name FROM groups WHERE group_id_id = ?;",
+                new Object[]{groupId},
+                new RowMapper<String>() {
+                    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getString("name");
+                    }
+                });
+
+        if (groups.size() != 1) {
+            return new StandardResponse(true, "Group does not exist");
+        }
+
+        String group = groups.get(0);
+
+        List<Integer> userIds = jt.queryForList(
+                "SELECT user_id FROM groupmembers WHERE group_id = ?;",
+                new Object[]{groupId},
+                Integer.class);
+
+        Group groupResponse = new Group();
+        groupResponse.setName(group);
+        groupResponse.setGroup_id(groupId);
+        groupResponse.setUser_ids(userIds);
+
+        return new StandardResponse(false, "Successfully retrieved resource", groupResponse);
     }
 
     public StandardResponse updateGroup(GroupRequest req, int groupId) {
