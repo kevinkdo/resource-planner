@@ -355,12 +355,20 @@ const ReservationList = React.createClass({
     var end = new Date();
     start.setMonth(now.getMonth() - 1);
     end.setMonth(now.getMonth() + 1);
+    var start_date = formatDate(start);
+    var start_time = formatTime(start);
+    var end_date = formatDate(end);
+    var end_time = formatTime(end);    
     return {
       loading_tags: true,
       loading_table: true,
       tags: [],
       start: start,
+      start_date: start_date,
+      start_time: start_time,
       end: end,
+      end_date: end_date,
+      end_time: end_time,
       reservations: {},
       error_msg: "",
       resource_id: ""
@@ -397,6 +405,33 @@ const ReservationList = React.createClass({
     this.state[field].setHours(parts[0]);
     this.state[field].setMinutes(parts[1]);
     this.setState(this.state);
+  },
+
+  convertToDate(field) {
+    var temp_date = this.state[field]
+    this.setDate(field, this.state[field + '_date']);
+    this.setTime(field, this.state[field + '_time']);
+    if (!this.isValidDate(this.state[field])) {
+      this.state[field] = temp_date;
+      this.setState(this.state);
+    }
+  },
+
+  //http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
+  isValidDate(date) {
+  if ( Object.prototype.toString.call(date) !== "[object Date]" )
+    return false;
+  return !isNaN(date.getTime());
+  },
+
+  updateDate(evt, field) {
+    this.set(field + '_date', evt.target.value);
+    this.convertToDate(field)
+  },
+
+  updateTime(evt, field) {
+    this.set(field + '_time', evt.target.value);
+    this.convertToDate(field)
   },
 
   editReservation(id) {
@@ -476,11 +511,11 @@ const ReservationList = React.createClass({
           <div className="panel-body">
             <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
             <h4>Start</h4>
-              <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_start_date" value={this.state.start_date} onChange={(evt) => this.updateDate(evt, 'start')}/>
+              <input type="time" className="form-control" id="reservation_list_start_time" value={this.state.start_time} onChange={(evt) => this.updateTime(evt, 'start')}/>
             <h4>End</h4>
-              <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_end_date" value={this.state.end_date} onChange={(evt) => this.updateDate(evt, 'end')}/>
+              <input type="time" className="form-control" id="reservation_list_end_time" value={this.state.end_time} onChange={(evt) => this.updateTime(evt, 'end')}/>
             <h4>Resource ID</h4>
               <input type="number" className="form-control" id="reservation_list_resource_id" value={this.state.resource_id} onChange={(evt) => this.set("resource_id", evt.target.value)}/>
             <h4>Tags</h4>
