@@ -9,9 +9,6 @@ import java.util.List;
 public class GroupRequest {
     private String group_name;
     private List<Integer> user_ids;
-    //private Boolean resource_p;
-    //private Boolean reservation_p;
-    //private Boolean user_p;
 
     public String getGroup_name() {
         return group_name;
@@ -21,17 +18,4 @@ public class GroupRequest {
         return user_ids;
     }
 
-    /*
-    public Boolean getResource_p() {
-        return resource_p;
-    }
-
-    public Boolean getReservation_p() {
-        return reservation_p;
-    }
-
-    public Boolean getUser_p() {
-        return user_p;
-    }
-    */
 }

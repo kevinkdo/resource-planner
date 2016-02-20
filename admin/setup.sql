@@ -13,9 +13,10 @@ CREATE TABLE users (
   email         VARCHAR(255) UNIQUE NOT NULL,
   passhash      VARCHAR(255)        NOT NULL,
   username      VARCHAR(255) UNIQUE NOT NULL,
-  resource_p    BOOLEAN             NOT NULL,
-  reservation_p BOOLEAN             NOT NULL,
-  user_p        BOOLEAN             NOT NULL,
+  super_p       BOOLEAN             NOT NULL DEFAULT FALSE,
+  resource_p    BOOLEAN             NOT NULL DEFAULT FALSE,
+  reservation_p BOOLEAN             NOT NULL DEFAULT FALSE,
+  user_p        BOOLEAN             NOT NULL DEFAULT FALSE,
   should_email  BOOLEAN             NOT NULL
 );
 
@@ -48,9 +49,9 @@ CREATE TABLE reservations (
 CREATE TABLE groups (
   group_id      SERIAL PRIMARY KEY NOT NULL,
   group_name    VARCHAR(255)       NOT NULL,
-  resource_p    BOOLEAN            NOT NULL,
-  reservation_p BOOLEAN            NOT NULL,
-  user_p        BOOLEAN            NOT NULL
+  resource_p    BOOLEAN            NOT NULL DEFAULT FALSE,
+  reservation_p BOOLEAN            NOT NULL DEFAULT FALSE,
+  user_p        BOOLEAN            NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE groupmembers (
