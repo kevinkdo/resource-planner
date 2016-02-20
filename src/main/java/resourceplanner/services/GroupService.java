@@ -33,8 +33,10 @@ public class GroupService {
     @Autowired
     private JdbcTemplate jt;
 
-
     public StandardResponse createGroup(final GroupRequest req) {
+        if (req.isValid()) {
+            return new StandardResponse(true, "Request not valid");
+        }
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
                 new PreparedStatementCreator() {
@@ -96,10 +98,45 @@ public class GroupService {
     }
 
     public StandardResponse updateGroup(GroupRequest req, int groupId) {
-        return null;
+        if (req.isValid()) {
+            return new StandardResponse(true, "Request not valid");
+        }
+        int groupExists = jt.queryForObject(
+                "SELECT COUNT(*) FROM groups WHERE group_id = ?;", Integer.class, groupId);
+        if (groupExists != 1) {
+            return new StandardResponse(true, "Group does not exist");
+        }
+
+        jt.update("UPDATE groups SET name = ? WHERE group_id = ?;",
+                req.getGroup_name(),
+                groupId);
+
+        jt.update("DELETE FROM groupmembers WHERE group_id = ?;", groupId);
+
+        List<Object[]> batch = new ArrayList<Object[]>();
+        for (int userId : req.getUser_ids()) {
+            Object[] values = new Object[]{
+                    groupId,
+                    userId};
+            batch.add(values);
+        }
+        int[] updateCounts = jt.batchUpdate(
+                "INSERT INTO groupmembers (group_id, user_id) VALUES (?, ?);",
+                batch);
+
+        return new StandardResponse(false, "Successfully updated group");
     }
 
     public StandardResponse deleteGroup(int groupId) {
-        return null;
+        int groupExists = jt.queryForObject(
+                "SELECT COUNT(*) FROM groups WHERE group_id = ?;", Integer.class, groupId);
+        if (groupExists != 1) {
+            return new StandardResponse(true, "Group does not exist");
+        }
+
+        jt.update("DELETE FROM groupresourcepermissions WHERE group_id = ?;", groupId);
+        jt.update("DELETE FROM groupmembers WHERE group_id = ?;", groupId);
+        jt.update("DELETE FROM groups WHERE group_id = ?;", groupId);
+        return new StandardResponse(false, "Successfully deleted group");
     }
 }

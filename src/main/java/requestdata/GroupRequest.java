@@ -10,6 +10,10 @@ public class GroupRequest {
     private String group_name;
     private List<Integer> user_ids;
 
+    public boolean isValid() {
+        return group_name != null && user_ids != null;
+    }
+
     public String getGroup_name() {
         return group_name;
     }

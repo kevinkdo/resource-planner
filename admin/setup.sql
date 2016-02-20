@@ -60,14 +60,14 @@ CREATE TABLE groupmembers (
   UNIQUE (group_id, user_id)
 );
 
-CREATE TABLE groupResourcePermissions(
+CREATE TABLE groupresourcepermissions(
   group_id INT NOT NULL REFERENCES groups (group_id) ON DELETE CASCADE,
   resource_id INT NOT NULL REFERENCES resources (resource_id) ON DELETE CASCADE,
   permission_level INT NOT NULL,
   UNIQUE (group_id, resource_id)
 );
 
-CREATE TABLE userResourcePermissions(
+CREATE TABLE userresourcepermissions(
   user_id INT NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
   resource_id INT NOT NULL REFERENCES resources (resource_id) ON DELETE CASCADE,
   permission_level INT NOT NULL,
