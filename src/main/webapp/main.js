@@ -54,6 +54,13 @@ var round = function(d) {
   return d;
 }
 
+function uniq(a) {
+    var seen = {};
+    return a.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+}
+
 var userId = function() {
   return jwt_decode(localStorage.getItem("session")).user_id;
 };
@@ -87,6 +94,8 @@ const Router = React.createClass({
         return <ResourceCreator setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_editor":
         return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
+      case "permissions_manager":
+        return <PermissionsManager setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
     }
     return <div>ERROR</div>;
   }
@@ -154,6 +163,7 @@ const Navbar = React.createClass({
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
                   <li><a href="#" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
+                  <li><a href="#" onClick={() => this.props.setPstate({route: "permissions_manager"})}>Permissions Manager</a></li>
                   <li><a href="#" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
                   <li><a href="#" onClick={this.logout}>Log Out</a></li>
@@ -343,6 +353,143 @@ const Settings = React.createClass({
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+});
+
+const PermissionsManager = React.createClass({
+  getInitialState() {
+    return {
+      data: {"system_permissions": {"user_permissions": [{"user_id": 1, "username": "Davis", "resource_p": true, "reservation_p": false, "user_p": true},
+                   {"user_id": 2, "username": "Kevin", "resource_p": false, "reservation_p": false, "user_p": true}],
+ "group_permissions": [{"group_id": 1, "group_name": "Dudes", "resource_p": true, "reservation_p": false, "user_p": true},
+{"group_id": 2, "group_name": "Girls", "resource_p": true, "reservation_p": false, "user_p": true}]
+            },
+ "resource_permissions": {"user_permissions": [{"user_id": 1, "username": "Davis", "resource_id": 2, "resource_name": "Chair", "permission_level": 1},
+                     {"user_id": 2, "username": "Kevin", "resource_id": 3, "resource_name": "Chair2", "permission_level": 2}],
+          "group_permissions": [{"group_id": 1, "group_name": "Dudes", "resource_id": 2, "resource_name": "Chair", "permission_level": 1},
+                                             {"group_id": 2, "group_name": "Girls", "resource_id": 3, "resource_name": "Chair2", "permission_level": 2}]
+                }
+ }};
+  },
+
+  getUserName(user_id) {
+    var answer = "";
+    this.state.data.resource_permissions.user_permissions.forEach(function(x) {
+      if (x.user_id == user_id) {
+        answer = x.username;
+      }
+    });
+    return answer ? answer : user_id.toString();
+  },
+
+  getGroupName(group_id) {
+    var answer = "";
+    this.state.data.resource_permissions.group_permissions.forEach(function(x) {
+      if (x.group_id == group_id) {
+        answer = x.group_name;
+      }
+    });
+    return answer ? answer : group_id.toString();
+  },
+
+  getResourceName(resource_id) {
+    var answer = "";
+    this.state.data.resource_permissions.user_permissions.forEach(function(x) {
+      if (x.resource_id == resource_id) {
+        answer = x.resource_name;
+      }
+    });
+    return answer ? answer : resource_id.toString();
+  },
+
+  getResourceUserPermission(resource_id, user_id) {
+    var answer = 0;
+    this.state.data.resource_permissions.user_permissions.forEach(function(x) {
+      if (x.user_id == user_id && x.resource_id == resource_id) {
+        answer = x.permission_level;
+      }
+    });
+    return answer;
+  },
+
+  getResourceGroupPermission(resource_id, group_id) {
+    var answer = 0;
+    this.state.data.resource_permissions.group_permissions.forEach(function(x) {
+      if (x.group_id == group_id && x.resource_id == resource_id) {
+        answer = x.permission_level;
+      }
+    });
+    return answer;
+  },
+
+  getSystemUserPermission(field, user_id) {
+    var answer = true;
+    this.state.data.system_permissions.user_permissions.forEach(function(x) {
+      if (x.user_id == user_id) {
+        answer = x[field];
+      }
+    });
+    return answer.toString();
+  },
+
+  getSystemGroupPermission(field, group_id) {
+    var answer = true;
+    this.state.data.system_permissions.group_permissions.forEach(function(x) {
+      if (x.group_id == group_id) {
+        answer = x[field];
+      }
+    });
+    return answer.toString();
+  },
+
+  render() {
+    // TODO if the user has no editable permissions at all
+    var user_ids = this.state.data.resource_permissions.user_permissions.map(x => x.user_id);
+    var group_ids = this.state.data.resource_permissions.group_permissions.map(x => x.group_id);
+    var resource_ids = uniq(this.state.data.resource_permissions.user_permissions.map(x => x.resource_id));
+    var user_management = this.state.data.system_permissions.user_permissions.length > 0;
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <h3>Permissions Manager</h3>
+        <table className="table table-hover">
+          <thead>
+            <tr>
+              <th>User</th>
+              {resource_ids.map(resource_id => <th>{this.getResourceName(resource_id)}</th>)}
+              {user_management ? <th>Manage Resources</th> : null}
+              {user_management ? <th>Manage Reservations</th> : null}
+              {user_management ? <th>Manage Users</th> : null}
+            </tr>
+          </thead>
+          <tbody>
+            {user_ids.map(user_id =>
+                <tr>
+                  <td>{this.getUserName(user_id)}</td>
+                  {
+                    resource_ids.map(resource_id => <td>{this.getResourceUserPermission(resource_id, user_id)}</td>)
+                  }
+                  {user_management ? <td>{this.getSystemUserPermission("resource_p", user_id)}</td> : null}
+                  {user_management ? <td>{this.getSystemUserPermission("reservation_p", user_id)}</td> : null}
+                  {user_management ? <td>{this.getSystemUserPermission("user_p", user_id)}</td> : null}
+                </tr>
+            )}
+            {group_ids.map(group_id =>
+                <tr>
+                  <td>{this.getGroupName(group_id)}</td>
+                  {
+                    resource_ids.map(resource_id => <td>{this.getResourceGroupPermission(resource_id, group_id)}</td>)
+                  }
+                  {user_management ? <td>{this.getSystemGroupPermission("resource_p", group_id)}</td> : null}
+                  {user_management ? <td>{this.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
+                  {user_management ? <td>{this.getSystemGroupPermission("user_p", group_id)}</td> : null}
+                </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     );
   }
