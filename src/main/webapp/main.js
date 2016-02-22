@@ -71,8 +71,8 @@ const Router = React.createClass({
     switch (this.state.route) {
       case "login":
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
-      case "admin_console":
-        return <AdminConsole setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "group_manager":
+        return <GroupManager setPstate={this.setState.bind(this)} pstate={this.state} />
       case "settings":
         return <Settings setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_list":
@@ -153,7 +153,7 @@ const Navbar = React.createClass({
               <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
-                  <li><a href="#" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
+                  <li><a href="#" onClick={() => this.props.setPstate({route: "group_manager"})}>Group Manager</a></li>
                   <li><a href="#" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
                   <li><a href="#" onClick={this.logout}>Log Out</a></li>
@@ -167,42 +167,9 @@ const Navbar = React.createClass({
   }
 });
 
-const AdminConsole = React.createClass({
-  set(field, value) {
-    this.state[field] = value;
-    this.setState(this.state);
-  },
-
-  createUser(evt) {
-    evt.preventDefault();
-    var me = this;
-    this.setState({loading: true});
-    send_xhr("POST", "/api/users", localStorage.getItem("session"),
-      JSON.stringify({username:this.state.username, password:this.state.password, email: this.state.email, should_email: this.state.should_email}),
-      function(obj) {
-        me.props.setPstate({ route: "reservation_list" });
-      },
-      function(obj) {
-        me.setState({loading: false, error_msg: obj.error_msg});
-      }
-    );
-  },
-
-  cancel() {
-    this.props.setPstate({
-      route: "reservation_list"
-    });
-  },
-
+const GroupManager = React.createClass({
   getInitialState() {
-    return {
-      email: "",
-      username: "",
-      password: "",
-      should_email: false,
-      loading: false,
-      error_msg: ""
-    };
+    return {};
   },
 
   render() {
@@ -211,37 +178,7 @@ const AdminConsole = React.createClass({
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-          <div className="row">
-            <div className="col-md-6 col-md-offset-3">
-              <form>
-                <legend>New user</legend>
-                {!this.state.error_msg ? <div></div> :
-                  <div className="alert alert-danger">
-                    <strong>{this.state.error_msg}</strong>
-                  </div>
-                }
-                <div className="form-group">
-                  <label htmlFor="user_creator_email">Email</label>
-                  <input type="email" className="form-control" id="user_creator_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="user_creator_username">Username</label>
-                  <input type="text" className="form-control" id="user_creator_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="user_creator_password">Password</label>
-                  <input type="password" className="form-control" id="user_creator_username" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
-                </div>
-                <div className="checkbox">
-                  <label htmlFor="user_creator_should_email"><input type="checkbox" id="user_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/>Email reminders</label>
-                </div>
-                <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.createUser}>Create user</button>
-                  <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
-                </div>
-              </form>
-            </div>
-          </div>
+          Hi Michael
         </div>
       </div>
     );
@@ -355,12 +292,18 @@ const ReservationList = React.createClass({
     var end = new Date();
     start.setMonth(now.getMonth() - 1);
     end.setMonth(now.getMonth() + 1);
+    var start_date = formatDate(start);
+    var start_time = formatTime(start);
+    var end_date = formatDate(end);
+    var end_time = formatTime(end);    
     return {
       loading_tags: true,
       loading_table: true,
       tags: [],
-      start: start,
-      end: end,
+      start_date: start_date,
+      start_time: start_time,
+      end_date: end_date,
+      end_time: end_time,
       reservations: {},
       error_msg: "",
       resource_id: ""
@@ -384,19 +327,25 @@ const ReservationList = React.createClass({
     this.setState(this.state);
   },
 
-  setDate(field, str) {
-    var parts = str.split('-');
-    this.state[field].setFullYear(parts[0]);
-    this.state[field].setMonth(parts[1]-1);
-    this.state[field].setDate(parts[2]);
-    this.setState(this.state);
+  getDateObject(dateStr, timeStr) {
+    var date = new Date();
+    var dateParts = dateStr.split('-');
+    date.setFullYear(dateParts[0]);
+    date.setMonth(dateParts[1]-1);
+    date.setDate(dateParts[2]);
+    
+    var timeParts = timeStr.split(':');
+    date.setHours(timeParts[0]);
+    date.setMinutes(timeParts[1]);
+    
+    return date;
   },
 
-  setTime(field, str) {
-    var parts = str.split(':');
-    this.state[field].setHours(parts[0]);
-    this.state[field].setMinutes(parts[1]);
-    this.setState(this.state);
+  //http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
+  isValidDate(date) {
+  if ( Object.prototype.toString.call(date) !== "[object Date]" )
+    return false;
+  return !isNaN(date.getTime());
   },
 
   editReservation(id) {
@@ -424,7 +373,7 @@ const ReservationList = React.createClass({
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
-    send_xhr("GET", "/api/reservations/?start=" + round(this.state.start).toISOString() + "&end=" + round(this.state.end).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str + "&resource_ids=" + this.state.resource_id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str + "&resource_ids=" + this.state.resource_id, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
           obj.data.forEach(function(x) {
@@ -476,11 +425,11 @@ const ReservationList = React.createClass({
           <div className="panel-body">
             <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
             <h4>Start</h4>
-              <input type="date" className="form-control" id="reservation_list_start_date" value={formatDate(this.state.start)} onChange={(evt) => this.setDate("start", evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_start_time" value={formatTime(this.state.start)} onChange={(evt) => this.setTime("start", evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_start_date" value={this.state.start_date} onChange={(evt) => this.set('start_date', evt.target.value)}/>
+              <input type="time" className="form-control" id="reservation_list_start_time" value={this.state.start_time} onChange={(evt) => this.set('start_time', evt.target.value)}/>
             <h4>End</h4>
-              <input type="date" className="form-control" id="reservation_list_end_date" value={formatDate(this.state.end)} onChange={(evt) => this.setDate("end", evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_end_time" value={formatTime(this.state.end)} onChange={(evt) => this.setTime("end", evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_end_date" value={this.state.end_date} onChange={(evt) => this.set('end_date', evt.target.value)}/>
+              <input type="time" className="form-control" id="reservation_list_end_time" value={this.state.end_time} onChange={(evt) => this.set('end_time', evt.target.value)}/>
             <h4>Resource ID</h4>
               <input type="number" className="form-control" id="reservation_list_resource_id" value={this.state.resource_id} onChange={(evt) => this.set("resource_id", evt.target.value)}/>
             <h4>Tags</h4>
