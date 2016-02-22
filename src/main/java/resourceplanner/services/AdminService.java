@@ -23,7 +23,7 @@ public class AdminService {
     public StandardResponse init() {
         String query;
         try {
-            BufferedReader in = new BufferedReader(new FileReader("setup.sql"));
+            BufferedReader in = new BufferedReader(new FileReader("admin/setup.sql"));
             String str;
             StringBuffer sb = new StringBuffer();
             while ((str = in.readLine()) != null) {
