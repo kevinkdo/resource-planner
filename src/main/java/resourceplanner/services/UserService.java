@@ -92,20 +92,19 @@ public class UserService {
                 new PreparedStatementCreator() {
                     public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                         PreparedStatement ps = connection.prepareStatement(
-                                "INSERT INTO users (email, passhash, username, should_email, permission) VALUES (?, ?, ?, ?, ?);",
+                                "INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, ?);",
                                 new String[] {"user_id"});
                         ps.setString(1, req.getEmail());
                         ps.setString(2, finalPasswordHash);
                         ps.setString(3, req.getUsername());
-                        ps.setBoolean(4, req.isShould_email());
-                        ps.setInt(5, 0);
+                        ps.setBoolean(4, req.getShould_email());
                         return ps;
                     }
                 },
                 keyHolder);
 
-        User committed = new User(keyHolder.getKey().intValue(), req.getEmail(), req.getUsername(), req.isShould_email());
-        return new StandardResponse(false, "Successfully registered.", committed);
+        // TODO update
+        return new StandardResponse(false, "Successfully registered.");
     }
 
     public StandardResponse getUserById(int userId) {
@@ -135,7 +134,7 @@ public class UserService {
 
     public StandardResponse updateUser(UserRequest req, int userId) {
         if (!req.isUpdateValid()) {
-            return new StandardResponse(true, "Invalid request", new User(userId, req.getEmail(), req.getUsername(), req.isShould_email()));
+            return new StandardResponse(true, "Invalid request");
         }
 
         List<User> users = getUsers(userId);
@@ -181,11 +180,11 @@ public class UserService {
                 userId);
                 */
         jt.update("UPDATE users SET should_email = ? WHERE user_id = ?;",
-                req.isShould_email(),
+                req.getShould_email(),
                 userId);
 
         //User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
-        UserUpdate committed = new UserUpdate(req.isShould_email());
+        UserUpdate committed = new UserUpdate(req.getShould_email());
         emailService.upateEmailAfterUserChange(userId);
         return new StandardResponse(false, "Successfully updated email settings", committed);
     }
