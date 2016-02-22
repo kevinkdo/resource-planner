@@ -12,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import requestdata.GroupRequest;
 import responses.StandardResponse;
 import responses.data.Group;
-import responses.data.Resource;
-import responses.data.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

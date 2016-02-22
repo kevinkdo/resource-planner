@@ -61,6 +61,7 @@ public class UserController extends Controller{
         return userService.deleteUser(userId);
     }
 
+    /*
     @RequestMapping(value = "/{userId}/editablePermissions",
             method = RequestMethod.GET)
     @ResponseBody
@@ -76,5 +77,6 @@ public class UserController extends Controller{
         //TODO
         return new StandResponse(false, "does endpoint work??");
     }
+    */
 }
 

@@ -92,23 +92,19 @@ public class UserService {
                 new PreparedStatementCreator() {
                     public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                         PreparedStatement ps = connection.prepareStatement(
-                                "INSERT INTO users (email, passhash, username, should_email, resource_p, reservation_p, user_p) VALUES (?, ?, ?, ?, ?, ?, ?);",
+                                "INSERT INTO users (email, passhash, username, should_email) VALUES (?, ?, ?, ?);",
                                 new String[] {"user_id"});
                         ps.setString(1, req.getEmail());
                         ps.setString(2, finalPasswordHash);
                         ps.setString(3, req.getUsername());
                         ps.setBoolean(4, req.getShould_email());
-                        ps.setBoolean(5, req.getResource_p());
-                        ps.setBoolean(6, req.getReservation_p());
-                        ps.setBoolean(7, req.getUser_p());
                         return ps;
                     }
                 },
                 keyHolder);
 
         // TODO update
-        User committed = new User(keyHolder.getKey().intValue(), req.getEmail(), req.getUsername(), req.getShould_email(), req.getResource_p(), req.getReservation_p(), req.getUser_p());
-        return new StandardResponse(false, "Successfully registered.", committed);
+        return new StandardResponse(false, "Successfully registered.");
     }
 
     public StandardResponse getUserById(int userId) {
@@ -138,7 +134,7 @@ public class UserService {
 
     public StandardResponse updateUser(UserRequest req, int userId) {
         if (!req.isUpdateValid()) {
-            return new StandardResponse(true, "Invalid request", new User(userId, req.getEmail(), req.getUsername(), req.getShould_email(), req.getResource_p(), req.getReservation_p(), req.getUser_p()));
+            return new StandardResponse(true, "Invalid request");
         }
 
         List<User> users = getUsers(userId);

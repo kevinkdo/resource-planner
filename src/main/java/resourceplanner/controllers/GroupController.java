@@ -7,9 +7,7 @@ package resourceplanner.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import requestdata.GroupRequest;
-import requestdata.ResourceRequest;
 import resourceplanner.services.GroupService;
-import resourceplanner.services.ResourceService;
 import responses.StandardResponse;
 
 import javax.servlet.http.HttpServletRequest;
