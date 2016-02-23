@@ -23,13 +23,14 @@ import java.util.List;
 @Transactional
 @Service
 public class AuthenticationService {
+
     @Autowired
     private JdbcTemplate jt;
 
     public StandardResponse login(UserRequest req) {
         List<AuthUser> users = jt.query(
                 "SELECT user_id, passhash, super_p, resource_p, reservation_p, user_p FROM users WHERE username = ?;",
-                new Object[]{req.getEmail(), req.getUsername()},
+                new Object[]{req.getUsername()},
                 new RowMapper<AuthUser>() {
                     public AuthUser mapRow(ResultSet rs, int rowNum) throws SQLException {
                         AuthUser user = new AuthUser();
