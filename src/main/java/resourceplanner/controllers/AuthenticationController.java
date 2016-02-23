@@ -17,16 +17,6 @@ public class AuthenticationController {
     @Autowired
     private AuthenticationService authenticationService;
 
-    /*
-    @RequestMapping(value = "/register",
-            method = RequestMethod.POST,
-            headers = {"Content-type=application/json"})
-    @ResponseBody
-    public StandardResponse register(@RequestBody final UserRequest req) {
-        return authenticationService.register(req);
-    }
-    */
-
     @RequestMapping(value = "/login",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
