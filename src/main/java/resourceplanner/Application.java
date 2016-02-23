@@ -21,14 +21,14 @@ import resourceplanner.filters.JwtFilter;
 @Configuration
 @SpringBootApplication
 public class Application {
-    boolean production = true;
+    boolean production = false;
 
     @Bean
     public FilterRegistrationBean jwtFilter() {
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new JwtFilter());
         registrationBean.addUrlPatterns("/api/*");
-        registrationBean.addUrlPatterns("/admin/*");
+        //registrationBean.addUrlPatterns("/admin/*");
 
         return registrationBean;
     }

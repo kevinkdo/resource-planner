@@ -7,6 +7,7 @@ class AuthorizationTestCases(unittest.TestCase):
   def setUp(self):
       r = requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
 
+  '''
   def test_RegisterValidUser(self):
       validUser = {'email':'user13@admin.com', 'username':'someusername', 'password':'something', 'should_email':'False'}
       r = requests.post(params.baseUrl + params.registerUrl, data = json.dumps(validUser), headers = params.headers, verify = False)
@@ -31,6 +32,7 @@ class AuthorizationTestCases(unittest.TestCase):
       assert decoded['data'] == None
       assert decoded['error_msg'] == 'Password must be between 1 and 250 characters long'
       #update with jiawei's message about min password length
+  '''
 
   def test_LoginValidUser(self):
       userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'admin'}
