@@ -21,7 +21,7 @@ public class OAuthController {
     @ResponseBody
     public StandardResponse auth(@RequestParam(value = "code") final String auth_code) {
         System.out.println(auth_code);
-        return null;
+        return oAuthService.auth(auth_code);
     }
 
 }
