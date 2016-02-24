@@ -87,7 +87,7 @@ const Router = React.createClass({
       case "reservation_list":
         return <ReservationList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_creator":
-        return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} resource_id={this.state.view_id} />
       case "reservation_editor":
         return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
       case "resource_list":
@@ -737,8 +737,7 @@ const ReservationList = React.createClass({
               {leftpane}
             </div>
             <div className="col-md-9">
-              <h3>Reservations
-              <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
+              <h3>Reservations</h3>
               {!this.state.error_msg ? <div></div> :
                 <div className="alert alert-danger">
                   <strong>{this.state.error_msg}</strong>
@@ -895,6 +894,7 @@ const ResourceList = React.createClass({
             <th>Tags</th>
             <th></th>
             <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -907,6 +907,7 @@ const ResourceList = React.createClass({
               <td>{x.tags.join(",")}</td>
               <td><a role="button" onClick={() => this.editResource(id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
+              <td><a role="button" onClick={() => this.props.setPstate({route: "reservation_creator", view_id: id})}>Reserve</a></td>
             </tr>
           })}
           {Object.keys(me.state.resources).length > 0 ? null :
@@ -1069,7 +1070,7 @@ const ReservationCreator = React.createClass({
   },
 
   cancel() {
-    this.props.setPstate({ route: "reservation_list" });
+    this.props.setPstate({ route: "resource_list" });
   },
 
   set(field, value) {
@@ -1095,7 +1096,7 @@ const ReservationCreator = React.createClass({
   getInitialState() {
     return {
       sending: false,
-      resource_id: 0,
+      resource_id: this.props.resource_id ? this.props.resource_id : 0,
       user_id: userId(),
       start: new Date(),
       end: new Date(),
@@ -1121,7 +1122,7 @@ const ReservationCreator = React.createClass({
                 }
                 <div className="form-group">
                   <label htmlFor="reservation_creator_resource">Resource ID</label>
-                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resourcue_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
+                  <input type="number" className="form-control" id="reservation_creator_resource_id" placeholder="Resource ID" value={this.state.resource_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_user_id">User ID (yours by default)</label>
