@@ -18,7 +18,6 @@ public class UserRequest {
         return should_email != null;
     }
 
-
     public String getEmail() {
         return email;
     }
@@ -31,7 +30,7 @@ public class UserRequest {
         return username;
     }
 
-    public Boolean isShould_email() {
+    public Boolean getShould_email() {
         return should_email;
     }
 }

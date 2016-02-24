@@ -24,7 +24,7 @@ public class ResourceController extends Controller{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse createResource(@RequestBody final ResourceRequest req, final HttpServletRequest request) {
-        if(!isAdmin(request)){
+        if(!hasResourceP(request)){
             return new StandardResponse(true, "You are not authorized.", req);
         }
         return resourceService.createRequest(req);
@@ -59,7 +59,7 @@ public class ResourceController extends Controller{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse updateResource(@PathVariable final int resourceId, @RequestBody final ResourceRequest req, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!hasResourceP(request)) {
             return new StandardResponse(true, "You are not authorized", req);
         }
         return resourceService.updateResource(req, resourceId);
@@ -69,7 +69,7 @@ public class ResourceController extends Controller{
             method = RequestMethod.DELETE)
     @ResponseBody
     public StandardResponse deleteResource(@PathVariable final int resourceId, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!hasResourceP(request)) {
             return new StandardResponse(true, "You are not authorized");
         }
         return resourceService.deleteResource(resourceId);
@@ -79,7 +79,7 @@ public class ResourceController extends Controller{
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse canDeleteResource(@PathVariable final int resourceId, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!hasResourceP(request)) {
             return new StandardResponse(true, "You are not authorized");
         }
         return resourceService.canDeleteResource(resourceId);

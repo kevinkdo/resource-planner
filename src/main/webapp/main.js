@@ -78,8 +78,10 @@ const Router = React.createClass({
     switch (this.state.route) {
       case "login":
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
-      case "admin_console":
-        return <AdminConsole setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "group_manager":
+        return <GroupManager setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "group_editor":
+        return <GroupEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id} />
       case "settings":
         return <Settings setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_list":
@@ -162,8 +164,8 @@ const Navbar = React.createClass({
               <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
-                  <li><a href="#" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
                   <li><a href="#" onClick={() => this.props.setPstate({route: "permissions_manager"})}>Permissions Manager</a></li>
+                  <li><a href="#" onClick={() => this.props.setPstate({route: "group_manager"})}>Group Manager</a></li>
                   <li><a href="#" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
                   <li><a href="#" onClick={this.logout}>Log Out</a></li>
@@ -177,45 +179,101 @@ const Navbar = React.createClass({
   }
 });
 
-const AdminConsole = React.createClass({
+const GroupManager = React.createClass({
+  getInitialState() {
+    return {
+      initial_load: false,
+      new_group_name: ""
+    };
+  },
+
+  newGroup() {
+    var new_group_name = prompt();
+    if (new_group_name != null) {
+      console.log(new_group_name);
+      //TODO POST the group
+    }
+  },
+
+  editGroup(id) {
+    this.props.setPstate({
+      route: "group_editor",
+      view_id: id
+    });
+  },
+
+  render() {
+    var table = this.state.initial_load ? <Loader /> : (
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>Group ID</th>
+            <th>Group Name</th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>234234</td>
+            <td>HR</td>
+            <td><a role="button" onClick={() => this.editGroup(37)}>Edit</a></td>
+            <td><a role="button" onClick={() => console.log("TODO Delete group")}>Delete</a></td>
+          </tr>
+        </tbody>
+      </table>
+    );
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+          <div>TODO replace 37 with the group ID to be edited. Change initial_load state to false to see the table</div>
+          <h3>Reservations
+              <button type="button" className="btn btn-success pull-right" onClick={this.newGroup}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New group</button>
+          </h3>
+          {table}
+        </div>
+      </div>
+    );
+  }
+});
+
+const GroupEditor = React.createClass({
   set(field, value) {
     this.state[field] = value;
     this.setState(this.state);
   },
 
-  createUser(evt) {
-    evt.preventDefault();
-    var me = this;
-    this.setState({loading: true});
-    send_xhr("POST", "/api/users", localStorage.getItem("session"),
-      JSON.stringify({username:this.state.username, password:this.state.password, email: this.state.email, should_email: this.state.should_email}),
-      function(obj) {
-        me.props.setPstate({ route: "reservation_list" });
-      },
-      function(obj) {
-        me.setState({loading: false, error_msg: obj.error_msg});
-      }
-    );
+  editGroup(evt) {
+    console.log("TODO");
   },
 
   cancel() {
-    this.props.setPstate({
-      route: "reservation_list"
-    });
+    this.props.setPstate({ route: "group_manager" });
+  },
+
+  addMember() {
+    this.state.members.push("");
+    this.setState({members: this.state.members});
+  },
+
+  setMember(evt, i) {
+    this.state.members[i] = evt.target.value;
+    this.setState({members: this.state.members});
   },
 
   getInitialState() {
     return {
-      email: "",
-      username: "",
-      password: "",
-      should_email: false,
-      loading: false,
-      error_msg: ""
+      name: "",
+      initial_load: false,
+      error_msg: "",
+      members: [""]
     };
   },
 
   render() {
+    var last_member = this.state.members[this.state.members.length-1];
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
@@ -223,38 +281,40 @@ const AdminConsole = React.createClass({
         <div className="container">
           <div className="row">
             <div className="col-md-6 col-md-offset-3">
-              <form>
-                <legend>New user</legend>
-                {!this.state.error_msg ? <div></div> :
-                  <div className="alert alert-danger">
-                    <strong>{this.state.error_msg}</strong>
+              {this.state.initial_load ? <Loader /> :
+                <form>
+                  <legend>Edit group {this.props.id}</legend>
+                  {!this.state.error_msg ? <div></div> :
+                    <div className="alert alert-danger">
+                      <strong>{this.state.error_msg}</strong>
+                    </div>
+                  }
+                  <div className="form-group">
+                    <label>Name</label>
+                    <input type="text" className="form-control" placeholder="Name" value={this.state.name} onChange={(evt) => this.set("name", evt.target.value)}/>
                   </div>
-                }
-                <div className="form-group">
-                  <label htmlFor="user_creator_email">Email</label>
-                  <input type="email" className="form-control" id="user_creator_email" placeholder="Email" value={this.state.email} onChange={(evt)=>this.set("email", evt.target.value)}/>
+                  <div className="form-group">
+                  <label>Members</label>
+                  <div className="row">
+                    <div className="col-md-4">
+                      {this.state.members.slice(0, -1).map((x,i) =>
+                        <ListInput key={i} addFunc={this.addMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member" hasAddon={false}/>
+                      )}
+                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.members.length-1} placeholder="Optional member" editFunc={this.setMember} hasAddon={true}/>
+                    </div>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="user_creator_username">Username</label>
-                  <input type="text" className="form-control" id="user_creator_username" placeholder="Username" value={this.state.username} onChange={(evt)=>this.set("username", evt.target.value)}/>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="user_creator_password">Password</label>
-                  <input type="password" className="form-control" id="user_creator_username" placeholder="Password" value={this.state.password} onChange={(evt)=>this.set("password", evt.target.value)}/>
-                </div>
-                <div className="checkbox">
-                  <label htmlFor="user_creator_should_email"><input type="checkbox" id="user_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/>Email reminders</label>
-                </div>
-                <div className="btn-toolbar">
-                  <button type="submit" className="btn btn-primary" onClick={this.createUser}>Create user</button>
-                  <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
-                </div>
-              </form>
+                  <div className="btn-toolbar">
+                    <button type="submit" className="btn btn-primary" onClick={this.editGroup} disabled={this.state.sending}>Edit group</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  </div>
+                </form>
+              }
             </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 });
 
@@ -346,7 +406,7 @@ const Settings = React.createClass({
                   </div>
                   <div className="btn-toolbar">
                     <button type="submit" className="btn btn-primary" onClick={this.editSettings} disabled={this.state.sending}>Edit user</button>
-                    <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                   </div>
                 </form>
               }
@@ -879,16 +939,18 @@ const ResourceList = React.createClass({
   }
 });
 
-const TagInput = React.createClass({
+/* Generic input for lists. Props are addFunc (called when user clicks the plus sign), value (string or number), index (int), editFunc (called onChange), placeholder (string), hasAddon (boolean)
+*/
+const ListInput = React.createClass({
   render() {
     var add_on = !this.props.hasAddon ? null :
       <span className="input-group-btn">
-        <button className="btn btn-default" type="button" onClick={this.props.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+        <button className="btn btn-default" type="button" onClick={this.props.addFunc}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
       </span>;
 
     return (
       <div className="input-group">
-        <input type="text" className="form-control" id="resource_creator_tags" placeholder="Optional tag" onChange={(evt) => this.props.setTag(evt, this.props.index)} value={this.props.value}/>
+        <input type="text" className="form-control" placeholder={this.props.placeholder} onChange={(evt) => this.props.editFunc(evt, this.props.index)} value={this.props.value}/>
         {add_on}
       </div>
     );
@@ -971,9 +1033,9 @@ const ResourceCreator = React.createClass({
                   <div className="row">
                     <div className="col-md-4">
                       {this.state.tags.slice(0, -1).map((x,i) =>
-                        <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                        <ListInput key={i} addFunc={this.addTag} value={x} index={i} editFunc={this.setTag} placeholder="Optional tag"hasAddon={false}/>
                       )}
-                      <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
+                      <ListInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} placeholder="Optional tag" editFunc={this.setTag} hasAddon={true}/>
                     </div>
                   </div>
                 </div>
@@ -1320,9 +1382,9 @@ const ResourceEditor = React.createClass({
                     <div className="row">
                       <div className="col-md-4">
                         {this.state.tags.slice(0, -1).map((x,i) =>
-                          <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                          <ListInput key={i} addFunc={this.addTag} value={x} index={i} editFunc={this.setTag} hasAddon={false}/>
                         )}
-                        <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
+                        <ListInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} editFunc={this.setTag} hasAddon={true}/>
                       </div>
                     </div>
                   </div>

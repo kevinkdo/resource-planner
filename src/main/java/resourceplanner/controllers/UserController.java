@@ -24,7 +24,7 @@ public class UserController extends Controller{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse createUser(@RequestBody final UserRequest req, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!hasUserP(request)) {
             return new StandardResponse(true, "You are not authorized");
         }
         return userService.createUser(req);
@@ -34,7 +34,7 @@ public class UserController extends Controller{
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse getUserById(@PathVariable final int userId, final HttpServletRequest request) {
-        if (!isAdmin(request) && (userId != getRequesterID(request))) {
+        if (!hasUserP(request) && (userId != getRequesterID(request))) {
             return new StandardResponse(true, "You are not authorized");
         }
         return userService.getUserById(userId);
@@ -45,7 +45,7 @@ public class UserController extends Controller{
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse updateUser(@PathVariable final int userId, @RequestBody final UserRequest req, final HttpServletRequest request) {
-        if (userId != getRequesterID(request) && !isAdmin(request)) {
+        if (userId != getRequesterID(request) && !hasUserP(request)) {
             return new StandardResponse(true, "You are not authorized");
         }
         return userService.updateUser(req, userId);
@@ -55,11 +55,28 @@ public class UserController extends Controller{
             method = RequestMethod.DELETE)
     @ResponseBody
     public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!hasUserP(request)) {
             return new StandardResponse(true, "You are not authorized");
         }
         return userService.deleteUser(userId);
     }
 
+    /*
+    @RequestMapping(value = "/{userId}/editablePermissions",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
+        //TODO
+        return new StandResponse(false, "does endpoint work?");
+    }
+
+    @RequestMapping(value = "/{userId}/editablePermissions",
+            method = RequestMethod.PUT)
+    @ResponseBody
+    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
+        //TODO
+        return new StandResponse(false, "does endpoint work??");
+    }
+    */
 }
 
