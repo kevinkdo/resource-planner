@@ -73,6 +73,8 @@ const Router = React.createClass({
         return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
       case "group_manager":
         return <GroupManager setPstate={this.setState.bind(this)} pstate={this.state} />
+      case "group_editor":
+        return <GroupEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id} />
       case "settings":
         return <Settings setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_list":
@@ -169,19 +171,140 @@ const Navbar = React.createClass({
 
 const GroupManager = React.createClass({
   getInitialState() {
-    return {};
+    return {
+      initial_load: false,
+      new_group_name: ""
+    };
+  },
+
+  newGroup() {
+    var new_group_name = prompt();
+    if (new_group_name != null) {
+      console.log(new_group_name);
+      //TODO POST the group
+    }
+  },
+
+  editGroup(id) {
+    this.props.setPstate({
+      route: "group_editor",
+      view_id: id
+    });
   },
 
   render() {
+    var table = this.state.initial_load ? <Loader /> : (
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>Group ID</th>
+            <th>Group Name</th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>234234</td>
+            <td>HR</td>
+            <td><a role="button" onClick={() => this.editGroup(37)}>Edit</a></td>
+            <td><a role="button" onClick={() => console.log("TODO Delete group")}>Delete</a></td>
+          </tr>
+        </tbody>
+      </table>
+    );
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-          Hi Michael
+          <div>TODO replace 37 with the group ID to be edited. Change initial_load state to false to see the table</div>
+          <h3>Reservations
+              <button type="button" className="btn btn-success pull-right" onClick={this.newGroup}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New group</button>
+          </h3>
+          {table}
         </div>
       </div>
     );
+  }
+});
+
+const GroupEditor = React.createClass({
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
+  },
+
+  editGroup(evt) {
+    console.log("TODO");
+  },
+
+  cancel() {
+    this.props.setPstate({ route: "group_manager" });
+  },
+
+  addMember() {
+    this.state.members.push("");
+    this.setState({members: this.state.members});
+  },
+
+  setMember(evt, i) {
+    this.state.members[i] = evt.target.value;
+    this.setState({members: this.state.members});
+  },
+
+  getInitialState() {
+    return {
+      name: "",
+      initial_load: false,
+      error_msg: "",
+      members: [""]
+    };
+  },
+
+  render() {
+    var last_member = this.state.members[this.state.members.length-1];
+    return (
+      <div>
+        <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+
+        <div className="container">
+          <div className="row">
+            <div className="col-md-6 col-md-offset-3">
+              {this.state.initial_load ? <Loader /> :
+                <form>
+                  <legend>Edit group {this.props.id}</legend>
+                  {!this.state.error_msg ? <div></div> :
+                    <div className="alert alert-danger">
+                      <strong>{this.state.error_msg}</strong>
+                    </div>
+                  }
+                  <div className="form-group">
+                    <label>Name</label>
+                    <input type="text" className="form-control" placeholder="Name" value={this.state.name} onChange={(evt) => this.set("name", evt.target.value)}/>
+                  </div>
+                  <div className="form-group">
+                  <label>Members</label>
+                  <div className="row">
+                    <div className="col-md-4">
+                      {this.state.members.slice(0, -1).map((x,i) =>
+                        <ListInput key={i} addFunc={this.addMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member" hasAddon={false}/>
+                      )}
+                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.members.length-1} placeholder="Optional member" editFunc={this.setMember} hasAddon={true}/>
+                    </div>
+                  </div>
+                </div>
+                  <div className="btn-toolbar">
+                    <button type="submit" className="btn btn-primary" onClick={this.editGroup} disabled={this.state.sending}>Edit group</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                  </div>
+                </form>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 });
 
@@ -273,7 +396,7 @@ const Settings = React.createClass({
                   </div>
                   <div className="btn-toolbar">
                     <button type="submit" className="btn btn-primary" onClick={this.editSettings} disabled={this.state.sending}>Edit user</button>
-                    <button type="submit" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                   </div>
                 </form>
               }
@@ -689,16 +812,18 @@ const ResourceList = React.createClass({
   }
 });
 
-const TagInput = React.createClass({
+/* Generic input for lists. Props are addFunc (called when user clicks the plus sign), value (string or number), index (int), editFunc (called onChange), placeholder (string), hasAddon (boolean)
+*/
+const ListInput = React.createClass({
   render() {
     var add_on = !this.props.hasAddon ? null :
       <span className="input-group-btn">
-        <button className="btn btn-default" type="button" onClick={this.props.addTag}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+        <button className="btn btn-default" type="button" onClick={this.props.addFunc}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
       </span>;
 
     return (
       <div className="input-group">
-        <input type="text" className="form-control" id="resource_creator_tags" placeholder="Optional tag" onChange={(evt) => this.props.setTag(evt, this.props.index)} value={this.props.value}/>
+        <input type="text" className="form-control" placeholder={this.props.placeholder} onChange={(evt) => this.props.editFunc(evt, this.props.index)} value={this.props.value}/>
         {add_on}
       </div>
     );
@@ -781,9 +906,9 @@ const ResourceCreator = React.createClass({
                   <div className="row">
                     <div className="col-md-4">
                       {this.state.tags.slice(0, -1).map((x,i) =>
-                        <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                        <ListInput key={i} addFunc={this.addTag} value={x} index={i} editFunc={this.setTag} placeholder="Optional tag"hasAddon={false}/>
                       )}
-                      <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
+                      <ListInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} placeholder="Optional tag" editFunc={this.setTag} hasAddon={true}/>
                     </div>
                   </div>
                 </div>
@@ -1130,9 +1255,9 @@ const ResourceEditor = React.createClass({
                     <div className="row">
                       <div className="col-md-4">
                         {this.state.tags.slice(0, -1).map((x,i) =>
-                          <TagInput key={i} addTag={this.addTag} value={x} index={i} setTag={this.setTag} hasAddon={false}/>
+                          <ListInput key={i} addFunc={this.addTag} value={x} index={i} editFunc={this.setTag} hasAddon={false}/>
                         )}
-                        <TagInput addTag={this.addTag} value={last_tag} index={this.state.tags.length-1} setTag={this.setTag} hasAddon={true}/>
+                        <ListInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} editFunc={this.setTag} hasAddon={true}/>
                       </div>
                     </div>
                   </div>
