@@ -30,7 +30,6 @@ class AuthorizationTestCases(unittest.TestCase):
       assert decoded['is_error'] == True
       assert decoded['data'] == None
       assert decoded['error_msg'] == 'Password must be between 1 and 250 characters long'
-      #update with jiawei's message about min password length
 
   def test_LoginValidUser(self):
       userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'admin'}
