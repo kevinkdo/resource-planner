@@ -485,6 +485,20 @@ const PermissionsManager = React.createClass({
     return answer.toString();
   },
 
+  getBackgroundColor(x) {
+    if (x === "true")
+      return "success";
+    if (x === "false")
+      return "danger";
+    if (x == 0)
+      return "danger";
+    if (x == 1)
+      return "info";
+    if (x == 2)
+      return "success";
+    return "";
+  },
+
   render() {
     var user_ids = this.state.data.resource_permissions.user_permissions.map(x => x.user_id);
     var group_ids = this.state.data.resource_permissions.group_permissions.map(x => x.group_id);
@@ -510,22 +524,23 @@ const PermissionsManager = React.createClass({
                 <tr>
                   <td>{this.getUserOrGroupField(user_id, "resource_permissions", "user_permissions", "user_id", "username")}</td>
                   {
-                    resource_ids.map(resource_id => <td>{this.getResourceUserPermission(resource_id, user_id)}</td>)
+                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceUserPermission(resource_id, user_id)) + " pointer"}>{
+                      this.getResourceUserPermission(resource_id, user_id)}</td>)
                   }
-                  {user_management ? <td>{this.getSystemUserPermission("resource_p", user_id)}</td> : null}
-                  {user_management ? <td>{this.getSystemUserPermission("reservation_p", user_id)}</td> : null}
-                  {user_management ? <td>{this.getSystemUserPermission("user_p", user_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("resource_p", user_id)) + " pointer"}>{this.getSystemUserPermission("resource_p", user_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("reservation_p", user_id)) + " pointer"}>{this.getSystemUserPermission("reservation_p", user_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("user_p", user_id)) + " pointer"}>{this.getSystemUserPermission("user_p", user_id)}</td> : null}
                 </tr>
             )}
             {group_ids.map(group_id =>
                 <tr>
                   <td>{this.getUserOrGroupField(group_id, "resource_permissions", "group_permissions", "group_id", "group_name")}</td>
                   {
-                    resource_ids.map(resource_id => <td>{this.getResourceGroupPermission(resource_id, group_id)}</td>)
+                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceGroupPermission(resource_id, group_id)) + " pointer"}>{this.getResourceGroupPermission(resource_id, group_id)}</td>)
                   }
-                  {user_management ? <td>{this.getSystemGroupPermission("resource_p", group_id)}</td> : null}
-                  {user_management ? <td>{this.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
-                  {user_management ? <td>{this.getSystemGroupPermission("user_p", group_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("resource_p", group_id)) + " pointer"}>{this.getSystemGroupPermission("resource_p", group_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("reservation_p", group_id)) + " pointer"}>{this.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("user_p", group_id)) + " pointer"}>{this.getSystemGroupPermission("user_p", group_id)}</td> : null}
                 </tr>
             )}
           </tbody>

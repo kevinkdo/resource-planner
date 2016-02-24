@@ -14,7 +14,9 @@ input[type="date"]::-webkit-clear-button {
     display: none;
 }
 
-
+.pointer {
+  cursor: pointer;
+}
 
 
 .spinner {
