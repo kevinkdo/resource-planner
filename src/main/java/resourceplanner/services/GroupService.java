@@ -32,7 +32,7 @@ public class GroupService {
     private JdbcTemplate jt;
 
     public StandardResponse createGroup(final GroupRequest req) {
-        if (req.isValid()) {
+        if (!req.isValid()) {
             return new StandardResponse(true, "Request not valid");
         }
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -40,8 +40,8 @@ public class GroupService {
                 new PreparedStatementCreator() {
                     public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                         PreparedStatement ps = connection.prepareStatement(
-                                "INSERT INTO groups (name) VALUES (?);",
-                                new String[] {"user_id"});
+                                "INSERT INTO groups (group_name) VALUES (?);",
+                                new String[]{"group_id"});
                         ps.setString(1, req.getGroup_name());
                         return ps;
                     }
@@ -58,21 +58,39 @@ public class GroupService {
                     userId};
             batch.add(values);
         }
-        int[] updateCounts = jt.batchUpdate(
-                "INSERT INTO groupmembers (group_id, user_id) VALUES (?, ?);",
-                batch);
+        try {
+            int[] updateCounts = jt.batchUpdate(
+                    "INSERT INTO groupmembers (group_id, user_id) VALUES (?, ?);",
+                    batch);
+        } catch (Exception e) {
+            return new StandardResponse(true, "Invalid users");
+        }
 
         // TODO error message if repeated users
         return new StandardResponse(false, "Successfully created group.");
     }
 
+    public StandardResponse getGroups() {
+        List<Group> groups = jt.query(
+                "SELECT group_name, group_id FROM groups;",
+                new RowMapper<Group>() {
+                    public Group mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        Group group = new Group();
+                        group.setGroup_id(rs.getInt("group_id"));
+                        group.setName(rs.getString("group_name"));
+                        return group;
+                    }
+                });
+        return new StandardResponse(false, "Successfully retrieved groups", groups);
+    }
+
     public StandardResponse getGroupById(int groupId) {
         List<String> groups = jt.query(
-                "SELECT name FROM groups WHERE group_id_id = ?;",
+                "SELECT group_name FROM groups WHERE group_id = ?;",
                 new Object[]{groupId},
                 new RowMapper<String>() {
                     public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getString("name");
+                        return rs.getString("group_name");
                     }
                 });
 
@@ -105,7 +123,7 @@ public class GroupService {
             return new StandardResponse(true, "Group does not exist");
         }
 
-        jt.update("UPDATE groups SET name = ? WHERE group_id = ?;",
+        jt.update("UPDATE groups SET group_name = ? WHERE group_id = ?;",
                 req.getGroup_name(),
                 groupId);
 

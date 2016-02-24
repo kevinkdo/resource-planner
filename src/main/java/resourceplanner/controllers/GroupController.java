@@ -30,6 +30,14 @@ public class GroupController extends Controller{
         return groupService.createGroup(req);
     }
 
+    @RequestMapping(value = "",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getGroups() {
+        return groupService.getGroups();
+    }
+
+
     @RequestMapping(value = "/{groupId}",
             method = RequestMethod.GET)
     @ResponseBody
