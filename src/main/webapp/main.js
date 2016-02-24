@@ -358,6 +358,7 @@ const Settings = React.createClass({
   }
 });
 
+// TODO when user, resource, group resources are returned
 const PermissionsManager = React.createClass({
   getInitialState() {
     return {
@@ -374,34 +375,14 @@ const PermissionsManager = React.createClass({
  }};
   },
 
-  getUserName(user_id) {
+  getUserOrGroupField(id, field1, field2, id_field, answer_field) {
     var answer = "";
-    this.state.data.resource_permissions.user_permissions.forEach(function(x) {
-      if (x.user_id == user_id) {
-        answer = x.username;
+    this.state.data[field1][field2].forEach(function(x) {
+      if (x[id_field] == id) {
+        answer = x[answer_field];
       }
     });
     return answer ? answer : user_id.toString();
-  },
-
-  getGroupName(group_id) {
-    var answer = "";
-    this.state.data.resource_permissions.group_permissions.forEach(function(x) {
-      if (x.group_id == group_id) {
-        answer = x.group_name;
-      }
-    });
-    return answer ? answer : group_id.toString();
-  },
-
-  getResourceName(resource_id) {
-    var answer = "";
-    this.state.data.resource_permissions.user_permissions.forEach(function(x) {
-      if (x.resource_id == resource_id) {
-        answer = x.resource_name;
-      }
-    });
-    return answer ? answer : resource_id.toString();
   },
 
   getResourceUserPermission(resource_id, user_id) {
@@ -445,7 +426,6 @@ const PermissionsManager = React.createClass({
   },
 
   render() {
-    // TODO if the user has no editable permissions at all
     var user_ids = this.state.data.resource_permissions.user_permissions.map(x => x.user_id);
     var group_ids = this.state.data.resource_permissions.group_permissions.map(x => x.group_id);
     var resource_ids = uniq(this.state.data.resource_permissions.user_permissions.map(x => x.resource_id));
@@ -459,7 +439,7 @@ const PermissionsManager = React.createClass({
           <thead>
             <tr>
               <th>User</th>
-              {resource_ids.map(resource_id => <th>{this.getResourceName(resource_id)}</th>)}
+              {resource_ids.map(resource_id => <th>{this.getUserOrGroupField(resource_id, "resource_permissions", "user_permissions", "resource_id", "resource_name")}</th>)}
               {user_management ? <th>Manage Resources</th> : null}
               {user_management ? <th>Manage Reservations</th> : null}
               {user_management ? <th>Manage Users</th> : null}
@@ -468,7 +448,7 @@ const PermissionsManager = React.createClass({
           <tbody>
             {user_ids.map(user_id =>
                 <tr>
-                  <td>{this.getUserName(user_id)}</td>
+                  <td>{this.getUserOrGroupField(user_id, "resource_permissions", "user_permissions", "user_id", "username")}</td>
                   {
                     resource_ids.map(resource_id => <td>{this.getResourceUserPermission(resource_id, user_id)}</td>)
                   }
@@ -479,7 +459,7 @@ const PermissionsManager = React.createClass({
             )}
             {group_ids.map(group_id =>
                 <tr>
-                  <td>{this.getGroupName(group_id)}</td>
+                  <td>{this.getUserOrGroupField(group_id, "resource_permissions", "group_permissions", "group_id", "group_name")}</td>
                   {
                     resource_ids.map(resource_id => <td>{this.getResourceGroupPermission(resource_id, group_id)}</td>)
                   }
