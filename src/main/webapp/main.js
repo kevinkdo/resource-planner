@@ -455,6 +455,17 @@ const PermissionsManager = React.createClass({
     return answer;
   },
 
+  cycleResourceUserPermission(resource_id, user_id) {
+    this.state.data.resource_permissions.user_permissions.forEach(function(x) {
+      if (x.user_id == user_id && x.resource_id == resource_id) {
+        x.permission_level += 1;
+        if (x.permission_level > 2)
+          x.permission_level = 0;
+      }
+    });
+    this.setState(this.state);
+  },
+
   getResourceGroupPermission(resource_id, group_id) {
     var answer = 0;
     this.state.data.resource_permissions.group_permissions.forEach(function(x) {
@@ -463,6 +474,17 @@ const PermissionsManager = React.createClass({
       }
     });
     return answer;
+  },
+
+  cycleResourceGroupPermission(resource_id, group_id) {
+    this.state.data.resource_permissions.group_permissions.forEach(function(x) {
+      if (x.group_id == group_id && x.resource_id == resource_id) {
+        x.permission_level += 1;
+        if (x.permission_level > 2)
+          x.permission_level = 0;
+      }
+    });
+    this.setState(this.state);
   },
 
   getSystemUserPermission(field, user_id) {
@@ -475,6 +497,15 @@ const PermissionsManager = React.createClass({
     return answer.toString();
   },
 
+  cycleSystemUserPermission(field, user_id) {
+    this.state.data.system_permissions.user_permissions.forEach(function(x) {
+      if (x.user_id == user_id) {
+        x[field] = !x[field];
+      }
+    });
+    this.setState(this.state);
+  },
+
   getSystemGroupPermission(field, group_id) {
     var answer = true;
     this.state.data.system_permissions.group_permissions.forEach(function(x) {
@@ -483,6 +514,15 @@ const PermissionsManager = React.createClass({
       }
     });
     return answer.toString();
+  },
+
+  cycleSystemGroupPermission(field, user_id) {
+    this.state.data.system_permissions.group_permissions.forEach(function(x) {
+      if (x.group_id == group_id) {
+        x[field] = !x[field];
+      }
+    });
+    this.setState(this.state);
   },
 
   getBackgroundColor(x) {
@@ -524,23 +564,23 @@ const PermissionsManager = React.createClass({
                 <tr>
                   <td>{this.getUserOrGroupField(user_id, "resource_permissions", "user_permissions", "user_id", "username")}</td>
                   {
-                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceUserPermission(resource_id, user_id)) + " pointer"}>{
+                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceUserPermission(resource_id, user_id)) + " pointer"} onClick={() => this.cycleResourceUserPermission(resource_id, user_id)}>{
                       this.getResourceUserPermission(resource_id, user_id)}</td>)
                   }
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("resource_p", user_id)) + " pointer"}>{this.getSystemUserPermission("resource_p", user_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("reservation_p", user_id)) + " pointer"}>{this.getSystemUserPermission("reservation_p", user_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("user_p", user_id)) + " pointer"}>{this.getSystemUserPermission("user_p", user_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("resource_p", user_id)) + " pointer"} onClick={() => this.cycleSystemUserPermission("resource_p", user_id)}>{this.getSystemUserPermission("resource_p", user_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("reservation_p", user_id)) + " pointer"} onClick={() => this.cycleSystemUserPermission("reservation_p", user_id)}>{this.getSystemUserPermission("reservation_p", user_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("user_p", user_id)) + " pointer"} onClick={() => this.cycleSystemUserPermission("user_p", user_id)}>{this.getSystemUserPermission("user_p", user_id)}</td> : null}
                 </tr>
             )}
             {group_ids.map(group_id =>
                 <tr>
                   <td>{this.getUserOrGroupField(group_id, "resource_permissions", "group_permissions", "group_id", "group_name")}</td>
                   {
-                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceGroupPermission(resource_id, group_id)) + " pointer"}>{this.getResourceGroupPermission(resource_id, group_id)}</td>)
+                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceGroupPermission(resource_id, group_id)) + " pointer"} onClick={() => this.cycleResourceGroupPermission(resource_id, group_id)}>{this.getResourceGroupPermission(resource_id, group_id)}</td>)
                   }
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("resource_p", group_id)) + " pointer"}>{this.getSystemGroupPermission("resource_p", group_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("reservation_p", group_id)) + " pointer"}>{this.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("user_p", group_id)) + " pointer"}>{this.getSystemGroupPermission("user_p", group_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("resource_p", group_id)) + " pointer"} onClick={() => this.cycleSystemGroupPermission("resource_p", group_id)}>{this.getSystemGroupPermission("resource_p", group_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("reservation_p", group_id)) + " pointer"} onClick={() => this.cycleSystemGroupPermission("reservation_p", group_id)}>{this.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
+                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("user_p", group_id)) + " pointer"} onClick={() => this.cycleSystemGroupPermission("user_p", group_id)}>{this.getSystemGroupPermission("user_p", group_id)}</td> : null}
                 </tr>
             )}
           </tbody>
