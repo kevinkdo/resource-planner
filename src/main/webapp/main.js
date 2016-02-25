@@ -932,7 +932,7 @@ const ReservationCreator = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
-      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.state.start).toISOString(), end_time: round(this.state.end).toISOString(), should_email:this.state.should_email}),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
@@ -951,28 +951,34 @@ const ReservationCreator = React.createClass({
     this.setState(this.state);
   },
 
-  setDate(field, str) {
-    var parts = str.split('-');
-    this.state[field].setFullYear(parts[0]);
-    this.state[field].setMonth(parts[1]-1);
-    this.state[field].setDate(parts[2]);
-    this.setState(this.state);
-  },
-
-  setTime(field, str) {
-    var parts = str.split(':');
-    this.state[field].setHours(parts[0]);
-    this.state[field].setMinutes(parts[1]);
-    this.setState(this.state);
+  getDateObject(dateStr, timeStr) {
+    var date = new Date();
+    var dateParts = dateStr.split('-');
+    date.setFullYear(dateParts[0]);
+    date.setMonth(dateParts[1]-1);
+    date.setDate(dateParts[2]);
+    
+    var timeParts = timeStr.split(':');
+    date.setHours(timeParts[0]);
+    date.setMinutes(timeParts[1]);
+    
+    return date;
   },
 
   getInitialState() {
+    var now = new Date();
+    var start_date = formatDate(now)
+    var start_time = formatTime(now)
+    var end_date = formatDate(now)
+    var end_time = formatTime(now)
     return {
       sending: false,
       resource_id: this.props.resource_id ? this.props.resource_id : 0,
       user_id: userId(),
-      start: new Date(),
-      end: new Date(),
+      start_date: start_date,
+      start_time: start_time,
+      end_date: end_date,
+      end_time: end_time,
       should_email: false,
       error_msg: ""
     };
@@ -1003,19 +1009,19 @@ const ReservationCreator = React.createClass({
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_start_date">Start Date</label>
-                  <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
+                  <input type="date" className="form-control" id="reservation_creator_start_date" value={this.state.start_date} onChange={(evt)=>this.set("start_date", evt.target.value)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_start_time">Start Time</label>
-                  <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
+                  <input type="time" className="form-control" id="reservation_creator_start_time" value={this.state.start_time} onChange={(evt)=>this.set("start_time", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_end_date">End Date</label>
-                  <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
+                  <input type="date" className="form-control" id="reservation_creator_end_date" value={this.state.end_date} onChange={(evt)=>this.set("end_date", evt.target.value)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_end_time">End Time</label>
-                  <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
+                  <input type="time" className="form-control" id="reservation_creator_end_time" value={this.state.end_time} onChange={(evt)=>this.set("end_time", evt.target.value)}/>
                 </div>
                 <div className="checkbox">
                   <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
@@ -1039,7 +1045,7 @@ const ReservationEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/reservations/" + this.props.id, localStorage.getItem("session"),
-      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.state.start).toISOString(), end_time: round(this.state.end).toISOString(), should_email:this.state.should_email}),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
@@ -1058,29 +1064,35 @@ const ReservationEditor = React.createClass({
     this.setState(this.state);
   },
 
-  setDate(field, str) {
-    var parts = str.split('-');
-    this.state[field].setFullYear(parts[0]);
-    this.state[field].setMonth(parts[1]-1);
-    this.state[field].setDate(parts[2]);
-    this.setState(this.state);
-  },
-
-  setTime(field, str) {
-    var parts = str.split(':');
-    this.state[field].setHours(parts[0]);
-    this.state[field].setMinutes(parts[1]);
-    this.setState(this.state);
+  getDateObject(dateStr, timeStr) {
+    var date = new Date();
+    var dateParts = dateStr.split('-');
+    date.setFullYear(dateParts[0]);
+    date.setMonth(dateParts[1]-1);
+    date.setDate(dateParts[2]);
+    
+    var timeParts = timeStr.split(':');
+    date.setHours(timeParts[0]);
+    date.setMinutes(timeParts[1]);
+    
+    return date;
   },
 
   getInitialState() {
+    var now = new Date();
+    var start_date = formatDate(now)
+    var start_time = formatTime(now)
+    var end_date = formatDate(now)
+    var end_time = formatTime(now)
     return {
       initial_load: true,
       sending: false,
       resource_id: 0,
       user_id: userId(),
-      start: new Date(),
-      end: new Date(),
+      start_date: start_date,
+      start_time: start_time,
+      end_date: end_date,
+      end_time: end_time,
       should_email: false,
       error_msg: ""
     };
@@ -1093,8 +1105,10 @@ const ReservationEditor = React.createClass({
         me.setState({
           resource_id: obj.data.resource.resource_id,
           user_id: obj.data.user.user_id,
-          start: new Date(obj.data.begin_time),
-          end: new Date(obj.data.end_time),
+          start_date: formatDate(new Date(obj.data.begin_time)),
+          start_time: formatTime(new Date(obj.data.begin_time)),
+          end_date: formatDate(new Date(obj.data.end_time)),
+          end_time: formatTime(new Date(obj.data.end_time)),
           should_email: obj.data.should_email,
           error_msg: "",
           initial_load: false
@@ -1132,19 +1146,19 @@ const ReservationEditor = React.createClass({
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_start_date">Start Date</label>
-                    <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
+                    <input type="date" className="form-control" id="reservation_creator_start_date" value={this.state.start_date} onChange={(evt)=>this.set("start_date", evt.target.value)} />
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_start_time">Start Time</label>
-                    <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
+                    <input type="time" className="form-control" id="reservation_creator_start_time" value={this.state.start_time} onChange={(evt)=>this.set("start_time", evt.target.value)}/>
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_end_date">End Date</label>
-                    <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
+                    <input type="date" className="form-control" id="reservation_creator_end_date" value={this.state.end_date} onChange={(evt)=>this.set("end_date", evt.target.value)} />
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_end_time">End Time</label>
-                    <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
+                    <input type="time" className="form-control" id="reservation_creator_end_time" value={this.state.end_time} onChange={(evt)=>this.set("end_time", evt.target.value)}/>
                   </div>
                   <div className="checkbox">
                     <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
