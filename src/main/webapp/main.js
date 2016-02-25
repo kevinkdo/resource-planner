@@ -173,15 +173,26 @@ const GroupManager = React.createClass({
   getInitialState() {
     return {
       initial_load: false,
-      new_group_name: ""
+      new_group_name: "",
+      groups: {}
     };
   },
 
   newGroup() {
     var new_group_name = prompt();
+    var me = this;
     if (new_group_name != null) {
       console.log(new_group_name);
-      //TODO POST the group
+      this.setState({sending: true});
+      send_xhr("POST", "/api/groups", localStorage.getItem("session"),
+      JSON.stringify({name:new_group_name}),
+      function(obj) {
+        me.refresh();
+      },
+      function(obj) {
+        me.setState({sending: false, error_msg: obj.error_msg});
+      }
+    );
     }
   },
 
@@ -192,7 +203,43 @@ const GroupManager = React.createClass({
     });
   },
 
+  refresh() {
+    var me = this;
+    send_xhr("GET", "/api/groups", localStorage.getItem("session"), null,
+      function(obj) {
+        var new_groups = {};
+        obj.data.groups.forEach(function(x) {
+          groups[x.group_id] = x;
+        });
+        me.setState({
+          groups: new_groups,
+          loading_table: false,
+        });
+      },
+      function(obj) {
+        me.setState({
+          error_msg: obj.error_msg
+        })
+      }
+    );
+  },
+
+  deleteGroup(id) {
+    var me = this;
+    send_xhr("DELETE", "/api/groups/" + id, localStorage.getItem("session"), null,
+      function(obj) {
+        me.refresh();
+        me.setState({error_msg: ""});       
+      },
+      function(obj) {
+        me.refresh();
+        me.setState({error_msg: obj.error_msg});
+      }
+    );
+  },
+
   render() {
+    var me = this;
     var table = this.state.initial_load ? <Loader /> : (
       <table className="table table-hover">
         <thead>
@@ -204,12 +251,16 @@ const GroupManager = React.createClass({
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>234234</td>
-            <td>HR</td>
-            <td><a role="button" onClick={() => this.editGroup(37)}>Edit</a></td>
-            <td><a role="button" onClick={() => console.log("TODO Delete group")}>Delete</a></td>
-          </tr>
+          {Object.keys(me.state.groups).map(id => {
+            var x = me.state.groups[id];
+            return <tr key={"group " + id}>
+              <td>{id}</td>
+              <td>{x.name}</td>
+              <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
+            </tr>
+          })}
+          {Object.keys(me.state.groups).length > 0 ? null :
+            <tr><td className="lead text-center" colSpan="7">No groups to display</td></tr>}
         </tbody>
       </table>
     );
@@ -236,7 +287,17 @@ const GroupEditor = React.createClass({
   },
 
   editGroup(evt) {
-    console.log("TODO");
+    var me = this;
+    this.setState({sending: true});
+    send_xhr("PUT", "/api/groups/" + this.props.id, localStorage.getItem("session"),
+      JSON.stringify({name: this.state.name, members:this.state.members}),
+      function(obj) {
+        me.props.setPstate({route: "group_manager"});
+      },
+      function(obj) {
+        me.setState({sending: false, error_msg: obj.error_msg});
+      }
+    );
   },
 
   cancel() {
