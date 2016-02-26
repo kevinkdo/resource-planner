@@ -21,14 +21,13 @@ import resourceplanner.filters.JwtFilter;
 @Configuration
 @SpringBootApplication
 public class Application {
-    boolean production = true;
+    public boolean production = true;
 
     @Bean
     public FilterRegistrationBean jwtFilter() {
         final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         registrationBean.setFilter(new JwtFilter());
         registrationBean.addUrlPatterns("/api/*");
-        registrationBean.addUrlPatterns("/admin/*");
 
         return registrationBean;
     }
@@ -53,8 +52,6 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        //SpringApplication.run(Application.class, args);
-
         ApplicationContext ctx = SpringApplication.run(Application.class, args);
         DispatcherServlet dispatcherServlet = (DispatcherServlet)ctx.getBean("dispatcherServlet");
         dispatcherServlet.setThrowExceptionIfNoHandlerFound(true);

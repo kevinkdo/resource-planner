@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import resourceplanner.Application;
 import resourceplanner.services.AdminService;
 import responses.StandardResponse;
 
@@ -26,10 +27,7 @@ public class AdminController extends Controller {
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse init(final HttpServletRequest request) throws Exception{
-        if (isSuperAdmin(request)) {
-            return adminService.init();
-        }
-        return new StandardResponse(true, "You are not authorized to access this functionality");
+        return adminService.init();
     }
 
 }

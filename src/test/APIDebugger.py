@@ -92,7 +92,7 @@ def processSelection(input):
       10: deleteRequest + resourceUrl + requestID + requestEnding,
       11: getRequest + resourceUrl + requestID + canDeleteUrl + requestEnding,
       12: getRequest + userUrl + requestID + requestEnding,
-      13: putRequest + groupUrl + requestPayload + requestEnding,
+      13: postRequest + groupUrl + requestPayload + requestEnding,
       14: getRequest + groupUrl + requestID + requestEnding,
       15: getRequest + groupUrl + requestEnding,
       16: putRequest + groupUrl + requestID + requestPayload + requestEnding,
