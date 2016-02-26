@@ -5,7 +5,11 @@ import params
 
 class UsersTestCases(unittest.TestCase):
   def setUp(self):
-      r = requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
+      requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
+      r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithAllMP), headers = params.headers, verify = False)
+      print r.json()
+      r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithRSMP), headers = params.headers, verify = False)
+      print r.json()
       
   # def test_CreateValidUserAsAdmin(self): #not sure how to check if admin
   #     newUser = {"email":"newuser@admin.com", "password":"password", "should_email":'false', "username":"newuser"}
@@ -43,21 +47,18 @@ class UsersTestCases(unittest.TestCase):
   #     assert decoded['data'] == None
   #     assert decoded['error_msg'] == 'Email already exists'
 
-  def test_GetUserWithValidID(self):
-      r = requests.get(params.baseUrl + params.userUrl + '/1', headers = params.headers, verify = False)
-      decoded = r.json()
-      assert decoded['is_error'] == False
-      assert decoded['data'] == {u'username': u'admin', u'should_email': False, u'user_id': 1, u'email': u'admin@admin.com'}
-      assert decoded['error_msg'] == 'Successfully retrieved user'
-
-  def test_GetUserWithInvalidID(self):
-      r = requests.get(params.baseUrl + params.userUrl + '/2', headers = params.headers, verify = False)
-      decoded = r.json()
-      assert decoded['is_error'] == True
-      assert decoded['data'] == None
-      assert decoded['error_msg'] == 'User not found'   
-
   #def test_GetUserWithQuery(self): not needed for current evolution
+
+  def test_GetUserWithValidIDWithUserManagementPermissions(self):
+      pass
+
+  def test_GetUserWithValidIDWithoutUserManagementPermissions(self):
+    #need to do from point of view of a user that doesn't have user management permissions 
+      pass
+
+  def test_GetUserWithInvalidIDWithUserManagementPermissions(self):
+      pass
+
   #def test_PutUserWithValidIDUpdateUsernameWithUniqueUsername(self): disabled
   #def test_PutUserWithValidIDUpdateUsernameWithPreexistingUsername(self): disabled
   #def test_PutUserWithValidIDUpdateNoFields(self): breaks if you try to update something other than should_email or leave it empty
