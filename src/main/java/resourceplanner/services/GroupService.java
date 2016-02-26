@@ -83,7 +83,7 @@ public class GroupService {
 
         List<Object[]> batchGroupPermissions = new ArrayList<Object[]>();
         for(int i : allResources){
-            batchUserPermissions.add(new Object[]{groupId, i, 0});
+            batchGroupPermissions.add(new Object[]{groupId, i, 0});
         }
 
         jt.batchUpdate(
