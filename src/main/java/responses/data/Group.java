@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class Group {
     private int group_id;
-    private String name;
+    private String group_name;
     private List<Integer> user_ids;
 
     public int getGroup_id() {
@@ -18,12 +18,12 @@ public class Group {
         this.group_id = group_id;
     }
 
-    public String getName() {
-        return name;
+    public String getGroup_name() {
+        return group_name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setGroup_name(String group_name) {
+        this.group_name = group_name;
     }
 
     public List<Integer> getUser_ids() {
