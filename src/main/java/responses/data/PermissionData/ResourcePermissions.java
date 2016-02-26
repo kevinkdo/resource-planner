@@ -8,20 +8,20 @@ import java.util.*;
  */
 
 public class ResourcePermissions {
-    private List<UserResourcePermission> user_permission;
-    private List<GroupResourcePermission> group_permission;
+    private List<UserResourcePermission> user_permissions;
+    private List<GroupResourcePermission> group_permissions;
 
-    public ResourcePermissions(List<UserResourcePermission> user_permission,
-    		List<GroupResourcePermission> group_permission){
-    	this.user_permission = user_permission;
-    	this.group_permission = group_permission;
+    public ResourcePermissions(List<UserResourcePermission> user_permissions,
+    		List<GroupResourcePermission> group_permissions){
+    	this.user_permissions = user_permissions;
+    	this.group_permissions = group_permissions;
     }
 
-    public List<UserResourcePermission> getUser_permission(){
-    	return user_permission;
+    public List<UserResourcePermission> getUser_permissions(){
+    	return user_permissions;
     }
 
-    public List<GroupResourcePermission> getGroup_permission(){
-    	return group_permission;
+    public List<GroupResourcePermission> getGroup_permissions(){
+    	return group_permissions;
     }
 }
