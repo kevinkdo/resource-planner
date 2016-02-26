@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import requestdata.UserRequest;
 import resourceplanner.services.UserService;
+import resourceplanner.services.PermissionService;
 import responses.StandardResponse;
 
 import javax.servlet.http.HttpServletRequest;
+import requestdata.PermissionRequest;
 
 @RestController
 @RequestMapping("/api/users")
@@ -18,6 +20,9 @@ public class UserController extends Controller{
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PermissionService permissionService;
 
     @RequestMapping(value = "",
             method = RequestMethod.POST,
@@ -61,22 +66,26 @@ public class UserController extends Controller{
         return userService.deleteUser(userId);
     }
 
-    /*
+    
     @RequestMapping(value = "/{userId}/editablePermissions",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
-        //TODO
-        return new StandResponse(false, "does endpoint work?");
+    public StandardResponse getPermissionMatrix(@PathVariable final int userId, final HttpServletRequest request) {
+        if(getRequesterID(request) != userId){
+            return new StandardResponse(false, "Requester ID does not match URL parameter ID");
+        }
+        return permissionService.getPermissionMatrix(userId, hasUserP(request), hasResourceP(request));
     }
 
     @RequestMapping(value = "/{userId}/editablePermissions",
-            method = RequestMethod.PUT)
+            method = RequestMethod.PUT,
+            headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {
-        //TODO
-        return new StandResponse(false, "does endpoint work??");
+    public StandardResponse updatePermissionMatrix(@PathVariable final int userId, @RequestBody final PermissionRequest req, final HttpServletRequest request) {
+        if(getRequesterID(request) != userId){
+            return new StandardResponse(false, "Requester ID does not match URL parameter ID");
+        }
+        return permissionService.updatePermissionMatrix(req, userId);
     }
-    */
 }
 

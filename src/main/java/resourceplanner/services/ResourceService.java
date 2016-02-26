@@ -32,7 +32,7 @@ public class ResourceService {
     @Autowired
     private JdbcTemplate jt;
 
-    public StandardResponse createRequest(final ResourceRequest req) {
+    public StandardResponse createRequest(final ResourceRequest req, int userId) {
         if (!req.isValid()) {
             return new StandardResponse(true, "Invalid request");
         }
@@ -76,8 +76,52 @@ public class ResourceService {
                 "INSERT INTO resourcetags (resource_id, tag) VALUES (?, ?);",
                 batch);
 
+        addDefaultResourcePermissions(resourceId, userId);
+
         return new StandardResponse(false, "Successfully inserted resource", new Resource(resourceId, req.getName(),
                 req.getDescription(), req.getTags()));
+    }
+
+    private void addDefaultResourcePermissions(int resourceId, int userId){
+        List<Integer> allUsers = jt.query(
+                "SELECT user_id FROM users WHERE user_id != " + userId + ";",
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("user_id");
+                    }
+                });
+        List<Integer> allGroups = jt.query(
+                "SELECT group_id FROM groups;",
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("group_id");
+                    }
+                });
+
+        List<Object[]> batchUserPermissions = new ArrayList<Object[]>();
+        for(int i : allUsers){
+            batchUserPermissions.add(new Object[]{i, resourceId, 0});
+        }
+
+        List<Object[]> batchGroupPermissions = new ArrayList<Object[]>();
+        for(int i : allGroups){
+            batchGroupPermissions.add(new Object[]{i, resourceId, 0});
+        }
+
+        jt.batchUpdate(
+            "INSERT INTO userresourcepermissions (user_id, resource_id, permission_level) VALUES (?, ?, ?);",
+            batchUserPermissions
+            );
+
+        jt.batchUpdate(
+            "INSERT INTO groupresourcepermissions (group_id, resource_id, permission_level) VALUES (?, ?, ?);",
+            batchGroupPermissions
+            );
+
+        jt.update(
+            "INSERT INTO userresourcepermissions (user_id, resource_id, permission_level) VALUES (" + userId +
+                ", " + resourceId + ", 1);"
+            );
     }
 
     public StandardResponse getResourceById(final int resourceId) {

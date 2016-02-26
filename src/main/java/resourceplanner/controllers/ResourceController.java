@@ -27,7 +27,7 @@ public class ResourceController extends Controller{
         if(!hasResourceP(request)){
             return new StandardResponse(true, "You are not authorized.", req);
         }
-        return resourceService.createRequest(req);
+        return resourceService.createRequest(req, getRequesterID(request));
     }
 
     @RequestMapping(value = "/{resourceId}",

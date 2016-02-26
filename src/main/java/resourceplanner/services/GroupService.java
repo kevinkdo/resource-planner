@@ -66,8 +66,30 @@ public class GroupService {
             return new StandardResponse(true, "Invalid users");
         }
 
+        addDefaultResourcePermissions(groupId);
+
         // TODO error message if repeated users
         return new StandardResponse(false, "Successfully created group.");
+    }
+
+    private void addDefaultResourcePermissions(int groupId){
+        List<Integer> allResources = jt.query(
+                "SELECT resource_id FROM resources;",
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("resource_id");
+                    }
+                });
+
+        List<Object[]> batchGroupPermissions = new ArrayList<Object[]>();
+        for(int i : allResources){
+            batchGroupPermissions.add(new Object[]{groupId, i, 0});
+        }
+
+        jt.batchUpdate(
+            "INSERT INTO groupresourcepermissions (group_id, resource_id, permission_level) VALUES (?, ?, ?);",
+            batchGroupPermissions
+            );
     }
 
     public StandardResponse getGroups() {

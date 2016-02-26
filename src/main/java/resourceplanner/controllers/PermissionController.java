@@ -19,6 +19,7 @@ public class PermissionController extends Controller{
     @Autowired
     private PermissionService permissionService;
 
+    /*
     @RequestMapping(value = "",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
@@ -28,7 +29,9 @@ public class PermissionController extends Controller{
         // maybe separate endpoints for users and groups
         return null;
     }
+    */
 
+    /*
     @RequestMapping(value = "/user/{userId}",
             method = RequestMethod.GET)
     @ResponseBody
@@ -36,22 +39,22 @@ public class PermissionController extends Controller{
         // TODO
         return null;
     }
-
-    @RequestMapping(value = "/group/{userId}",
+    */
+    /*
+    @RequestMapping(value = "/user/{userId}/editablePermissions",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse getGroupPermissions(@PathVariable final int userId, final HttpServletRequest request) {
-        // TODO
-        return null;
+    public StandardResponse getPermissionMatrix(@PathVariable final int userId, final HttpServletRequest request) {
+        return permissionService.getPermissionMatrix(userId, )
     }
 
-    @RequestMapping(value = "",
+    @RequestMapping(value = "/user/{userId}/editablePermissions",
             method = RequestMethod.PUT,
             headers = {"Content-type=application/json"})
     @ResponseBody
-    public StandardResponse updatePermissions(@RequestBody final PermissionRequest req, final HttpServletRequest request) {
+    public StandardResponse updatePermissionMatrix(@RequestBody final PermissionRequest req, final HttpServletRequest request) {
         // TODO
-        return null;
-    }
+        return permissionService.updatePermissionMatrix(req, userId, )
+    }*/
 }
 
