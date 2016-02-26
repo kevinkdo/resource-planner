@@ -185,7 +185,7 @@ const GroupManager = React.createClass({
       console.log(new_group_name);
       this.setState({sending: true});
       send_xhr("POST", "/api/groups", localStorage.getItem("session"),
-      JSON.stringify({name:new_group_name}),
+      JSON.stringify({group_name:new_group_name, user_ids: [], resource_p: false, reservation_p: false, user_p: false}),
       function(obj) {
         me.refresh();
       },
@@ -208,8 +208,8 @@ const GroupManager = React.createClass({
     send_xhr("GET", "/api/groups", localStorage.getItem("session"), null,
       function(obj) {
         var new_groups = {};
-        obj.data.groups.forEach(function(x) {
-          groups[x.group_id] = x;
+        obj.data.forEach(function(x) {
+          new_groups[x.group_id] = x;
         });
         me.setState({
           groups: new_groups,
@@ -238,8 +238,12 @@ const GroupManager = React.createClass({
     );
   },
 
+  componentDidMount() {
+    this.refresh();
+  },
+
   render() {
-    var me = this;
+    var me = this;    
     var table = this.state.initial_load ? <Loader /> : (
       <table className="table table-hover">
         <thead>
@@ -253,10 +257,11 @@ const GroupManager = React.createClass({
         <tbody>
           {Object.keys(me.state.groups).map(id => {
             var x = me.state.groups[id];
-            return <tr key={"group " + id}>
-              <td>{id}</td>
+            return <tr key={"group " + x.group_id}>
+              <td>{x.group_id}</td>
               <td>{x.name}</td>
-              <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
+              <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.deleteGroup(x.group_id)}>Delete</a></td>
             </tr>
           })}
           {Object.keys(me.state.groups).length > 0 ? null :
@@ -269,7 +274,6 @@ const GroupManager = React.createClass({
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-          <div>TODO replace 37 with the group ID to be edited. Change initial_load state to false to see the table</div>
           <h3>Reservations
               <button type="button" className="btn btn-success pull-right" onClick={this.newGroup}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New group</button>
           </h3>
@@ -290,7 +294,7 @@ const GroupEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/groups/" + this.props.id, localStorage.getItem("session"),
-      JSON.stringify({name: this.state.name, members:this.state.members}),
+      JSON.stringify({group_name: this.state.group_name, user_ids:this.state.user_ids}),
       function(obj) {
         me.props.setPstate({route: "group_manager"});
       },
@@ -305,26 +309,26 @@ const GroupEditor = React.createClass({
   },
 
   addMember() {
-    this.state.members.push("");
-    this.setState({members: this.state.members});
+    this.state.user_ids.push("");
+    this.setState({user_ids: this.state.user_ids});
   },
 
   setMember(evt, i) {
-    this.state.members[i] = evt.target.value;
-    this.setState({members: this.state.members});
+    this.state.user_ids[i] = evt.target.value;
+    this.setState({user_ids: this.state.user_ids});
   },
 
   getInitialState() {
     return {
-      name: "",
+      group_name: "",
       initial_load: false,
       error_msg: "",
-      members: [""]
+      user_ids: [""]
     };
   },
 
   render() {
-    var last_member = this.state.members[this.state.members.length-1];
+    var last_member = this.state.user_ids[this.state.user_ids.length-1];
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
@@ -342,16 +346,16 @@ const GroupEditor = React.createClass({
                   }
                   <div className="form-group">
                     <label>Name</label>
-                    <input type="text" className="form-control" placeholder="Name" value={this.state.name} onChange={(evt) => this.set("name", evt.target.value)}/>
+                    <input type="text" className="form-control" placeholder="Name" value={this.state.group_name} onChange={(evt) => this.set("group_name", evt.target.value)}/>
                   </div>
                   <div className="form-group">
                   <label>Members</label>
                   <div className="row">
                     <div className="col-md-4">
-                      {this.state.members.slice(0, -1).map((x,i) =>
+                      {this.state.user_ids.slice(0, -1).map((x,i) =>
                         <ListInput key={i} addFunc={this.addMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member" hasAddon={false}/>
                       )}
-                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.members.length-1} placeholder="Optional member" editFunc={this.setMember} hasAddon={true}/>
+                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member" editFunc={this.setMember} hasAddon={true}/>
                     </div>
                   </div>
                 </div>
