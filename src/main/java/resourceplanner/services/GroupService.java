@@ -68,6 +68,11 @@ public class GroupService {
 
         addDefaultResourcePermissions(groupId);
 
+        Group returnGroup = new Group();
+        returnGroup.setGroup_id(groupId);
+        returnGroup.setGroup_name(req.getGroup_name());
+        returnGroup.setUser_ids(req.getUser_ids());
+
         // TODO error message if repeated users
         return new StandardResponse(false, "Successfully created group.");
     }
@@ -99,7 +104,7 @@ public class GroupService {
                     public Group mapRow(ResultSet rs, int rowNum) throws SQLException {
                         Group group = new Group();
                         group.setGroup_id(rs.getInt("group_id"));
-                        group.setName(rs.getString("group_name"));
+                        group.setGroup_name(rs.getString("group_name"));
                         return group;
                     }
                 });
@@ -128,7 +133,7 @@ public class GroupService {
                 Integer.class);
 
         Group groupResponse = new Group();
-        groupResponse.setName(group);
+        groupResponse.setGroup_name(group);
         groupResponse.setGroup_id(groupId);
         groupResponse.setUser_ids(userIds);
 

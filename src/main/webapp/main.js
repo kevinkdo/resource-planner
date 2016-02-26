@@ -1365,7 +1365,7 @@ const Login = React.createClass({
     evt.preventDefault();
     var me = this;
     send_xhr("POST", "/auth/login", "o",
-      JSON.stringify({email:this.state.email, password:this.state.password}),
+      JSON.stringify({username:this.state.username, password:this.state.password}),
       function(obj) {
         localStorage.setItem("session", obj.data.token);
         me.props.setPstate({ route: "reservation_list" });
@@ -1378,7 +1378,7 @@ const Login = React.createClass({
 
   getInitialState() {
     return {
-      email: "",
+      username: "",
       password: "",
       error_msg: ""
     }
@@ -1399,8 +1399,8 @@ const Login = React.createClass({
                   </div>
                 }
                 <div className="form-group">
-                  <label htmlFor="login_email">Email address</label>
-                  <input type="email" className="form-control" id="login_email" placeholder="Email" onChange={(evt)=>this.set("email", evt.target.value)} value={this.state.email}/>
+                  <label htmlFor="login_username">Username</label>
+                  <input type="text" className="form-control" id="login_username" placeholder="Username" onChange={(evt)=>this.set("username", evt.target.value)} value={this.state.username}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="login_password">Password</label>
