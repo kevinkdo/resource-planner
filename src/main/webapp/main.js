@@ -184,7 +184,7 @@ const GroupManager = React.createClass({
     if (new_group_name != null) {
       this.setState({sending: true});
       send_xhr("POST", "/api/groups", localStorage.getItem("session"),
-      JSON.stringify({group_name:new_group_name, user_ids: [], resource_p: false, reservation_p: false, user_p: false}),
+      JSON.stringify({group_name:new_group_name, user_ids: []}),
       function(obj) {
         me.refresh();
       },
@@ -259,7 +259,7 @@ const GroupManager = React.createClass({
             return <tr key={"group " + x.group_id}>
               <td>{x.group_id}</td>
               <td>{x.group_name}</td>
-             {/* <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>*/}
+              <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteGroup(x.group_id)}>Delete</a></td>
             </tr>
           })}
