@@ -182,7 +182,6 @@ const GroupManager = React.createClass({
     var new_group_name = prompt();
     var me = this;
     if (new_group_name != null) {
-      console.log(new_group_name);
       this.setState({sending: true});
       send_xhr("POST", "/api/groups", localStorage.getItem("session"),
       JSON.stringify({group_name:new_group_name, user_ids: [], resource_p: false, reservation_p: false, user_p: false}),
