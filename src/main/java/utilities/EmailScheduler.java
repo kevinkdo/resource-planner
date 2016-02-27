@@ -1,11 +1,18 @@
 package utilities;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import responses.data.Reservation;
 
 /**
  * Created by Davis Treybig
  */
 
+//@Configuration
+//@PropertySource("classpath:config.properties")
 public class EmailScheduler implements Runnable{
 	private EmailUtility emailUtility = new EmailUtility();
 	private Reservation reservation;
@@ -14,8 +21,8 @@ public class EmailScheduler implements Runnable{
 	public static final String BEGIN_ALERT = "begin";
 	public static final String END_ALERT = "end";
 
-	private static final String fromString = "ResourceManagerAlerts@gmail.com";
-
+	//@Value("${fromString}")
+	private String fromString ="ResourceManagerAlerts@gmail.com";
 
 	public EmailScheduler(Reservation reservation, String alertType){
 		this.reservation = reservation;
@@ -43,4 +50,5 @@ public class EmailScheduler implements Runnable{
 		}
 		emailUtility.sendMessage(reservation.getUser().getEmail(), fromString, subject, message);
 	}
+
 }

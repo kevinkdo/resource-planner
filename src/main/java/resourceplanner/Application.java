@@ -62,7 +62,7 @@ public class Application {
         DispatcherServlet dispatcherServlet = (DispatcherServlet) ctx.getBean("dispatcherServlet");
         dispatcherServlet.setThrowExceptionIfNoHandlerFound(true);
     }
-    
+
     /*
     //To resolve ${} in @Value
     @Bean
