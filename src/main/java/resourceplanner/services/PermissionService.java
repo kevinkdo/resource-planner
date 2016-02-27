@@ -99,11 +99,18 @@ public class PermissionService {
 
     	List<ResourceAndID> viewableResources = new ArrayList<ResourceAndID>();
 
+    	Set<Integer> resource_ids = new TreeSet<Integer>();
     	for(UserResourcePermission u : resourcePermissions.getUser_permissions()){
-    		viewableResources.add(new ResourceAndID(u.getResource_id(), allResources.get(u.getResource_id())));
+    		if(!resource_ids.contains(u.getResource_id())){
+    			viewableResources.add(new ResourceAndID(u.getResource_id(), allResources.get(u.getResource_id())));
+    			resource_ids.add(u.getResource_id());
+    		}	
     	}
     	for(GroupResourcePermission g : resourcePermissions.getGroup_permissions()){
-    		viewableResources.add(new ResourceAndID(g.getResource_id(), allResources.get(g.getResource_id())));
+    		if(!resource_ids.contains(g.getResource_id())){
+    			viewableResources.add(new ResourceAndID(g.getResource_id(), allResources.get(g.getResource_id())));
+    			resource_ids.add(g.getResource_id());
+    		}	
     	}
 
     	return viewableResources;  	

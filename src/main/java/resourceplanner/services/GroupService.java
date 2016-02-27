@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import requestdata.GroupRequest;
 import responses.StandardResponse;
 import responses.data.Group;
+import responses.data.PermissionData.SimpleGroup;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -74,7 +75,7 @@ public class GroupService {
         returnGroup.setUser_ids(req.getUser_ids());
 
         // TODO error message if repeated users
-        return new StandardResponse(false, "Successfully created group.");
+        return new StandardResponse(false, "Successfully created group.", returnGroup);
     }
 
     private void addDefaultResourcePermissions(int groupId){
@@ -98,11 +99,11 @@ public class GroupService {
     }
 
     public StandardResponse getGroups() {
-        List<Group> groups = jt.query(
+        List<SimpleGroup> groups = jt.query(
                 "SELECT group_name, group_id FROM groups;",
-                new RowMapper<Group>() {
-                    public Group mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        Group group = new Group();
+                new RowMapper<SimpleGroup>() {
+                    public SimpleGroup mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        SimpleGroup group = new SimpleGroup();
                         group.setGroup_id(rs.getInt("group_id"));
                         group.setGroup_name(rs.getString("group_name"));
                         return group;
@@ -137,11 +138,11 @@ public class GroupService {
         groupResponse.setGroup_id(groupId);
         groupResponse.setUser_ids(userIds);
 
-        return new StandardResponse(false, "Successfully retrieved resource", groupResponse);
+        return new StandardResponse(false, "Successfully retrieved group", groupResponse);
     }
 
     public StandardResponse updateGroup(GroupRequest req, int groupId) {
-        if (req.isValid()) {
+        if (!req.isValid()) {
             return new StandardResponse(true, "Request not valid");
         }
         int groupExists = jt.queryForObject(
