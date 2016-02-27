@@ -138,7 +138,7 @@ public class GroupService {
         groupResponse.setGroup_id(groupId);
         groupResponse.setUser_ids(userIds);
 
-        return new StandardResponse(false, "Successfully retrieved resource", groupResponse);
+        return new StandardResponse(false, "Successfully retrieved group", groupResponse);
     }
 
     public StandardResponse updateGroup(GroupRequest req, int groupId) {
