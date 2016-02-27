@@ -14,17 +14,17 @@ public class Controller {
 
 	public boolean hasResourceP(HttpServletRequest request){
 		final Claims claims = (Claims) request.getAttribute("claims");
-		return Boolean.parseBoolean(claims.get("resource_p").toString());
+		return Boolean.parseBoolean(claims.get("resource_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
 	}
 
 	public boolean hasReservationP(HttpServletRequest request){
 		final Claims claims = (Claims) request.getAttribute("claims");
-		return Boolean.parseBoolean(claims.get("reservation_p").toString());
+		return Boolean.parseBoolean(claims.get("reservation_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
 	}
 
 	public boolean hasUserP(HttpServletRequest request){
 		final Claims claims = (Claims) request.getAttribute("claims");
-		return Boolean.parseBoolean(claims.get("user_p").toString());
+		return Boolean.parseBoolean(claims.get("user_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
 	}
 
 
