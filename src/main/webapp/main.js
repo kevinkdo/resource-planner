@@ -207,13 +207,8 @@ const GroupManager = React.createClass({
     send_xhr("GET", "/api/groups", localStorage.getItem("session"), null,
       function(obj) {
         var new_groups = {};
-<<<<<<< HEAD
         obj.data.forEach(function(x) {
           new_groups[x.group_id] = x;
-=======
-        obj.data.groups.forEach(function(x) {
-          groups[x.group_id] = x;
->>>>>>> a18886d22d80f3682932eb98d436ee5ea9b443f7
         });
         me.setState({
           groups: new_groups,
@@ -242,17 +237,12 @@ const GroupManager = React.createClass({
     );
   },
 
-<<<<<<< HEAD
   componentDidMount() {
     this.refresh();
   },
 
   render() {
-    var me = this;    
-=======
-  render() {
     var me = this;
->>>>>>> a18886d22d80f3682932eb98d436ee5ea9b443f7
     var table = this.state.initial_load ? <Loader /> : (
       <table className="table table-hover">
         <thead>
@@ -266,18 +256,11 @@ const GroupManager = React.createClass({
         <tbody>
           {Object.keys(me.state.groups).map(id => {
             var x = me.state.groups[id];
-<<<<<<< HEAD
             return <tr key={"group " + x.group_id}>
               <td>{x.group_id}</td>
-              <td>{x.name}</td>
-              <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>
+              <td>{x.group_name}</td>
+             {/* <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>*/}
               <td><a role="button" onClick={() => this.deleteGroup(x.group_id)}>Delete</a></td>
-=======
-            return <tr key={"group " + id}>
-              <td>{id}</td>
-              <td>{x.name}</td>
-              <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
->>>>>>> a18886d22d80f3682932eb98d436ee5ea9b443f7
             </tr>
           })}
           {Object.keys(me.state.groups).length > 0 ? null :
@@ -310,11 +293,7 @@ const GroupEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/groups/" + this.props.id, localStorage.getItem("session"),
-<<<<<<< HEAD
       JSON.stringify({group_name: this.state.group_name, user_ids:this.state.user_ids}),
-=======
-      JSON.stringify({name: this.state.name, members:this.state.members}),
->>>>>>> a18886d22d80f3682932eb98d436ee5ea9b443f7
       function(obj) {
         me.props.setPstate({route: "group_manager"});
       },
