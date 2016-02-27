@@ -1,4 +1,4 @@
-package responses.data;
+package responses.data.UserData;
 
 /**
  * Created by jiaweizhang on 2/3/16.

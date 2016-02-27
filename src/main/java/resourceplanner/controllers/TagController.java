@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import responses.StandardResponse;
-import responses.data.Tags;
+import responses.data.ResourceData.Tags;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

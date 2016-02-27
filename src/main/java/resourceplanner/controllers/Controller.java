@@ -8,44 +8,23 @@ public class Controller {
 
 	public boolean isSuperAdmin(HttpServletRequest request){
 		final Claims claims = (Claims) request.getAttribute("claims");
-        boolean resourceP = Boolean.parseBoolean(claims.get("resource_p").toString());
-		boolean reservationP = Boolean.parseBoolean(claims.get("reservation_p").toString());
-		boolean userP = Boolean.parseBoolean(claims.get("user_p").toString());
-		return resourceP && reservationP && userP;
+        return Boolean.parseBoolean(claims.get("super_p").toString());
 	}
 
 
 	public boolean hasResourceP(HttpServletRequest request){
-		return true;
-		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
-		if (claims.get("resource_p") == null) {
-			return false;
-		}
-		return Boolean.parseBoolean(claims.get("resource_p").toString());
-		*/
+		return Boolean.parseBoolean(claims.get("resource_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
 	}
 
 	public boolean hasReservationP(HttpServletRequest request){
-		return true;
-		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
-		if (claims.get("reservation_p") == null) {
-			return false;
-		}
-		return Boolean.parseBoolean(claims.get("reservation_p").toString());
-		*/
+		return Boolean.parseBoolean(claims.get("reservation_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
 	}
 
 	public boolean hasUserP(HttpServletRequest request){
-		return true;
-		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
-		if (claims.get("user_p") == null) {
-			return false;
-		}
-		return Boolean.parseBoolean(claims.get("user_p").toString());
-		*/
+		return Boolean.parseBoolean(claims.get("user_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
 	}
 
 
@@ -55,8 +34,7 @@ public class Controller {
 			return 0; // TODO decide what to do
 		}
     	//Verify that the user_id in the request == current user
-    	int requesterID = Integer.parseInt(claims.get("user_id").toString());
-    	return requesterID;
+		return Integer.parseInt(claims.get("user_id").toString());
 	}
 
 	/*

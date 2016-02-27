@@ -11,7 +11,7 @@ import requestdata.GetAllMatchingReservationRequest;
 import requestdata.ReservationRequest;
 import resourceplanner.services.ReservationService;
 import responses.StandardResponse;
-import responses.data.ReservationWithIDs;
+import responses.data.ReservationData.ReservationWithIDs;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;

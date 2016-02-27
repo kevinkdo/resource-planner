@@ -1,5 +1,7 @@
-package responses.data;
+package responses.data.ReservationData;
 
+import responses.data.ResourceData.Resource;
+import responses.data.UserData.User;
 import utilities.TimeUtility;
 
 import java.sql.Timestamp;

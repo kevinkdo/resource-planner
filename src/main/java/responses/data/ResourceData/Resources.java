@@ -1,4 +1,6 @@
-package responses.data;
+package responses.data.ResourceData;
+
+import responses.data.ResourceData.Resource;
 
 import java.util.List;
 

@@ -7,6 +7,7 @@ package resourceplanner.models;
 public class AuthUser {
     private int user_id;
     private String passhash;
+    private boolean super_p;
     private boolean resource_p;
     private boolean reservation_p;
     private boolean user_p;
@@ -25,6 +26,14 @@ public class AuthUser {
 
     public void setPasshash(String passhash) {
         this.passhash = passhash;
+    }
+
+    public boolean isSuper_p() {
+        return super_p;
+    }
+
+    public void setSuper_p(boolean super_p) {
+        this.super_p = super_p;
     }
 
     public boolean isResource_p() {
