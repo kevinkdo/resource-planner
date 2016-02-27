@@ -1,7 +1,7 @@
 package utilities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import responses.StandardResponse;
+import resourceplanner.main.StandardResponse;
 
 /**
  * Created by jiaweizhang on 1/19/2016.
