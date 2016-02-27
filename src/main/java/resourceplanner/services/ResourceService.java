@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.ResourceRequest;
 import responses.StandardResponse;
-import responses.data.CanDelete;
-import responses.data.Resource;
-import responses.data.Resources;
+import responses.data.ResourceData.CanDelete;
+import responses.data.ResourceData.Resource;
+import responses.data.ResourceData.Resources;
 import utilities.TimeUtility;
 
 import java.sql.*;

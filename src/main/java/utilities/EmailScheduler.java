@@ -1,6 +1,6 @@
 package utilities;
 
-import responses.data.Reservation;
+import responses.data.ReservationData.Reservation;
 
 /**
  * Created by Davis Treybig

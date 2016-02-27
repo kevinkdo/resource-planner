@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.UserRequest;
 import responses.StandardResponse;
-import responses.data.User;
-import responses.data.UserUpdate;
+import responses.data.UserData.User;
+import responses.data.UserData.UserUpdate;
 import utilities.PasswordHash;
 
 import java.sql.Connection;

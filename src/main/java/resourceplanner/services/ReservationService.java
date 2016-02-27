@@ -9,7 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import requestdata.GetAllMatchingReservationRequest;
 import requestdata.ReservationRequest;
 import responses.StandardResponse;
-import responses.data.*;
+import responses.data.ReservationData.Reservation;
+import responses.data.ReservationData.ReservationWithIDs;
+import responses.data.ReservationData.ReservationWithIDsData;
+import responses.data.ResourceData.Resource;
+import responses.data.UserData.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;

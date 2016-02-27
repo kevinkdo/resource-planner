@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import requestdata.GroupRequest;
 import responses.StandardResponse;
-import responses.data.Group;
-import responses.data.PermissionData.SimpleGroup;
+import responses.data.GroupData.Group;
+import responses.data.GroupData.SimpleGroup;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

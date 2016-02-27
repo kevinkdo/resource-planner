@@ -1,4 +1,4 @@
-package responses.data;
+package responses.data.ReservationData;
 
 import utilities.TimeUtility;
 

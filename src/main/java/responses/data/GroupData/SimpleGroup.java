@@ -1,14 +1,13 @@
-package responses.data;
+package responses.data.GroupData;
 
 import java.util.List;
 
 /**
- * Created by jiaweizhang on 2/20/16.
+ * Created by jiaweizhang on 2/27/16.
  */
-public class Group {
+public class SimpleGroup {
     private int group_id;
     private String group_name;
-    private List<Integer> user_ids;
 
     public int getGroup_id() {
         return group_id;
@@ -26,11 +25,4 @@ public class Group {
         this.group_name = group_name;
     }
 
-    public List<Integer> getUser_ids() {
-        return user_ids;
-    }
-
-    public void setUser_ids(List<Integer> user_ids) {
-        this.user_ids = user_ids;
-    }
 }
