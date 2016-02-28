@@ -1405,11 +1405,9 @@ const Login = React.createClass({
                   <label htmlFor="login_password">Password</label>
                   <input type="password" className="form-control" id="login_password" placeholder="Password" onChange={(evt)=>this.set("password", evt.target.value)} value={this.state.password}/>
                 </div>
-                <button type="submit" className="btn btn-primary">Log In Here</button>
+                <button type="submit" className="btn btn-primary">Log In</button>
+                <a className="btn btn-primary" href="https://oauth.oit.duke.edu/oauth/authorize.php?client_id=ECE458_Resource_manager2&state=0.6590120431501418&response_type=token&redirect_uri=https://colab-sbx-304.oit.duke.edu/oauth">Login with Duke NetID</a>
               </form>
-              <div>
-                <a href="https://oauth.oit.duke.edu/oauth/authorize.php?client_id=ECE458_Resource_manager2&state=0.6590120431501418&response_type=token&redirect_uri=https://colab-sbx-304.oit.duke.edu/oauth">Login with Duke NetID</a>
-              </div>
             </div>
           </div>
         </div>
