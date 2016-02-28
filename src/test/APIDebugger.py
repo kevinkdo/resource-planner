@@ -14,16 +14,8 @@ loginUrl = '"/auth/login"'
 reserveUrl = '"/api/reservations"'
 userUrl = '"/api/users"'
 canDeleteUrl = '+ "/candelete"'
-headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
-validUser = {'email':'user13@admin.com', 'username':'someusername', 'password':'something', 'should_email':'False'}
-#invalidUser = {'email':'admin@admin.com', 'username':'someusername', 'password':'something', 'should_email':'False'}
-validUserLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'admin'}
-validResource = {'name':'some resource', 'description':'some resource description', 'tags':[]}
-validReservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-update = {'resource_id':'2', 'should_email':'false'}
-      
-
-
+groupUrl = '"/api/groups/"'
+permissionUrl = ' + "/editablePermissions"'
 getRequest = 'r = requests.get(baseUrl + '
 postRequest = 'r = requests.post(baseUrl + '
 putRequest = 'r = requests.put(baseUrl + '
@@ -35,6 +27,7 @@ requestPayloadPost = ')'
 requestID = ''
 requestIDPre = ' + "/'
 requestIDPost = '"'
+headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
 
 class Verbs(Enum): 
   Get = 'get'
@@ -44,46 +37,26 @@ class Verbs(Enum):
 
 #define options
 optionsPrint = {
-  1: (Verbs.Get, 'Get all tags'), # don't need to ask for any ID
-  2: (Verbs.Post, 'Register a valid user'),
-  3: (Verbs.Post, 'Login as valid user'),
-  4: (Verbs.Post, 'Create valid reservation'),
-  5: (Verbs.Get, 'Get reservation'),
-  6: (Verbs.Put, 'Update reservation'),
-  7: (Verbs.Delete, 'Delete reservation'),
-  8: (Verbs.Post, 'Create resource'),
-  9: (Verbs.Get, 'Get resource'),
-  10: (Verbs.Put, 'Update resource'),
-  11: (Verbs.Delete, 'Delete resource'),
-  12: (Verbs.Get,'Get resource canDelete'),
-  13: (Verbs.Post, 'Create valid user'),
-  14: (Verbs.Get, 'Get user'),
-  15: (Verbs.Put, 'Update user'),
-  16: (Verbs.Delete, 'Delete user')
+  1: (Verbs.Get, 'Get all tags'), 
+  2: (Verbs.Post, 'Login user'), # can only be for admin
+  3: (Verbs.Post, 'Create reservation'),
+  4: (Verbs.Get, 'Get reservation by ID'),
+  5: (Verbs.Put, 'Update reservation by ID'),
+  6: (Verbs.Delete, 'Delete reservation by ID'),
+  7: (Verbs.Post, 'Create resource'),
+  8: (Verbs.Get, 'Get resource by ID'),
+  9: (Verbs.Put, 'Update resource by ID'),
+  10: (Verbs.Delete, 'Delete resource by ID'),
+  11: (Verbs.Get,'Get resource canDelete by ID'),
+  12: (Verbs.Get, 'Get user by ID'),
+  13: (Verbs.Post, 'Create Group'),
+  14: (Verbs.Get, 'Get Group by ID'),
+  15: (Verbs.Get, 'Get all groups'), 
+  16: (Verbs.Put, 'Update Group by ID'),
+  17: (Verbs.Delete, 'Delete Group by ID'),
+  18: (Verbs.Post, 'Update permissions by user ID'),
+  19: (Verbs.Get, 'Get permissions by user ID')
 }
-
-def refreshDict():
-  refreshedDict = {
-    1: getRequest + tagUrl + requestEnding, 
-    2: postRequest + registerUrl + requestPayload + requestEnding,
-    3: postRequest + loginUrl + requestPayload + requestEnding,
-    4: postRequest + reserveUrl + requestPayload + requestEnding,
-    5: getRequest + reserveUrl + requestID + requestEnding, 
-    6: putRequest + reserveUrl + requestID + requestPayload + requestEnding,
-    7: deleteRequest + reserveUrl + requestID + requestEnding,
-    8: postRequest + resourceUrl + requestPayload + requestEnding,
-    9: getRequest + resourceUrl + requestID + requestEnding,
-    10: putRequest + resourceUrl + requestID + requestPayload + requestEnding,
-    11: deleteRequest + resourceUrl + requestID + requestEnding,
-    12: getRequest + resourceUrl + requestID + canDeleteUrl + requestEnding,
-    13: postRequest + userUrl + requestPayload + requestEnding,
-    14: getRequest + userUrl + requestID + requestEnding,
-    15: putRequest + userUrl + requestID + requestPayload + requestEnding,
-    16: deleteRequest + userUrl + requestID + requestEnding
-  }
-
-  return refreshedDict
-
 
 def debugger():
   while(True):
@@ -108,21 +81,24 @@ def processSelection(input):
 
     updatedDict = {
       1: getRequest + tagUrl + requestEnding, 
-      2: postRequest + registerUrl + requestPayload + requestEnding,
-      3: postRequest + loginUrl + requestPayload + requestEnding,
-      4: postRequest + reserveUrl + requestPayload + requestEnding,
-      5: getRequest + reserveUrl + requestID + requestEnding, 
-      6: putRequest + reserveUrl + requestID + requestPayload + requestEnding,
-      7: deleteRequest + reserveUrl + requestID + requestEnding,
-      8: postRequest + resourceUrl + requestPayload + requestEnding,
-      9: getRequest + resourceUrl + requestID + requestEnding,
-      10: putRequest + resourceUrl + requestID + requestPayload + requestEnding,
-      11: deleteRequest + resourceUrl + requestID + requestEnding,
-      12: getRequest + resourceUrl + requestID + canDeleteUrl + requestEnding,
-      13: postRequest + userUrl + requestPayload + requestEnding,
-      14: getRequest + userUrl + requestID + requestEnding,
-      15: putRequest + userUrl + requestID + requestPayload + requestEnding,
-      16: deleteRequest + userUrl + requestID + requestEnding
+      2: postRequest + loginUrl + requestPayload + requestEnding,
+      3: postRequest + reserveUrl + requestPayload + requestEnding,
+      4: getRequest + reserveUrl + requestID + requestEnding, 
+      5: putRequest + reserveUrl + requestID + requestPayload + requestEnding,
+      6: deleteRequest + reserveUrl + requestID + requestEnding,
+      7: postRequest + resourceUrl + requestPayload + requestEnding,
+      8: getRequest + resourceUrl + requestID + requestEnding,
+      9: putRequest + resourceUrl + requestID + requestPayload + requestEnding,
+      10: deleteRequest + resourceUrl + requestID + requestEnding,
+      11: getRequest + resourceUrl + requestID + canDeleteUrl + requestEnding,
+      12: getRequest + userUrl + requestID + requestEnding,
+      13: postRequest + groupUrl + requestPayload + requestEnding,
+      14: getRequest + groupUrl + requestID + requestEnding,
+      15: getRequest + groupUrl + requestEnding,
+      16: putRequest + groupUrl + requestID + requestPayload + requestEnding,
+      17: deleteRequest + groupUrl + requestID + requestEnding,
+      18: postRequest + userUrl + requestID + permissionUrl + requestPayload + requestEnding,
+      19: getRequest + userUrl + requestID + permissionUrl + requestEnding
     }
     exec(updatedDict[input])
     

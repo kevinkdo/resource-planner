@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   user_id       SERIAL PRIMARY KEY  NOT NULL,
   email         VARCHAR(255) UNIQUE NOT NULL,
-  passhash      VARCHAR(255)        NOT NULL,
+  passhash      VARCHAR(255)        NOT NULL DEFAULT '',
   username      VARCHAR(255) UNIQUE NOT NULL,
   super_p       BOOLEAN             NOT NULL DEFAULT FALSE,
   resource_p    BOOLEAN             NOT NULL DEFAULT FALSE,
@@ -20,10 +20,10 @@ CREATE TABLE users (
   should_email  BOOLEAN             NOT NULL
 );
 
-INSERT INTO users (email, username, passhash, resource_p, reservation_p, user_p, should_email)
+INSERT INTO users (email, username, passhash, super_p, resource_p, reservation_p, user_p, should_email)
 VALUES ('admin@admin.com', 'admin',
         '1000:9816dd56235c68a566b1f50a1815ab96761ebf7ad33d84cd:5b209a5f9b1628fbd80cdffb0aa50b7ec58f07e93f9b18fc',
-        TRUE, TRUE, TRUE, FALSE);
+        TRUE, TRUE, TRUE, TRUE, FALSE);
 
 
 CREATE TABLE resources (

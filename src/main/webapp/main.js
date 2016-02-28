@@ -183,15 +183,25 @@ const GroupManager = React.createClass({
   getInitialState() {
     return {
       initial_load: false,
-      new_group_name: ""
+      new_group_name: "",
+      groups: {}
     };
   },
 
   newGroup() {
     var new_group_name = prompt();
+    var me = this;
     if (new_group_name != null) {
-      console.log(new_group_name);
-      //TODO POST the group
+      this.setState({sending: true});
+      send_xhr("POST", "/api/groups", localStorage.getItem("session"),
+      JSON.stringify({group_name:new_group_name, user_ids: [], resource_p: false, reservation_p: false, user_p: false}),
+      function(obj) {
+        me.refresh();
+      },
+      function(obj) {
+        me.setState({sending: false, error_msg: obj.error_msg});
+      }
+    );
     }
   },
 
@@ -202,7 +212,47 @@ const GroupManager = React.createClass({
     });
   },
 
+  refresh() {
+    var me = this;
+    send_xhr("GET", "/api/groups", localStorage.getItem("session"), null,
+      function(obj) {
+        var new_groups = {};
+        obj.data.forEach(function(x) {
+          new_groups[x.group_id] = x;
+        });
+        me.setState({
+          groups: new_groups,
+          loading_table: false,
+        });
+      },
+      function(obj) {
+        me.setState({
+          error_msg: obj.error_msg
+        })
+      }
+    );
+  },
+
+  deleteGroup(id) {
+    var me = this;
+    send_xhr("DELETE", "/api/groups/" + id, localStorage.getItem("session"), null,
+      function(obj) {
+        me.refresh();
+        me.setState({error_msg: ""});       
+      },
+      function(obj) {
+        me.refresh();
+        me.setState({error_msg: obj.error_msg});
+      }
+    );
+  },
+
+  componentDidMount() {
+    this.refresh();
+  },
+
   render() {
+    var me = this;
     var table = this.state.initial_load ? <Loader /> : (
       <table className="table table-hover">
         <thead>
@@ -214,12 +264,17 @@ const GroupManager = React.createClass({
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>234234</td>
-            <td>HR</td>
-            <td><a role="button" onClick={() => this.editGroup(37)}>Edit</a></td>
-            <td><a role="button" onClick={() => console.log("TODO Delete group")}>Delete</a></td>
-          </tr>
+          {Object.keys(me.state.groups).map(id => {
+            var x = me.state.groups[id];
+            return <tr key={"group " + x.group_id}>
+              <td>{x.group_id}</td>
+              <td>{x.group_name}</td>
+             {/* <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>*/}
+              <td><a role="button" onClick={() => this.deleteGroup(x.group_id)}>Delete</a></td>
+            </tr>
+          })}
+          {Object.keys(me.state.groups).length > 0 ? null :
+            <tr><td className="lead text-center" colSpan="7">No groups to display</td></tr>}
         </tbody>
       </table>
     );
@@ -228,7 +283,6 @@ const GroupManager = React.createClass({
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-          <div>TODO replace 37 with the group ID to be edited. Change initial_load state to false to see the table</div>
           <h3>Reservations
               <button type="button" className="btn btn-success pull-right" onClick={this.newGroup}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New group</button>
           </h3>
@@ -246,7 +300,17 @@ const GroupEditor = React.createClass({
   },
 
   editGroup(evt) {
-    console.log("TODO");
+    var me = this;
+    this.setState({sending: true});
+    send_xhr("PUT", "/api/groups/" + this.props.id, localStorage.getItem("session"),
+      JSON.stringify({group_name: this.state.group_name, user_ids:this.state.user_ids}),
+      function(obj) {
+        me.props.setPstate({route: "group_manager"});
+      },
+      function(obj) {
+        me.setState({sending: false, error_msg: obj.error_msg});
+      }
+    );
   },
 
   cancel() {
@@ -254,26 +318,26 @@ const GroupEditor = React.createClass({
   },
 
   addMember() {
-    this.state.members.push("");
-    this.setState({members: this.state.members});
+    this.state.user_ids.push("");
+    this.setState({user_ids: this.state.user_ids});
   },
 
   setMember(evt, i) {
-    this.state.members[i] = evt.target.value;
-    this.setState({members: this.state.members});
+    this.state.user_ids[i] = evt.target.value;
+    this.setState({user_ids: this.state.user_ids});
   },
 
   getInitialState() {
     return {
-      name: "",
+      group_name: "",
       initial_load: false,
       error_msg: "",
-      members: [""]
+      user_ids: [""]
     };
   },
 
   render() {
-    var last_member = this.state.members[this.state.members.length-1];
+    var last_member = this.state.user_ids[this.state.user_ids.length-1];
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
@@ -291,16 +355,16 @@ const GroupEditor = React.createClass({
                   }
                   <div className="form-group">
                     <label>Name</label>
-                    <input type="text" className="form-control" placeholder="Name" value={this.state.name} onChange={(evt) => this.set("name", evt.target.value)}/>
+                    <input type="text" className="form-control" placeholder="Name" value={this.state.group_name} onChange={(evt) => this.set("group_name", evt.target.value)}/>
                   </div>
                   <div className="form-group">
                   <label>Members</label>
                   <div className="row">
                     <div className="col-md-4">
-                      {this.state.members.slice(0, -1).map((x,i) =>
+                      {this.state.user_ids.slice(0, -1).map((x,i) =>
                         <ListInput key={i} addFunc={this.addMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member" hasAddon={false}/>
                       )}
-                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.members.length-1} placeholder="Optional member" editFunc={this.setMember} hasAddon={true}/>
+                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member" editFunc={this.setMember} hasAddon={true}/>
                     </div>
                   </div>
                 </div>
@@ -1114,7 +1178,7 @@ const ReservationCreator = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
-      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.state.start).toISOString(), end_time: round(this.state.end).toISOString(), should_email:this.state.should_email}),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
@@ -1133,28 +1197,34 @@ const ReservationCreator = React.createClass({
     this.setState(this.state);
   },
 
-  setDate(field, str) {
-    var parts = str.split('-');
-    this.state[field].setFullYear(parts[0]);
-    this.state[field].setMonth(parts[1]-1);
-    this.state[field].setDate(parts[2]);
-    this.setState(this.state);
-  },
-
-  setTime(field, str) {
-    var parts = str.split(':');
-    this.state[field].setHours(parts[0]);
-    this.state[field].setMinutes(parts[1]);
-    this.setState(this.state);
+  getDateObject(dateStr, timeStr) {
+    var date = new Date();
+    var dateParts = dateStr.split('-');
+    date.setFullYear(dateParts[0]);
+    date.setMonth(dateParts[1]-1);
+    date.setDate(dateParts[2]);
+    
+    var timeParts = timeStr.split(':');
+    date.setHours(timeParts[0]);
+    date.setMinutes(timeParts[1]);
+    
+    return date;
   },
 
   getInitialState() {
+    var now = new Date();
+    var start_date = formatDate(now)
+    var start_time = formatTime(now)
+    var end_date = formatDate(now)
+    var end_time = formatTime(now)
     return {
       sending: false,
       resource_id: this.props.resource_id ? this.props.resource_id : 0,
       user_id: userId(),
-      start: new Date(),
-      end: new Date(),
+      start_date: start_date,
+      start_time: start_time,
+      end_date: end_date,
+      end_time: end_time,
       should_email: false,
       error_msg: ""
     };
@@ -1185,19 +1255,19 @@ const ReservationCreator = React.createClass({
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_start_date">Start Date</label>
-                  <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
+                  <input type="date" className="form-control" id="reservation_creator_start_date" value={this.state.start_date} onChange={(evt)=>this.set("start_date", evt.target.value)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_start_time">Start Time</label>
-                  <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
+                  <input type="time" className="form-control" id="reservation_creator_start_time" value={this.state.start_time} onChange={(evt)=>this.set("start_time", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_end_date">End Date</label>
-                  <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
+                  <input type="date" className="form-control" id="reservation_creator_end_date" value={this.state.end_date} onChange={(evt)=>this.set("end_date", evt.target.value)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="reservation_creator_end_time">End Time</label>
-                  <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
+                  <input type="time" className="form-control" id="reservation_creator_end_time" value={this.state.end_time} onChange={(evt)=>this.set("end_time", evt.target.value)}/>
                 </div>
                 <div className="checkbox">
                   <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
@@ -1221,7 +1291,7 @@ const ReservationEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/reservations/" + this.props.id, localStorage.getItem("session"),
-      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.state.start).toISOString(), end_time: round(this.state.end).toISOString(), should_email:this.state.should_email}),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
       },
@@ -1240,29 +1310,35 @@ const ReservationEditor = React.createClass({
     this.setState(this.state);
   },
 
-  setDate(field, str) {
-    var parts = str.split('-');
-    this.state[field].setFullYear(parts[0]);
-    this.state[field].setMonth(parts[1]-1);
-    this.state[field].setDate(parts[2]);
-    this.setState(this.state);
-  },
-
-  setTime(field, str) {
-    var parts = str.split(':');
-    this.state[field].setHours(parts[0]);
-    this.state[field].setMinutes(parts[1]);
-    this.setState(this.state);
+  getDateObject(dateStr, timeStr) {
+    var date = new Date();
+    var dateParts = dateStr.split('-');
+    date.setFullYear(dateParts[0]);
+    date.setMonth(dateParts[1]-1);
+    date.setDate(dateParts[2]);
+    
+    var timeParts = timeStr.split(':');
+    date.setHours(timeParts[0]);
+    date.setMinutes(timeParts[1]);
+    
+    return date;
   },
 
   getInitialState() {
+    var now = new Date();
+    var start_date = formatDate(now)
+    var start_time = formatTime(now)
+    var end_date = formatDate(now)
+    var end_time = formatTime(now)
     return {
       initial_load: true,
       sending: false,
       resource_id: 0,
       user_id: userId(),
-      start: new Date(),
-      end: new Date(),
+      start_date: start_date,
+      start_time: start_time,
+      end_date: end_date,
+      end_time: end_time,
       should_email: false,
       error_msg: ""
     };
@@ -1275,8 +1351,10 @@ const ReservationEditor = React.createClass({
         me.setState({
           resource_id: obj.data.resource.resource_id,
           user_id: obj.data.user.user_id,
-          start: new Date(obj.data.begin_time),
-          end: new Date(obj.data.end_time),
+          start_date: formatDate(new Date(obj.data.begin_time)),
+          start_time: formatTime(new Date(obj.data.begin_time)),
+          end_date: formatDate(new Date(obj.data.end_time)),
+          end_time: formatTime(new Date(obj.data.end_time)),
           should_email: obj.data.should_email,
           error_msg: "",
           initial_load: false
@@ -1314,19 +1392,19 @@ const ReservationEditor = React.createClass({
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_start_date">Start Date</label>
-                    <input type="date" className="form-control" id="reservation_creator_start_date" value={formatDate(this.state.start)} onChange={(evt)=>this.setDate("start", evt.target.value)} />
+                    <input type="date" className="form-control" id="reservation_creator_start_date" value={this.state.start_date} onChange={(evt)=>this.set("start_date", evt.target.value)} />
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_start_time">Start Time</label>
-                    <input type="time" className="form-control" id="reservation_creator_start_time" value={formatTime(this.state.start)} onChange={(evt)=>this.setTime("start", evt.target.value)}/>
+                    <input type="time" className="form-control" id="reservation_creator_start_time" value={this.state.start_time} onChange={(evt)=>this.set("start_time", evt.target.value)}/>
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_end_date">End Date</label>
-                    <input type="date" className="form-control" id="reservation_creator_end_date" value={formatDate(this.state.end)} onChange={(evt)=>this.setDate("end", evt.target.value)} />
+                    <input type="date" className="form-control" id="reservation_creator_end_date" value={this.state.end_date} onChange={(evt)=>this.set("end_date", evt.target.value)} />
                   </div>
                   <div className="form-group">
                     <label htmlFor="reservation_creator_end_time">End Time</label>
-                    <input type="time" className="form-control" id="reservation_creator_end_time" value={formatTime(this.state.end)} onChange={(evt)=>this.setTime("end", evt.target.value)}/>
+                    <input type="time" className="form-control" id="reservation_creator_end_time" value={this.state.end_time} onChange={(evt)=>this.set("end_time", evt.target.value)}/>
                   </div>
                   <div className="checkbox">
                     <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
@@ -1468,7 +1546,7 @@ const Login = React.createClass({
     evt.preventDefault();
     var me = this;
     send_xhr("POST", "/auth/login", "o",
-      JSON.stringify({email:this.state.email, password:this.state.password}),
+      JSON.stringify({username:this.state.username, password:this.state.password}),
       function(obj) {
         localStorage.setItem("session", obj.data.token);
         me.props.setPstate({ route: "reservation_list" });
@@ -1481,7 +1559,7 @@ const Login = React.createClass({
 
   getInitialState() {
     return {
-      email: "",
+      username: "",
       password: "",
       error_msg: ""
     }
@@ -1502,14 +1580,15 @@ const Login = React.createClass({
                   </div>
                 }
                 <div className="form-group">
-                  <label htmlFor="login_email">Email address</label>
-                  <input type="email" className="form-control" id="login_email" placeholder="Email" onChange={(evt)=>this.set("email", evt.target.value)} value={this.state.email}/>
+                  <label htmlFor="login_username">Username</label>
+                  <input type="text" className="form-control" id="login_username" placeholder="Username" onChange={(evt)=>this.set("username", evt.target.value)} value={this.state.username}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="login_password">Password</label>
                   <input type="password" className="form-control" id="login_password" placeholder="Password" onChange={(evt)=>this.set("password", evt.target.value)} value={this.state.password}/>
                 </div>
                 <button type="submit" className="btn btn-primary">Log In</button>
+                <a className="btn btn-primary" href="https://oauth.oit.duke.edu/oauth/authorize.php?client_id=ECE458_Resource_manager2&state=0.6590120431501418&response_type=token&redirect_uri=https://colab-sbx-304.oit.duke.edu/oauth">Login with Duke NetID</a>
               </form>
             </div>
           </div>
