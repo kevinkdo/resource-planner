@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
  * Created by jiaweizhang on 2/27/16.
  */
 
+@RestController
+@RequestMapping("/api/users")
 public class UserController extends Controller {
 
     @Autowired
