@@ -5,9 +5,22 @@ package resourceplanner.models;
  */
 
 public class OAuth {
-    private String access_token;
+    private String eppn;
+    private String error;
 
-    public String getAccess_token() {
-        return access_token;
+    public String getEppn() {
+        return eppn;
+    }
+
+    public void setEppn(String eppn) {
+        this.eppn = eppn;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }

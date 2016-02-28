@@ -2,7 +2,10 @@ package resourceplanner.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +15,8 @@ import responses.StandardResponse;
 import responses.data.Login;
 import utilities.TokenCreator;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -32,28 +37,41 @@ public class OAuthService {
     public StandardResponse auth(String authCode) {
         RestTemplate rt = new RestTemplate();
         Map<String, Object> variables = new HashMap<String, Object>();
-        variables.put("grant_type", "authorization_code");
-        variables.put("code", authCode);
-        variables.put("redirect_uri", "https://colab-sbx-304.oit.duke.edu/oauth");
-        variables.put("client_id", 1234); // TODO
-        variables.put("client_secret", "some client secret");
 
-        OAuth res = rt.postForObject("https://oauth2.duke.edu/token", null, OAuth.class, variables);
-        System.out.println(res);
+        //variables.put("grant_type", "authorization_code");
+        //variables.put("code", authCode);
+        //variables.put("redirect_uri", "https://colab-sbx-304.oit.duke.edu/oauth");
+        //variables.put("client_id", 1234); // TODO
+        //variables.put("client_secret", "some client secret");
 
-        // get stuff from the OAuth object if possible
-        String netId = "abc123";
-        String dukeToken = res.getAccess_token();
-        if (dukeToken == null || dukeToken.equals("")) {
+        variables.put("access_token", authCode);
+
+        OAuth res = null;
+        try {
+            res = rt.getForObject("https://oauth.oit.duke.edu/oauth/resource.php?access_token=" + authCode, OAuth.class);
+        } catch (Exception e) {
+            e.printStackTrace();
             return new StandardResponse(true, "Failed to authenticate");
         }
+        System.out.println(res);
+        System.out.println(res.getError());
+        System.out.println(res.getEppn());
+
+        // get stuff from the OAuth object if possible
+        if (res.getEppn() == null) {
+            return new StandardResponse(true, "Failed to authenticate");
+        }
+
+        String netIdEmail = res.getEppn();
+
+        String netId = netIdEmail.substring(0, netIdEmail.indexOf("@"));
 
         // check if netId exists in users table
         List<AuthUser> users = getUsers(netId);
 
         int userId = 0;
         if (users.size() != 1) {
-            createUser(netId);
+            userId = createUser(netId);
             users = getUsers(netId);
             if (users.size() != 1) {
                 return new StandardResponse(true, "Failed to add first-time user to database");
@@ -67,10 +85,23 @@ public class OAuthService {
 
     }
 
-    private void createUser(final String netId) {
+    private int createUser(final String netId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
-                "INSERT INTO users (email, username, should_email) VALUES (?, ?, ?);",
-                new Object[]{netId + "@duke.edu", netId, true});
+                new PreparedStatementCreator() {
+                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                        PreparedStatement ps = connection.prepareStatement(
+                                "INSERT INTO users (email, username, should_email) VALUES (?, ?, ?);",
+                                new String[]{"user_id"});
+                        ps.setString(1, netId + "@duke.edu");
+                        ps.setString(2, netId);
+                        ps.setBoolean(3, true);
+                        return ps;
+                    }
+                },
+                keyHolder);
+
+        return keyHolder.getKey().intValue();
 
     }
 
