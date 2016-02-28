@@ -2,7 +2,7 @@ package utilities;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import resourceplanner.models.AuthUser;
+import resourceplanner.authentication.AuthUser;
 
 /**
  * Created by jiaweizhang on 1/17/2016.
