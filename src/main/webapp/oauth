@@ -2,11 +2,16 @@
 redirect
 <head>
     <script>
-        console.log("something here");
-        console.log("jfkdjfkdjkfjdkfjdk");
-        console.log(window.location.pathname + window.location.search);
-        var str = (window.location.pathname + window.location.search).replace('#','?');
+        //console.log("something here");
+        //console.log("jfkdjfkdjkfjdkfjdk");
+        //console.log(window.location.pathname + window.location.search);
+        //var concated = window.location.pathname + window.location.search;
+        var concated = window.location.href
+        console.log(concated);
+        var str = concated.replace('#','?');
+        console.log(str);
         var url = str.replace('oauth','serveroauth');
+        console.log(url);
         window.location = url;
     </script>
 </head>

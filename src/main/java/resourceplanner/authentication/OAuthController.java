@@ -18,13 +18,7 @@ public class OAuthController {
     @RequestMapping(value = "",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse auth(@RequestParam(value = "access_token", required = false) final String auth_code, @RequestParam(value = "error", required = false) final String error) {
-        if (error == null && auth_code == null) {
-
-        }
-        if (error != null) {
-            return new StandardResponse(true, "You are not authorized");
-        }
+    public StandardResponse auth(@RequestParam(value = "access_token", required = false) final String auth_code) {
         System.out.println(auth_code);
         if (auth_code == null) {
             return new StandardResponse(true, "Invalid authcode");
