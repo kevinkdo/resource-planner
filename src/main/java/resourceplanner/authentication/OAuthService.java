@@ -101,13 +101,13 @@ public class OAuthService {
                 },
                 keyHolder);
 
-        addDefaultResourcePermissions(Integer.parseInt(netId));
+        addDefaultResourcePermissions(netId, netId + "@duke.edu"));
 
         return keyHolder.getKey().intValue();
 
     }
 
-    private void addDefaultResourcePermissions(int userId){
+    private void addDefaultResourcePermissions(String netId, String email){
         List<Integer> allResources = jt.query(
                 "SELECT resource_id FROM resources;",
                 new RowMapper<Integer>() {
@@ -116,9 +116,17 @@ public class OAuthService {
                     }
                 });
 
+        List<Integer> user = jt.query(
+                "SELECT user_id FROM users WHERE username = '" + netId + "' AND email = '" + email + "';",
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("user_id");
+                    }
+                });
+
         List<Object[]> batchPermissions = new ArrayList<Object[]>();
         for(int i : allResources){
-            batchPermissions.add(new Object[]{userId, i, 0});
+            batchPermissions.add(new Object[]{user.get(0), i, 0});
         }
 
         jt.batchUpdate(
