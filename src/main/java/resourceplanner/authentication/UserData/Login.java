@@ -6,12 +6,12 @@ package resourceplanner.authentication.UserData;
 public class Login {
     private String token;
     private int userId;
-    private String userName;
+    private String username;
 
-    public Login(String token, int userId, String userName) {
+    public Login(String token, int userId, String username) {
         this.token = token;
         this.userId = userId;
-        this.userName = userName;
+        this.username = username;
     }
 
     public String getToken() {
@@ -22,7 +22,7 @@ public class Login {
         return userId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 }
