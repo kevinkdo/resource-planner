@@ -101,7 +101,7 @@ public class OAuthService {
                 },
                 keyHolder);
 
-        addDefaultResourcePermissions(netId, netId + "@duke.edu"));
+        addDefaultResourcePermissions(netId, netId + "@duke.edu");
 
         return keyHolder.getKey().intValue();
 
