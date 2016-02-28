@@ -68,22 +68,18 @@ public class PermissionService {
     	return new StandardResponse(false, "Permissions retrieved", matrix);
     }
 
-    public StandardResponse updatePermissionMatrix(PermissionRequest req, int userId){
+    public StandardResponse updatePermissionMatrix(PermissionRequest permissionMatrix, int userId){
+    	SystemPermissions systemPermissions = permissionMatrix.getSystem_permissions();
+    	ResourcePermissions resourcePermissions = permissionMatrix.getResource_permissions();
+    	boolean shouldUpdateSystem = permissionMatrix.
+
+
+
     	return new StandardResponse(true, "Not implemented yet");
     }
 
 
     private List<ResourceAndID> getViewableResourcesAndIDs(ResourcePermissions resourcePermissions){
-    	/*
-    	List<ResourceAndID> allResources = jt.query(
-                "SELECT resource_id, name FROM resources;",
-                new RowMapper<ResourceAndID>() {
-                    public ResourceAndID mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new ResourceAndID(rs.getInt("resource_id"), rs.getInt("name"));
-                    }
-                });
-        */
-
     	Map<Integer, String> allResources = (Map) jt.query(
     			"SELECT resource_id, name FROM resources;", new ResultSetExtractor() {
 			        public Object extractData(ResultSet rs) throws SQLException {
