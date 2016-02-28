@@ -1,0 +1,13 @@
+<html>
+redirect
+<head>
+    <script>
+        console.log("something here");
+        console.log("jfkdjfkdjkfjdkfjdk");
+        console.log(window.location.pathname + window.location.search);
+        var str = (window.location.pathname + window.location.search).replace('#','?');
+        var url = str.replace('oauth','serveroauth');
+        window.location = url;
+    </script>
+</head>
+</html>
