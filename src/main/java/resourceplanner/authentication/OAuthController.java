@@ -9,7 +9,7 @@ import resourceplanner.main.StandardResponse;
  */
 
 @RestController
-@RequestMapping("/oauth")
+@RequestMapping("/serveroauth")
 public class OAuthController {
 
     @Autowired
@@ -18,7 +18,10 @@ public class OAuthController {
     @RequestMapping(value = "",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse auth(@RequestParam(value = "access_token", required=false) final String auth_code, @RequestParam(value="error", required=false) final String error) {
+    public StandardResponse auth(@RequestParam(value = "access_token", required = false) final String auth_code, @RequestParam(value = "error", required = false) final String error) {
+        if (error == null && auth_code == null) {
+
+        }
         if (error != null) {
             return new StandardResponse(true, "You are not authorized");
         }
