@@ -15,11 +15,23 @@ public class ResourcePermissions {
     	this.group_permissions = group_permissions;
     }
 
+    //DONT REMOVE. Default empty constructor needed for PUT request
+    public ResourcePermissions(){   
+    }
+
     public List<UserResourcePermission> getUser_permissions(){
     	return user_permissions;
     }
 
+    public void setUser_permissions(List<UserResourcePermission> user_permissions){
+       this.user_permissions = user_permissions;
+    }
+
     public List<GroupResourcePermission> getGroup_permissions(){
     	return group_permissions;
+    }
+
+    public void setGroup_permissions(List<GroupResourcePermission> group_permissions){
+        this.group_permissions = group_permissions;
     }
 }

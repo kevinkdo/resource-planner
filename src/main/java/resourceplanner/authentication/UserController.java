@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
  * Created by jiaweizhang on 2/27/16.
  */
 
+@RestController
+@RequestMapping("/api/users")
 public class UserController extends Controller {
 
     @Autowired
@@ -71,6 +73,8 @@ public class UserController extends Controller {
         if (getRequesterID(request) != userId) {
             return new StandardResponse(false, "Requester ID does not match URL parameter ID");
         }
+        System.out.println(hasUserP(request));
+        System.out.println(hasResourceP(request));
         return permissionService.getPermissionMatrix(userId, hasUserP(request), hasResourceP(request));
     }
 
@@ -82,7 +86,7 @@ public class UserController extends Controller {
         if (getRequesterID(request) != userId) {
             return new StandardResponse(false, "Requester ID does not match URL parameter ID");
         }
-        return permissionService.updatePermissionMatrix(req, userId);
+        return permissionService.updatePermissionMatrix(req, userId, hasResourceP(request), hasUserP(request));
     }
 
 }

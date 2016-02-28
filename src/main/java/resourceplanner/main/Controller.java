@@ -6,6 +6,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.util.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 public class Controller {
 
@@ -13,33 +20,59 @@ public class Controller {
     private JdbcTemplate jt;
 
 	public boolean isSuperAdmin(HttpServletRequest request){
+		int userId = getRequesterID(request);
+		List<Boolean> individualPermission = jt.query(
+                "SELECT super_p FROM users WHERE user_id = " + userId + 
+                " AND super_p = true;",
+                new RowMapper<Boolean>() {
+                    public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getBoolean("super_p");
+                    }
+                });
+
+		return individualPermission.size() > 0;
+
+		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
         return Boolean.parseBoolean(claims.get("super_p").toString());
+        */
 	}
 
 
 	// Returns true if the user himself has resource_p, or if the user is part of a 
 	// group with resource_p
 	public boolean hasResourceP(HttpServletRequest request){
+		int userId = getRequesterID(request);
+		return hasSpecificPermission(userId, "resource_p");
+		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		return Boolean.parseBoolean(claims.get("resource_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
+		*/
 	}
 
 	// Returns true if the user himself has reservation_p, or if the user is part of a 
 	// group with reservation_p
 	public boolean hasReservationP(HttpServletRequest request){
+		int userId = getRequesterID(request);
+		return hasSpecificPermission(userId, "reservation_p");
+		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		return Boolean.parseBoolean(claims.get("reservation_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
+		*/
 	}
 
 	// Returns true if the user himself has user_p, or if the user is part of a 
 	// group with user permission
 	public boolean hasUserP(HttpServletRequest request){
+		int userId = getRequesterID(request);
+		return hasSpecificPermission(userId, "user_p");
+		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		return Boolean.parseBoolean(claims.get("user_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
+		*/
 	}
 
-	/*
+	
 	private boolean hasSpecificPermission(int userId, String permissionType){
 		List<Boolean> individualPermission = jt.query(
                 "SELECT " + permissionType + " FROM users WHERE user_id = " + userId + 
@@ -56,13 +89,13 @@ public class Controller {
                 " AND groups.group_id = groupmembers.group_id AND " + permissionType +  " = true;",
                 new RowMapper<Boolean>() {
                     public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getBoolean("user_p");
+                        return rs.getBoolean(permissionType);
                     }
                 });
 
 		return individualPermission.size() > 0 || groupPermission.size() > 0;
 	}
-	*/
+	
 
 
 	public int getRequesterID(HttpServletRequest request){

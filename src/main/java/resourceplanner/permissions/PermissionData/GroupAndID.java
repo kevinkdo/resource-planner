@@ -13,6 +13,10 @@ public class GroupAndID {
         this.group_name = group_name;
     }
 
+    //DONT REMOVE. Default empty constructor needed for PUT request
+    public GroupAndID(){   
+    }
+
     public int getGroup_id() {
         return group_id;
     }

@@ -13,6 +13,10 @@ public class ResourceAndID {
         this.resource_name = resource_name;
     }
 
+    //DONT REMOVE. Default empty constructor needed for PUT request
+    public ResourceAndID(){   
+    }
+
     public int getResource_id() {
         return resource_id;
     }

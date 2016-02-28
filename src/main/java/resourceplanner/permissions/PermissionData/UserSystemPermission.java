@@ -12,8 +12,16 @@ public class UserSystemPermission extends GenericSystemPermission {
         this.user_id = user_id;
     }
 
+    //DONT REMOVE. Default empty constructor needed for PUT request
+    public UserSystemPermission(){   
+    }
+
     public int getUser_id(){
     	return user_id;
+    }
+
+    public void setUser_id(int user_id){
+    	this.user_id = user_id;
     }
 
 }

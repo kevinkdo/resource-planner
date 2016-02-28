@@ -47,7 +47,7 @@ public class AuthService {
         try {
             if (PasswordHash.validatePassword(req.getPassword(), maxPermissionUser.getPasshash())) {
                 String token = TokenCreator.generateToken(maxPermissionUser, req.getUsername());
-                Login login = new Login(token, maxPermissionUser.getUser_id());
+                Login login = new Login(token, maxPermissionUser.getUser_id(), req.getUsername());
                 return new StandardResponse(false, "Successfully authenticated", login);
             }
         } catch (Exception e) {
