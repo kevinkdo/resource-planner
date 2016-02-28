@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.*;
 
 /**
  * Created by jiaweizhang on 1/26/2016.
@@ -102,9 +103,39 @@ public class UserService {
                     }
                 },
                 keyHolder);
+        addDefaultResourcePermissions(req.getUsername(), req.getEmail());
 
         // TODO update
         return new StandardResponse(false, "Successfully registered.");
+    }
+
+    private void addDefaultResourcePermissions(String username, String email){
+        List<Integer> allResources = jt.query(
+                "SELECT resource_id FROM resources;",
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("resource_id");
+                    }
+                });
+
+        List<Integer> user = jt.query(
+                "SELECT user_id FROM users WHERE username = '" + username + "' AND email = '" + email + "';",
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("user_id");
+                    }
+                });
+
+
+        List<Object[]> batchPermissions = new ArrayList<Object[]>();
+        for(int i : allResources){
+            batchPermissions.add(new Object[]{user.get(0), i, 0});
+        }
+
+        jt.batchUpdate(
+            "INSERT INTO userresourcepermissions (user_id, resource_id, permission_level) VALUES (?, ?, ?);",
+            batchPermissions
+            );
     }
 
     public StandardResponse getUserById(int userId) {

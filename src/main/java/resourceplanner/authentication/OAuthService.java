@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jiaweizhang on 2/22/16.
@@ -76,7 +77,7 @@ public class OAuthService {
             }
         }
         //users.get(0).setUser_id(userId);
-
+        System.out.println("Authenticated");
         String token = TokenCreator.generateToken(users.get(0), netId);
         Login login = new Login(token, users.get(0).getUser_id(), netId);
         return new StandardResponse(false, "Successfully authenticated", login);
@@ -84,6 +85,7 @@ public class OAuthService {
     }
 
     private int createUser(final String netId) {
+        System.out.println("Creating user");
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
                 new PreparedStatementCreator() {
@@ -99,8 +101,30 @@ public class OAuthService {
                 },
                 keyHolder);
 
+        addDefaultResourcePermissions(Integer.parseInt(netId));
+
         return keyHolder.getKey().intValue();
 
+    }
+
+    private void addDefaultResourcePermissions(int userId){
+        List<Integer> allResources = jt.query(
+                "SELECT resource_id FROM resources;",
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getInt("resource_id");
+                    }
+                });
+
+        List<Object[]> batchPermissions = new ArrayList<Object[]>();
+        for(int i : allResources){
+            batchPermissions.add(new Object[]{userId, i, 0});
+        }
+
+        jt.batchUpdate(
+            "INSERT INTO userresourcepermissions (user_id, resource_id, permission_level) VALUES (?, ?, ?);",
+            batchPermissions
+            );
     }
 
     private List<AuthUser> getUsers(final String netId) {
