@@ -1,38 +1,31 @@
 <html>
-redirect
-<head>
+  <head>
     <script>
-        //console.log("something here");
-        //console.log("jfkdjfkdjkfjdkfjdk");
-        //console.log(window.location.pathname + window.location.search);
-        //var concated = window.location.pathname + window.location.search;
-        var concated = window.location.href
-        console.log(concated);
-        var str = concated.replace('#','?');
-        console.log(str);
-        var url = str.replace('oauth','serveroauth');
-        console.log(url);
-        //window.location = url;
+      // This script redirects the user to the webapp
+      // after setting tokens in localStorage
+      // URL preprocessing
+      var str =  window.location.href.replace('#','?');
+      var url = str.replace('oauth','serveroauth');
 
-        var res =httpGet(url);
-        var resp = JSON.parse(res);
-        console.log(resp);
-        console.log(resp.data);
-        if (resp.error == true) {
-            alert('Failed to authenticate');
-        } else {
-            localStorage.setItem("session", resp.data.token);
+      // Set up request
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+          if (xhr.status == 200) {
+            var responseObject = JSON.parse(xhr.responseText);
+            if (responseObject.is_error) {
+              alert('Failed to authenticate');
+            } else {
+              localStorage.setItem("session", responseObject.data.token);
+            }
+
+            window.location = '/';// Set this redirect URL
+          }
         }
-
-        window.location = '/';
-
-        function httpGet(theUrl)
-        {
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-            xmlHttp.send( null );
-            return xmlHttp.responseText;
-        }
+      };
+      xhr.open("GET", url, true);
+      xhr.send(null);
+      
     </script>
-</head>
+  </head>
 </html>
