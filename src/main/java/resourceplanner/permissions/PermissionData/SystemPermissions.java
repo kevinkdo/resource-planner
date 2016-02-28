@@ -14,6 +14,10 @@ public class SystemPermissions {
     	this.group_permissions = group_permissions;
     }
 
+    //DONT REMOVE. Default empty constructor needed for PUT request
+    public SystemPermissions(){   
+    }
+
     public List<UserSystemPermission> getUser_permissions(){
     	return user_permissions;
     }

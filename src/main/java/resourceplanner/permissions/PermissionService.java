@@ -66,14 +66,13 @@ public class PermissionService {
     	return new StandardResponse(false, "Permissions retrieved", matrix);
     }
 
-    public StandardResponse updatePermissionMatrix(PermissionRequest permissionRequest, int userId,
+    public StandardResponse updatePermissionMatrix(PermissionRequest permissionMatrix, int userId,
             boolean resourceP, boolean userP){
 
-        if(!permissionRequest.isValid()){
+        if(!permissionMatrix.isValid()){
             return new StandardResponse(true, "JSON input has unexpected format");
         }
 
-        PermissionMatrix permissionMatrix = permissionRequest.getPermission_matrix();
     	SystemPermissions systemPermissions = permissionMatrix.getSystem_permissions();
     	ResourcePermissions resourcePermissions = permissionMatrix.getResource_permissions();
 
