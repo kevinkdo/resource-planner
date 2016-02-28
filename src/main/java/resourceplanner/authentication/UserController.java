@@ -84,7 +84,7 @@ public class UserController extends Controller {
         if (getRequesterID(request) != userId) {
             return new StandardResponse(false, "Requester ID does not match URL parameter ID");
         }
-        return permissionService.updatePermissionMatrix(req, userId);
+        return permissionService.updatePermissionMatrix(req, userId, hasResourceP(request), hasUserP(request));
     }
 
 }

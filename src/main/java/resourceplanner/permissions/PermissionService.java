@@ -66,14 +66,66 @@ public class PermissionService {
     	return new StandardResponse(false, "Permissions retrieved", matrix);
     }
 
-    public StandardResponse updatePermissionMatrix(PermissionRequest permissionMatrix, int userId){
+    public StandardResponse updatePermissionMatrix(PermissionRequest permissionRequest, int userId,
+            boolean resourceP, boolean userP){
+
+        if(!permissionRequest.isValid()){
+            return new StandardResponse(true, "JSON input has unexpected format");
+        }
+
+        PermissionMatrix permissionMatrix = permissionRequest.getPermission_matrix();
     	SystemPermissions systemPermissions = permissionMatrix.getSystem_permissions();
     	ResourcePermissions resourcePermissions = permissionMatrix.getResource_permissions();
-    	boolean shouldUpdateSystem = permissionMatrix.
 
+        if(userP){
+            List<Object[]> batchUserPermissions = new ArrayList<Object[]>();
+            for(UserSystemPermission u : systemPermissions.getUser_permissions()){
+                batchUserPermissions.add(new Object[]{u.getResource_p(), u.getReservation_p(),
+                    u.getUser_p(), u.getUser_id()});
+            }
 
+            jt.batchUpdate(
+                "UPDATE users SET (resource_p, reservation_p, user_p) = (?, ?, ?) WHERE user_id = ?;",
+                batchUserPermissions
+                );
 
-    	return new StandardResponse(true, "Not implemented yet");
+            List<Object[]> batchGroupPermissions = new ArrayList<Object[]>();
+            for(GroupSystemPermission g : systemPermissions.getGroup_permissions()){
+                batchGroupPermissions.add(new Object[]{g.getResource_p(), g.getReservation_p(),
+                    g.getUser_p(), g.getGroup_id()});
+            }
+
+            jt.batchUpdate(
+                "UPDATE groups SET (resource_p, reservation_p, user_p) = (?, ?, ?) WHERE group_id = ?;",
+                batchGroupPermissions
+                );
+        }
+
+        if(resourceP){
+            List<Object[]> batchUserResourcePermissions = new ArrayList<Object[]>();
+            for(UserResourcePermission u : resourcePermissions.getUser_permissions()){
+                batchUserResourcePermissions.add(new Object[]{u.getPermission_level(), u.getUser_id(),
+                    u.getResource_id()});
+            }
+
+            jt.batchUpdate(
+                "UPDATE userresourcepermissions SET permission_level = ? WHERE (user_id = ? AND resource_id = ?);",
+                batchUserResourcePermissions
+                );
+
+            List<Object[]> batchGroupResourcePermissions = new ArrayList<Object[]>();
+            for(GroupResourcePermission g : resourcePermissions.getGroup_permissions()){
+                batchGroupResourcePermissions.add(new Object[]{g.getPermission_level(), g.getGroup_id(),
+                    g.getResource_id()});
+            }
+
+            jt.batchUpdate(
+                "UPDATE groupresourcepermissions SET permission_level = ? WHERE (group_id = ? AND resource_id = ?);",
+                batchGroupResourcePermissions
+                );
+        }
+
+        return new StandardResponse(false, "Permissions updated");
     }
 
 
