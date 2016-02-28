@@ -1,0 +1,38 @@
+<html>
+redirect
+<head>
+    <script>
+        //console.log("something here");
+        //console.log("jfkdjfkdjkfjdkfjdk");
+        //console.log(window.location.pathname + window.location.search);
+        //var concated = window.location.pathname + window.location.search;
+        var concated = window.location.href
+        console.log(concated);
+        var str = concated.replace('#','?');
+        console.log(str);
+        var url = str.replace('oauth','serveroauth');
+        console.log(url);
+        //window.location = url;
+
+        var res =httpGet(url);
+        var resp = JSON.parse(res);
+        console.log(resp);
+        console.log(resp.data);
+        if (resp.error == true) {
+            alert('Failed to authenticate');
+        } else {
+            localStorage.setItem("session", resp.data.token);
+        }
+
+        window.location = '/';
+
+        function httpGet(theUrl)
+        {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+            xmlHttp.send( null );
+            return xmlHttp.responseText;
+        }
+    </script>
+</head>
+</html>

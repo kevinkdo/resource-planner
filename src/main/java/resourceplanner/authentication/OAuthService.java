@@ -48,7 +48,7 @@ public class OAuthService {
         try {
             res = rt.getForObject("https://oauth.oit.duke.edu/oauth/resource.php?access_token=" + authCode, OAuth.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return new StandardResponse(true, "Failed to authenticate");
         }
         System.out.println(res);
