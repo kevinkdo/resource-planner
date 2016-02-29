@@ -158,14 +158,14 @@ const Navbar = React.createClass({
             <ul className="nav navbar-nav navbar-left">
               <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "resource_list"})}>Resources</a></li>
               <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "reservation_list"})}>Reservations</a></li>
+              <li className={this.props.pstate.route.indexOf("group") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "group_manager"})}>Groups</a></li>
+              <li className={this.props.pstate.route.indexOf("permissions") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "permissions_manager"})}>Permissions Manager</a></li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
               <li><p className="navbar-text">{this.state.username}</p></li>
               <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
-                  <li><a href="#" onClick={() => this.props.setPstate({route: "permissions_manager"})}>Permissions Manager</a></li>
-                  <li><a href="#" onClick={() => this.props.setPstate({route: "group_manager"})}>Group Manager</a></li>
                   <li><a href="#" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
                   <li><a href="#" onClick={this.logout}>Log Out</a></li>
@@ -189,9 +189,9 @@ const GroupManager = React.createClass({
   },
 
   newGroup() {
-    var new_group_name = prompt();
+    var new_group_name = prompt("New group name:");
     var me = this;
-    if (new_group_name != null) {
+    if (new_group_name != null && new_group_name.length > 0) {
       this.setState({sending: true});
       send_xhr("POST", "/api/groups", localStorage.getItem("session"),
       JSON.stringify({group_name:new_group_name, user_ids: [], resource_p: false, reservation_p: false, user_p: false}),
@@ -283,7 +283,7 @@ const GroupManager = React.createClass({
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <div className="container">
-          <h3>Reservations
+          <h3>Groups
               <button type="button" className="btn btn-success pull-right" onClick={this.newGroup}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New group</button>
           </h3>
           {table}
@@ -592,6 +592,23 @@ const PermissionsManager = React.createClass({
     return "";
   },
 
+  save() {
+    var me = this;
+    me.setState({sending: true});
+    send_xhr("PUT", "/api/users/" + userId() + "/editablePermissions", localStorage.getItem("session"),
+      JSON.stringify(me.state.data),
+      function(obj) {
+        me.setState({sending: false});
+      },
+      function(obj) {
+        me.setState({
+          sending: false,
+          error_msg: obj.error_msg
+        });
+      }
+    );
+  },
+
   componentDidMount() {
     var me = this;
     send_xhr("GET", "/api/users/" + userId() + "/editablePermissions", localStorage.getItem("session"), null,
@@ -668,7 +685,9 @@ const PermissionsManager = React.createClass({
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
-        <h3>Permissions Manager</h3>
+        <h3>Permissions Manager
+          <span className="padleft"><button type="button" className="btn btn-success" onClick={() => this.save()}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button></span>
+        </h3>
         {this.state.initial_load ? <Loader /> : this.makeTable()}
       </div>
     );

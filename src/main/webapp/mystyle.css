@@ -28,6 +28,10 @@ input[type="date"]::-webkit-clear-button {
                                   not supported by any browser */
 }
 
+.padleft {
+  padding-left: 1em;
+}
+
 .spinner {
   margin: 25px auto 0;
   width: 70px;
