@@ -59,7 +59,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.reserveUrl + '/1', headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}
+      assert decoded['data'] == {u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'user_id': 1, u'resource_p': True, u'reservation_p': True, u'user_p': True, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}
       assert decoded['error_msg'] == 'Reservation with given ID found'
     
   def test_GetReservationWithInvalidID(self):
@@ -74,27 +74,27 @@ class ReservationTestCases(unittest.TestCase):
   def test_GetReservationWithValidQueryWithResourceAndUserLists(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
-      queryUrl = '/?start=2008-08-06T10:54:17Z&end=2015-08-06T10:54:17Z&user_ids=1,2&resource_ids=1'
+      queryUrl = '/?start=2008-08-06T10:54:17.000Z&end=2015-08-06T10:54:17.000Z&user_ids=1,2&resource_ids=1'
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'should_email': False, u'email': u'admin@admin.com'}}]
+      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'user_id': 1, u'username': u'admin', u'resource_p': True, u'reservation_p': True, u'user_p': True, u'should_email': False, u'email': u'admin@admin.com'}}]
       assert decoded['error_msg'] == 'Matching reservations retrieved'
 
   def test_GetReservationWithQueryValidTimeRange(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
-      queryUrl = '/?start=2008-08-06T10:54:17Z&end=2015-08-06T10:54:17Z'
+      queryUrl = '/?start=2008-08-06T10:54:17.000Z&end=2015-08-06T10:54:17.000Z'
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'admin', u'should_email': False, u'user_id': 1, u'email': u'admin@admin.com'}}]
+      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'some resource description', u'tags': [], u'name': u'some resource', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'admin', u'resource_p': True, u'reservation_p': True, u'user_p': True, u'should_email': False, u'user_id': 1, u'email': u'admin@admin.com'}}]
       assert decoded['error_msg'] == 'Matching reservations retrieved'
 
   def test_GetReservationWithQueryInvalidTimeRange(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
-      queryUrl = '/?start=2015-08-06T10:54:17Z&end=2008-08-06T10:54:17Z'
+      queryUrl = '/?start=2015-08-06T10:54:17.000Z&end=2008-08-06T10:54:17.000Z'
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True

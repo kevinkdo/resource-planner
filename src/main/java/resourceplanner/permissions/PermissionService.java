@@ -176,22 +176,33 @@ public class PermissionService {
     	Set<Integer> allViewableResources = new TreeSet<Integer>(userViewableResources); 
 		allViewableResources.addAll(groupViewableResources);
 
+        List<UserResourcePermission> userPermissionsToRemove = new ArrayList<UserResourcePermission>();
 		for(UserResourcePermission u : userResourcePermissions){
 			if(!allViewableResources.contains(u.getResource_id())){
-				userResourcePermissions.remove(u);
+                userPermissionsToRemove.add(u);
+				//userResourcePermissions.remove(u);
 			}
 		}
+        for(UserResourcePermission u : userPermissionsToRemove){
+            userResourcePermissions.remove(u);
+        }
 
+
+        List<GroupResourcePermission> groupPermissionsToRemove = new ArrayList<GroupResourcePermission>();
 		for(GroupResourcePermission g : groupResourcePermissions){
 			if(!allViewableResources.contains(g.getResource_id())){
-				groupResourcePermissions.remove(g);
+                groupPermissionsToRemove.add(g);
+				//groupResourcePermissions.remove(g);
 			}
 		}
+        for(GroupResourcePermission g : groupPermissionsToRemove){
+            groupResourcePermissions.remove(g);
+        }
     }
 
     //Returns all resources that a user can view due to personal permissions
     //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM A GROUP HE IS IN)
-    private List<Integer> getUserViewableResources(int userId){
+    public List<Integer> getUserViewableResources(int userId){
     	String userViewableQueryString = "SELECT resource_id FROM userresourcepermissions WHERE user_id = " + userId +
     		" AND permission_level > 0;"; 
 
@@ -208,7 +219,7 @@ public class PermissionService {
 
     //Returns all resources a user can view due to group memberships
     //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM PERSONAL PERMISSIONS)
-    private List<Integer> getGroupViewableResources(int userId){
+    public List<Integer> getGroupViewableResources(int userId){
     	String groupViewableQueryString = "SELECT resource_id FROM groupresourcepermissions WHERE group_id IN " +
     			"(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
     			"permission_level > 0;";

@@ -14,6 +14,7 @@ import resourceplanner.resources.ResourceData.CanDelete;
 import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.resources.ResourceData.Resources;
 import utilities.TimeUtility;
+import resourceplanner.permissions.PermissionService;
 
 import java.sql.*;
 import java.util.*;
@@ -28,6 +29,9 @@ public class ResourceService {
 
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    PermissionService permissionService;
 
     @Autowired
     private JdbcTemplate jt;
@@ -124,7 +128,7 @@ public class ResourceService {
             );
     }
 
-    public StandardResponse getResourceById(final int resourceId) {
+    public StandardResponse getResourceById(final int resourceId, int userId) {
         List<Resource> resources = jt.query(
                 "SELECT name, description FROM resources WHERE resource_id = ?;",
                 new Object[]{resourceId},
@@ -149,10 +153,57 @@ public class ResourceService {
                 String.class);
         resource.setTags(tags);
         resource.setResource_id(resourceId);
+
+
+        Set<Integer> allViewableResources = getViewableResources(userId);
+        if(allViewableResources.contains(resourceId)){
+            return new StandardResponse(false, "Successfully retrieved resource", resource);
+        }
+        else{
+            return new StandardResponse(true, "You do not have permission to view this resource");
+        }
+    }
+
+    public StandardResponse getResourceByIdIgnoringPermissions(final int resourceId) {
+        List<Resource> resources = jt.query(
+                "SELECT name, description FROM resources WHERE resource_id = ?;",
+                new Object[]{resourceId},
+                new RowMapper<Resource>() {
+                    public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        Resource resource = new Resource();
+                        resource.setName(rs.getString("name"));
+                        resource.setDescription(rs.getString("description"));
+                        return resource;
+                    }
+                });
+
+        if (resources.size() != 1) {
+            return new StandardResponse(true, "Resource does not exist");
+        }
+
+        Resource resource = resources.get(0);
+
+        List<String> tags = jt.queryForList(
+                "SELECT tag FROM resourcetags WHERE resource_id = ?;",
+                new Object[]{resourceId},
+                String.class);
+        resource.setTags(tags);
+        resource.setResource_id(resourceId);
+
         return new StandardResponse(false, "Successfully retrieved resource", resource);
     }
 
-    public StandardResponse getResource(String[] requiredTags, String[] excludedTags) {
+
+
+    public Set<Integer> getViewableResources(int userId){
+        List<Integer> userViewableResources = permissionService.getUserViewableResources(userId);
+        List<Integer> groupViewableResources = permissionService.getGroupViewableResources(userId);
+        Set<Integer> allViewableResources = new TreeSet<Integer>(userViewableResources); 
+        allViewableResources.addAll(groupViewableResources);
+        return allViewableResources;
+    }
+
+    public StandardResponse getResource(String[] requiredTags, String[] excludedTags, int userId) {
         if (requiredTags == null) {
             requiredTags = new String[0];
         }
@@ -223,7 +274,15 @@ public class ResourceService {
             response.add(processList.get(i));
         }
 
-        return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
+        Set<Integer> allViewableResources = getViewableResources(userId);
+        List<Resource> finalResponse = new ArrayList<Resource>();
+        for(Resource r : response){
+            if(allViewableResources.contains(r.getResource_id())){
+                finalResponse.add(r);
+            }
+        }
+
+        return new StandardResponse(false, "Successfully retrieved resources", new Resources(finalResponse));
     }
 
     private static class RT {

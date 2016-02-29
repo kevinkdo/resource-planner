@@ -43,7 +43,7 @@ public class Controller {
 	// group with resource_p
 	public boolean hasResourceP(HttpServletRequest request){
 		int userId = getRequesterID(request);
-		return hasSpecificPermission(userId, "resource_p");
+		return hasSpecificPermission(userId, "resource_p") || isSuperAdmin(request);
 		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		return Boolean.parseBoolean(claims.get("resource_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
@@ -54,7 +54,7 @@ public class Controller {
 	// group with reservation_p
 	public boolean hasReservationP(HttpServletRequest request){
 		int userId = getRequesterID(request);
-		return hasSpecificPermission(userId, "reservation_p");
+		return hasSpecificPermission(userId, "reservation_p") || isSuperAdmin(request);
 		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		return Boolean.parseBoolean(claims.get("reservation_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());
@@ -65,7 +65,7 @@ public class Controller {
 	// group with user permission
 	public boolean hasUserP(HttpServletRequest request){
 		int userId = getRequesterID(request);
-		return hasSpecificPermission(userId, "user_p");
+		return hasSpecificPermission(userId, "user_p") || isSuperAdmin(request);
 		/*
 		final Claims claims = (Claims) request.getAttribute("claims");
 		return Boolean.parseBoolean(claims.get("user_p").toString()) || Boolean.parseBoolean(claims.get("super_p").toString());

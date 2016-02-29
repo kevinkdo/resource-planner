@@ -32,8 +32,10 @@ public class ResourceController extends Controller {
     @RequestMapping(value = "/{resourceId}",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse getResourceById(@PathVariable final int resourceId) {
-        return resourceService.getResourceById(resourceId);
+    public StandardResponse getResourceById(@PathVariable final int resourceId,
+                                            final HttpServletRequest request) {
+        int userId = getRequesterID(request);
+        return resourceService.getResourceById(resourceId, userId);
     }
 
     @RequestMapping(value = "/",
@@ -41,15 +43,18 @@ public class ResourceController extends Controller {
     @ResponseBody
     public StandardResponse getResource(
             @RequestParam(value = "required_tags", required = false) String[] requiredTags,
-            @RequestParam(value = "excluded_tags", required = false) String[] excludedTags) {
-        return resourceService.getResource(requiredTags, excludedTags);
+            @RequestParam(value = "excluded_tags", required = false) String[] excludedTags,
+            final HttpServletRequest request) {
+        int userId = getRequesterID(request);
+        return resourceService.getResource(requiredTags, excludedTags, userId);
     }
 
     @RequestMapping(value = "",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse getAllResources() {
-        return resourceService.getResource(new String[0], new String[0]);
+    public StandardResponse getAllResources(final HttpServletRequest request) {
+        int userId = getRequesterID(request);
+        return resourceService.getResource(new String[0], new String[0], userId);
     }
 
 
