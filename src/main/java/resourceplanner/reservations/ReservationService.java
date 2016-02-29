@@ -263,6 +263,21 @@ public class ReservationService{
             return new StandardResponse(true, "New user or resource id is not valid");
         }
 
+        Object[] updateObject = new Object[]{existingRes.getUser_id(), existingRes.getResource_id(), existingRes.getBegin_time(),
+                            existingRes.getEnd_time(), existingRes.getShould_email(), reservationId};
+
+        int rows = jt.update("UPDATE reservations SET user_id = ?, resource_id = ?, begin_time = ?, end_time = ?, should_email = ? WHERE reservation_id = ?;",
+                            updateObject);
+        if(rows == 1){
+            ReservationWithIDsData reservationToReturn = new ReservationWithIDsData(existingRes);
+            emailService.rescheduleEmails(reservationToReturn);
+            return new StandardResponse(false, "Successfully updated reservation", reservationToReturn);
+        }
+        else{
+            return new StandardResponse(true, "Error updating database entry for reservation");
+        }
+
+        /*
         Connection c = JDBC.connect();
         PreparedStatement st = null;
         String query = "UPDATE reservations SET user_id = ?, resource_id = ?, begin_time = ?, end_time = ?, should_email = ? WHERE reservation_id = ?;";
@@ -288,6 +303,7 @@ public class ReservationService{
         catch (Exception e){
             return new StandardResponse(true, "Error issuing SQL update");
         }
+        */
 
     }
 
