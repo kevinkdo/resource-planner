@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <script>
+      // This script redirects the user to the webapp
+      // after setting tokens in localStorage
+      // URL preprocessing
+      var str =  window.location.href.replace('#','?');
+      var url = str.replace('oauth','serveroauth');
+
+      // Set up request
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+          if (xhr.status == 200) {
+            var responseObject = JSON.parse(xhr.responseText);
+            if (responseObject.is_error) {
+              alert('Failed to authenticate');
+            } else {
+              localStorage.setItem("session", responseObject.data.token);
+            }
+
+            window.location = '/';// Set this redirect URL
+          }
+        }
+      };
+      xhr.open("GET", url, true);
+      xhr.send(null);
+      
+    </script>
+  </head>
+</html>
