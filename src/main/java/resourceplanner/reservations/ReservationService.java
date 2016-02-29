@@ -364,7 +364,7 @@ public class ReservationService{
     }
 
     private Resource getResourceById(int resourceId) {
-    	StandardResponse resourceResponse = resourceService.getResourceById(resourceId);
+    	StandardResponse resourceResponse = resourceService.getResourceByIdIgnoringPermissions(resourceId);
     	return (Resource) resourceResponse.getData();
     }
 
