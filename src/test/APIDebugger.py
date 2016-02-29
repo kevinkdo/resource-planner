@@ -27,8 +27,7 @@ requestPayloadPost = ')'
 requestID = ''
 requestIDPre = ' + "/'
 requestIDPost = '"'
-headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
-
+headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOjEsInN1cGVyX3AiOnRydWUsInJlc291cmNlX3AiOmZhbHNlLCJyZXNlcnZhdGlvbl9wIjpmYWxzZSwidXNlcl9wIjpmYWxzZX0.ftBgC8KfB5GyQy68I7HdQQZjUdBvkF-il93Z87BwKfg", "Content-Type": "application/json" }
 class Verbs(Enum): 
   Get = 'get'
   Post = 'post'
