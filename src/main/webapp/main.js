@@ -482,31 +482,11 @@ const Settings = React.createClass({
   }
 });
 
-// TODO when user, resource, group resources are returned
 const PermissionsManager = React.createClass({
   getInitialState() {
     return {
-      data: {"system_permissions": {"user_permissions": [{"user_id": 1, "username": "Davis", "resource_p": true, "reservation_p": false, "user_p": true},
-                   {"user_id": 2, "username": "Kevin", "resource_p": false, "reservation_p": false, "user_p": true}],
- "group_permissions": [{"group_id": 1, "group_name": "Dudes", "resource_p": true, "reservation_p": false, "user_p": true},
-{"group_id": 2, "group_name": "Girls", "resource_p": true, "reservation_p": false, "user_p": true}]
-            },
- "resource_permissions": {"user_permissions": [{"user_id": 1, "username": "Davis", "resource_id": 2, "resource_name": "Chair", "permission_level": 1},
-                     {"user_id": 2, "username": "Kevin", "resource_id": 3, "resource_name": "Chair2", "permission_level": 2}],
-          "group_permissions": [{"group_id": 1, "group_name": "Dudes", "resource_id": 2, "resource_name": "Chair", "permission_level": 1},
-                                             {"group_id": 2, "group_name": "Girls", "resource_id": 3, "resource_name": "Chair2", "permission_level": 2}]
-                }
- }};
-  },
-
-  getUserOrGroupField(id, field1, field2, id_field, answer_field) {
-    var answer = "";
-    this.state.data[field1][field2].forEach(function(x) {
-      if (x[id_field] == id) {
-        answer = x[answer_field];
-      }
-    });
-    return answer ? answer : user_id.toString();
+      initial_load: true
+    }
   },
 
   getResourceUserPermission(resource_id, user_id) {
@@ -580,13 +560,22 @@ const PermissionsManager = React.createClass({
     return answer.toString();
   },
 
-  cycleSystemGroupPermission(field, user_id) {
+  cycleSystemGroupPermission(field, group_id) {
     this.state.data.system_permissions.group_permissions.forEach(function(x) {
       if (x.group_id == group_id) {
         x[field] = !x[field];
       }
     });
     this.setState(this.state);
+  },
+
+  getPermissionText(x) {
+    if (x == 0) 
+      return "None";
+    if (x == 1)
+      return "View";
+    if (x == 2)
+      return "Reserve";
   },
 
   getBackgroundColor(x) {
@@ -603,52 +592,84 @@ const PermissionsManager = React.createClass({
     return "";
   },
 
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/users/" + userId() + "/editablePermissions", localStorage.getItem("session"), null,
+      function(obj) {
+        me.setState({
+          data: obj.data,
+          initial_load: false
+        });
+      },
+      function(obj) {
+        me.setState({
+          initial_load: false,
+          error_msg: obj.error_msg
+        });
+      }
+    );
+  },
+
+  makeTable() {
+    var me = this;
+    var user_ids = me.state.data.users.map(x => x.user_id);
+    var group_ids = me.state.data.groups.map(x => x.group_id);
+    var resource_ids = me.state.data.resources.map(x => x.resource_id);
+    var resource_names = me.state.data.resources.map(x => x.resource_name);
+    var user_management = me.state.data.system_permissions.user_permissions.length > 0;
+    return (
+      <table className="table table-hover">
+        <thead>
+          <tr>
+            <th>User/Group</th>
+            {user_management ? <th>Manage Resources</th> : null}
+            {user_management ? <th>Manage Reservations</th> : null}
+            {user_management ? <th>Manage Users</th> : null}
+            {me.state.data.resources.map(resource => <th key={"res" + resource.resource_id}>{resource.resource_name}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {me.state.data.users.map(function(user) {
+            var user_id = user.user_id;
+            return (
+              <tr key={"tr user" + user_id}>
+                <td>{user.username}</td>
+                {user_management ? <td className={me.getBackgroundColor(me.getSystemUserPermission("resource_p", user_id)) + " pointer noselect"} onClick={() => me.cycleSystemUserPermission("resource_p", user_id)}>{me.getSystemUserPermission("resource_p", user_id)}</td> : null}
+                {user_management ? <td className={me.getBackgroundColor(me.getSystemUserPermission("reservation_p", user_id)) + " pointer noselect"} onClick={() => me.cycleSystemUserPermission("reservation_p", user_id)}>{me.getSystemUserPermission("reservation_p", user_id)}</td> : null}
+                {user_management ? <td className={me.getBackgroundColor(me.getSystemUserPermission("user_p", user_id)) + " pointer noselect"} onClick={() => me.cycleSystemUserPermission("user_p", user_id)}>{me.getSystemUserPermission("user_p", user_id)}</td> : null}
+                {
+                  resource_ids.map(resource_id => <td className={me.getBackgroundColor(me.getResourceUserPermission(resource_id, user_id)) + " pointer noselect"} onClick={() => me.cycleResourceUserPermission(resource_id, user_id)} key={"permuser" + resource_id + " " + user_id}>{
+                    me.getPermissionText(me.getResourceUserPermission(resource_id, user_id))}</td>)
+                }
+              </tr>
+            );
+          })}
+          {me.state.data.groups.map(function(group) {
+            var group_id = group.group_id;
+            return (
+              <tr key={"tr group" + group_id}>
+                <td>{group.group_name}</td>
+                {user_management ? <td className={me.getBackgroundColor(me.getSystemGroupPermission("resource_p", group_id)) + " pointer noselect"} onClick={() => me.cycleSystemGroupPermission("resource_p", group_id)}>{me.getSystemGroupPermission("resource_p", group_id)}</td> : null}
+                {user_management ? <td className={me.getBackgroundColor(me.getSystemGroupPermission("reservation_p", group_id)) + " pointer noselect"} onClick={() => me.cycleSystemGroupPermission("reservation_p", group_id)}>{me.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
+                {user_management ? <td className={me.getBackgroundColor(me.getSystemGroupPermission("user_p", group_id)) + " pointer noselect"} onClick={() => me.cycleSystemGroupPermission("user_p", group_id)}>{me.getSystemGroupPermission("user_p", group_id)}</td> : null}
+                {
+                  resource_ids.map(resource_id => <td className={me.getBackgroundColor(me.getResourceGroupPermission(resource_id, group_id)) + " pointer noselect"} onClick={() => me.cycleResourceGroupPermission(resource_id, group_id)} key={"permgroup" + resource_id + " " + group_id}>{me.getPermissionText(me.getResourceGroupPermission(resource_id, group_id))}</td>)
+                }
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  },
+
   render() {
-    var user_ids = this.state.data.resource_permissions.user_permissions.map(x => x.user_id);
-    var group_ids = this.state.data.resource_permissions.group_permissions.map(x => x.group_id);
-    var resource_ids = uniq(this.state.data.resource_permissions.user_permissions.map(x => x.resource_id));
-    var user_management = this.state.data.system_permissions.user_permissions.length > 0;
     return (
       <div>
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <h3>Permissions Manager</h3>
-        <table className="table table-hover">
-          <thead>
-            <tr>
-              <th>User</th>
-              {resource_ids.map(resource_id => <th>{this.getUserOrGroupField(resource_id, "resource_permissions", "user_permissions", "resource_id", "resource_name")}</th>)}
-              {user_management ? <th>Manage Resources</th> : null}
-              {user_management ? <th>Manage Reservations</th> : null}
-              {user_management ? <th>Manage Users</th> : null}
-            </tr>
-          </thead>
-          <tbody>
-            {user_ids.map(user_id =>
-                <tr>
-                  <td>{this.getUserOrGroupField(user_id, "resource_permissions", "user_permissions", "user_id", "username")}</td>
-                  {
-                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceUserPermission(resource_id, user_id)) + " pointer"} onClick={() => this.cycleResourceUserPermission(resource_id, user_id)}>{
-                      this.getResourceUserPermission(resource_id, user_id)}</td>)
-                  }
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("resource_p", user_id)) + " pointer"} onClick={() => this.cycleSystemUserPermission("resource_p", user_id)}>{this.getSystemUserPermission("resource_p", user_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("reservation_p", user_id)) + " pointer"} onClick={() => this.cycleSystemUserPermission("reservation_p", user_id)}>{this.getSystemUserPermission("reservation_p", user_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemUserPermission("user_p", user_id)) + " pointer"} onClick={() => this.cycleSystemUserPermission("user_p", user_id)}>{this.getSystemUserPermission("user_p", user_id)}</td> : null}
-                </tr>
-            )}
-            {group_ids.map(group_id =>
-                <tr>
-                  <td>{this.getUserOrGroupField(group_id, "resource_permissions", "group_permissions", "group_id", "group_name")}</td>
-                  {
-                    resource_ids.map(resource_id => <td className={this.getBackgroundColor(this.getResourceGroupPermission(resource_id, group_id)) + " pointer"} onClick={() => this.cycleResourceGroupPermission(resource_id, group_id)}>{this.getResourceGroupPermission(resource_id, group_id)}</td>)
-                  }
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("resource_p", group_id)) + " pointer"} onClick={() => this.cycleSystemGroupPermission("resource_p", group_id)}>{this.getSystemGroupPermission("resource_p", group_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("reservation_p", group_id)) + " pointer"} onClick={() => this.cycleSystemGroupPermission("reservation_p", group_id)}>{this.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
-                  {user_management ? <td className={this.getBackgroundColor(this.getSystemGroupPermission("user_p", group_id)) + " pointer"} onClick={() => this.cycleSystemGroupPermission("user_p", group_id)}>{this.getSystemGroupPermission("user_p", group_id)}</td> : null}
-                </tr>
-            )}
-          </tbody>
-        </table>
+        {this.state.initial_load ? <Loader /> : this.makeTable()}
       </div>
     );
   }
