@@ -78,12 +78,16 @@ public class PermissionService {
     	SystemPermissions systemPermissions = permissionMatrix.getSystem_permissions();
     	ResourcePermissions resourcePermissions = permissionMatrix.getResource_permissions();
 
-        /*
-        if(systemPermissions.getUser_permissions().size() == 0 && systemPermissions.getGroup_permissions().size() == 0
-            && userP){
+        
+        if((systemPermissions.getUser_permissions().size() > 0 || systemPermissions.getGroup_permissions().size() > 0)
+            && !userP){
             return new StandardResponse(true, "Trying to edit system permissions without user_p");
         }
-        */
+
+        if((resourcePermissions.getUser_permissions().size() > 0 || resourcePermissions.getGroup_permissions().size() > 0)
+            && !resourceP){
+            return new StandardResponse(true, "Trying to edit resource permissions without resource_p");
+        }
 
         if(userP){
             List<Object[]> batchUserPermissions = new ArrayList<Object[]>();
