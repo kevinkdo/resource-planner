@@ -15,6 +15,9 @@ import resourceplanner.reservations.ReservationData.ReservationWithIDs;
 import resourceplanner.reservations.ReservationData.ReservationWithIDsData;
 import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.authentication.UserData.User;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
@@ -185,51 +188,29 @@ public class ReservationService{
             return new StandardResponse(true, "Resource does not exist");
         }
 
-        Connection c = JDBC.connect();
-        try {
-            c.setAutoCommit(false);
-        } catch (SQLException e) {
-            return new StandardResponse(true, "failed to disable autocommit", req);
-        }
-        PreparedStatement st = null;
-        String reservationsInsert = "INSERT INTO reservations (user_id, resource_id, begin_time, end_time, should_email) VALUES (?, ?, ?, ?, ?);";
-		int reservation_id;
-        try {
-            st = c.prepareStatement(reservationsInsert, Statement.RETURN_GENERATED_KEYS);
-            st.setInt(1, req.getUser_id());
-            st.setInt(2, req.getResource_id());
-            st.setTimestamp(3, req.getBegin_time());
-            st.setTimestamp(4, req.getEnd_time());
-            st.setBoolean(5, req.getShould_email());
-            int affectedRows = st.executeUpdate();
-            if (affectedRows == 0) {
-                return new StandardResponse(true, "No new reservation created");
-            }
-        } catch (Exception e) {
-            return new StandardResponse(true, "Failed to add reservation");
-        }
-        try {
-            ResultSet generatedKeys = st.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                reservation_id = generatedKeys.getInt(1);
-            } else {
-                return new StandardResponse(true, "Creating reservation failed, no ID obtained.");
-            }
-        } catch (Exception e) {
-            return new StandardResponse(true, "insert reservation failed - no ID obtained.");
-        }
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jt.update(
+                new PreparedStatementCreator() {
+                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                        PreparedStatement ps = connection.prepareStatement(
+                                "INSERT INTO reservations (user_id, resource_id, begin_time, end_time, should_email) VALUES (?, ?, ?, ?, ?);",
+                                new String[]{"reservation_id"});
+                        ps.setInt(1, req.getUser_id());
+                        ps.setInt(2, req.getResource_id());
+                        ps.setTimestamp(3, req.getBegin_time());
+                        ps.setTimestamp(4, req.getEnd_time());
+                        ps.setBoolean(5, req.getShould_email());
+                        return ps;
+                    }
+                },
+                keyHolder);
 
-        try{
-        	c.commit();
-        	ReservationWithIDsData newReservation = new ReservationWithIDsData(reservation_id, req.getUser_id(), req.getResource_id(),
-        		req.getBegin_time(), req.getEnd_time(), req.getShould_email());
-            c.close();
-            emailService.scheduleEmailUpdate(newReservation);
-        	return new StandardResponse(false, "Reservation inserted successfully", newReservation);
-        }
-        catch (Exception e){
-        	return new StandardResponse(true, "Insert reservation commit failed");
-        }
+
+        int resId = keyHolder.getKey().intValue();
+        ReservationWithIDsData newReservation = new ReservationWithIDsData(resId, req.getUser_id(), req.getResource_id(),
+                req.getBegin_time(), req.getEnd_time(), req.getShould_email());
+        emailService.scheduleEmailUpdate(newReservation);
+        return new StandardResponse(false, "Reservation inserted successfully", newReservation);
 
     }
 
@@ -276,34 +257,6 @@ public class ReservationService{
         else{
             return new StandardResponse(true, "Error updating database entry for reservation");
         }
-
-        /*
-        Connection c = JDBC.connect();
-        PreparedStatement st = null;
-        String query = "UPDATE reservations SET user_id = ?, resource_id = ?, begin_time = ?, end_time = ?, should_email = ? WHERE reservation_id = ?;";
-        try {
-            st = c.prepareStatement(query);
-            st.setInt(1, existingRes.getUser_id());
-            st.setInt(2, existingRes.getResource_id());
-            st.setTimestamp(3, existingRes.getBegin_time());
-            st.setTimestamp(4, existingRes.getEnd_time());
-            st.setBoolean(5, existingRes.getShould_email());
-            st.setInt(6, reservationId);
-
-            int affectedRows = st.executeUpdate();
-            if(affectedRows == 1){
-            	ReservationWithIDsData reservationToReturn = new ReservationWithIDsData(existingRes);
-            	emailService.rescheduleEmails(reservationToReturn);
-                return new StandardResponse(false, "Successfully updated reservation", reservationToReturn);
-            }
-            else{
-                return new StandardResponse(true, "Error updating database entry for reservation");
-            }
-        }
-        catch (Exception e){
-            return new StandardResponse(true, "Error issuing SQL update");
-        }
-        */
 
     }
 
