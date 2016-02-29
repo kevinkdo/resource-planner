@@ -3,15 +3,52 @@ import requests
 import json
 import params
 
+#user id 1
+adminHeaders =  {
+  'Accept': 'application/json',
+  "Authorization": "Bearer ",
+  "Content-Type": "application/json" 
+}
+#userid 2
+allMPHeaders = {
+  'Accept': 'application/json',
+  "Authorization": "Bearer ",
+  "Content-Type": "application/json" 
+}
+#userid 3
+RSMPHeaders = {
+  'Accept': 'application/json',
+  "Authorization": "Bearer ",
+  "Content-Type": "application/json" 
+}
+
+permissions = {
+  "users":[{"user_id":2,"username":"all"}, {"user_id":3,"username":"resource"}],
+  "groups":[],
+  "resources":[],
+  "system_permissions":{
+    "user_permissions":[{"resource_p":True,"reservation_p":True,"user_p":True,"user_id":2}, {"resource_p":True,"reservation_p":False,"user_p":False,"user_id":3}],
+    "group_permissions":[]
+  },
+  "resource_permissions":{
+    "user_permissions":[],
+    "group_permissions":[]
+  }
+}
+
 class UsersTestCases(unittest.TestCase):
   def setUp(self):
-      requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
-      r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithAllMP), headers = params.headers, verify = False)
-      print r.json()
-      r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithRSMP), headers = params.headers, verify = False)
-      print r.json()
+      r = requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
+      r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithAll), headers = params.headers, verify = False)
+      r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithResource), headers = params.headers, verify = False)
+      r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(params.loginWithAdmin), headers = params.headers, verify = False)
+      adminHeaders["Authorization"] = "Bearer " + r.json()["data"]["token"]
+
+      r = requests.put(params.baseUrl + params.userUrl + "/1" + params.permissionsUrl, data = json.dumps(permissions), headers = adminHeaders, verify = False)
+      r = requests.get(params.baseUrl + params.userUrl + "/1" + params.permissionsUrl, headers = adminHeaders, verify = False)
       
-  # def test_CreateValidUserAsAdmin(self): #not sure how to check if admin
+      
+  # def test_CreateValidUserAsAdmin(self): 
   #     newUser = {"email":"newuser@admin.com", "password":"password", "should_email":'false', "username":"newuser"}
   #     r = requests.post(params.baseUrl + params.userUrl, data = json.dumps(newUser), headers = params.headers, verify = False)
   #     decoded = r.json()
@@ -50,14 +87,31 @@ class UsersTestCases(unittest.TestCase):
   #def test_GetUserWithQuery(self): not needed for current evolution
 
   def test_GetUserWithValidIDWithUserManagementPermissions(self):
-      pass
+      r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(params.loginWithAll), headers = params.headers, verify = False)
+      allMPHeaders["Authorization"] = "Bearer " + r.json()["data"]["token"]
+      r = requests.get(params.baseUrl + params.userUrl + "/2", headers = allMPHeaders, verify = False)
+      decoded = r.json()
+      assert decoded['is_error'] == False
+      assert decoded['data'] == {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}
+      assert decoded['error_msg'] == u'Successfully retrieved user'
 
   def test_GetUserWithValidIDWithoutUserManagementPermissions(self):
-    #need to do from point of view of a user that doesn't have user management permissions 
-      pass
+      r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(params.loginWithResource), headers = params.headers, verify = False)
+      RSMPHeaders["Authorization"] = "Bearer " + r.json()["data"]["token"]
+      r = requests.get(params.baseUrl + params.userUrl + "/1", headers = RSMPHeaders, verify = False)
+      decoded = r.json()
+      assert decoded['is_error'] == True 
+      assert decoded['data'] == None
+      assert decoded['error_msg'] == 'You are not authorized'
 
   def test_GetUserWithInvalidIDWithUserManagementPermissions(self):
-      pass
+      r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(params.loginWithAll), headers = params.headers, verify = False)
+      allMPHeaders["Authorization"] = "Bearer " + r.json()["data"]["token"]
+      r = requests.get(params.baseUrl + params.userUrl + "/20", headers = allMPHeaders, verify = False)
+      decoded = r.json()
+      assert decoded['is_error'] == True
+      assert decoded['data'] == None
+      assert decoded['error_msg'] == 'User not found'
 
   #def test_PutUserWithValidIDUpdateUsernameWithUniqueUsername(self): disabled
   #def test_PutUserWithValidIDUpdateUsernameWithPreexistingUsername(self): disabled
