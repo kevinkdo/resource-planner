@@ -163,11 +163,15 @@ public class GroupService {
                     userId};
             batch.add(values);
         }
-        int[] updateCounts = jt.batchUpdate(
+        try{
+            int[] updateCounts = jt.batchUpdate(
                 "INSERT INTO groupmembers (group_id, user_id) VALUES (?, ?);",
                 batch);
-
-        return new StandardResponse(false, "Successfully updated group");
+            return new StandardResponse(false, "Successfully updated group");
+        }
+        catch(Exception e){
+            return new StandardResponse(true, "Tried to add non-existant users");
+        }
     }
 
     public StandardResponse deleteGroup(int groupId) {

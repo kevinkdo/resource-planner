@@ -44,6 +44,17 @@ public class UserController extends Controller {
         return userService.getUserById(userId);
     }
 
+    @RequestMapping(value = "/",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getUsers(final HttpServletRequest request) {
+        if (!hasUserP(request)) {
+            return new StandardResponse(true, "You are not authorized");
+        }
+        return userService.getUsers();
+    }
+
+
     @RequestMapping(value = "/{userId}",
             method = RequestMethod.PUT,
             headers = {"Content-type=application/json"})
