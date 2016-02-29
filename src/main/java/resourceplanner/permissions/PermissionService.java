@@ -42,11 +42,13 @@ public class PermissionService {
 
     	filterResourcePermissions(userId, userResourcePermissions, groupResourcePermissions);
 
+        removeAdminRow(userSystemPermissions, userResourcePermissions);
+
     	SystemPermissions systemPermissions = new SystemPermissions(userSystemPermissions, groupSystemPermissions);
     	ResourcePermissions resourcePermissions = new ResourcePermissions(userResourcePermissions, groupResourcePermissions); 
 
     	List<UserAndID> users =  jt.query(
-                "SELECT user_id, username FROM users;",
+                "SELECT user_id, username FROM users WHERE user_id != 1;",
                 new RowMapper<UserAndID>() {
                     public UserAndID mapRow(ResultSet rs, int rowNum) throws SQLException {
                         return new UserAndID(rs.getInt("user_id"), rs.getString("username"));
@@ -166,6 +168,24 @@ public class PermissionService {
     	}
 
     	return viewableResources;  	
+    }
+
+    private void removeAdminRow(List<UserSystemPermission> userSystemPermissions, List<UserResourcePermission> userResourcePermissions){       
+        List<UserSystemPermission> adminSystemPermissions = new ArrayList<UserSystemPermission>();
+        for(UserSystemPermission u : userSystemPermissions){
+            if(u.getUser_id() == 1){
+                adminSystemPermissions.add(u);
+            }
+        }
+        userSystemPermissions.removeAll(adminSystemPermissions);
+
+        List<UserResourcePermission> adminResourcePermissions = new ArrayList<UserResourcePermission>();
+        for(UserResourcePermission u : userResourcePermissions){
+            if(u.getUser_id() == 1){
+                adminResourcePermissions.add(u);
+            }
+        }
+        userResourcePermissions.removeAll(adminResourcePermissions);
     }
 
     // Filters resource permissions to only include those that the user is allowed to see/reserve. 

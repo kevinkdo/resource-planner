@@ -231,5 +231,25 @@ public class UserService {
         // TODO make sure that original admin cannot be deleted
     }
 
+    public StandardResponse getUsers(){
+        List<User> users = jt.query(
+                "SELECT * FROM users;",
+                new RowMapper<User>() {
+                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        User user = new User();
+                        user.setEmail(rs.getString("email"));
+                        user.setUsername(rs.getString("username"));
+                        user.setShould_email(rs.getBoolean("should_email"));
+                        user.setUser_id(rs.getInt("user_id"));
+                        user.setResource_p(rs.getBoolean("resource_p"));
+                        user.setUser_p(rs.getBoolean("user_p"));
+                        user.setReservation_p(rs.getBoolean("reservation_p"));
+                        return user;
+                    }
+                });
+
+        return new StandardResponse(false, "Users retrieved", users);
+    }
+
 
 }
