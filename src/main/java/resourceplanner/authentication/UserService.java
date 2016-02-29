@@ -158,6 +158,9 @@ public class UserService {
                         user.setUsername(rs.getString("username"));
                         user.setShould_email(rs.getBoolean("should_email"));
                         user.setUser_id(rs.getInt("user_id"));
+                        user.setResource_p(rs.getBoolean("resource_p"));
+                        user.setUser_p(rs.getBoolean("user_p"));
+                        user.setReservation_p(rs.getBoolean("reservation_p"));
                         return user;
                     }
                 });
