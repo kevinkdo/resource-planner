@@ -21,25 +21,25 @@ userWithAll = {
   "email": "all@a.com",
   "password": "password",
   "should_email": "false",
-  "username": "all",
+  "username": "all"
 }
 userWithUser = {
   "email": "user@a.com",
   "password": "password",
   "should_email": "false",
-  "username": "user",
+  "username": "user"
 }
 userWithResource = {
   "email": "resource@a.com",
   "password": "password",
   "should_email": "false",
-  "username": "resource",
+  "username": "resource"
 }
 userWithReserve = {
   "email": "reserve@a.com",
   "password": "password",
   "should_email": "false",
-  "username": "reserve",
+  "username": "reserve"
 }
 
 #user login json

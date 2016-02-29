@@ -54,11 +54,12 @@ optionsPrint = {
   15: (Verbs.Get, 'Get all groups'), 
   16: (Verbs.Put, 'Update Group by ID'),
   17: (Verbs.Delete, 'Delete Group by ID'),
-  18: (Verbs.Post, 'Update permissions by user ID'),
+  18: (Verbs.Put, 'Update permissions by user ID'),
   19: (Verbs.Get, 'Get permissions by user ID')
 }
 
 def debugger():
+  print "Assumes you are logged in as admin"
   while(True):
     for s in optionsPrint:
       print str(s) + ': ' + optionsPrint[s][1]
@@ -70,14 +71,33 @@ def debugger():
         break
       else:
         print 'enter either "q" or one of the above options\n'
-    
+
+def jsonValidate(str):
+  if len(str) == 0:
+    return False
+  if str[0] != "{" or str[len(str) - 1] != "}":
+    return False
+
 def processSelection(input):
   r = None
+  requestID = ""
+  requestPayload = ""
   if input in optionsPrint:
-    if optionsPrint[input][0] is Verbs.Put or Verbs.Get or Verbs.Delete:
-      requestID = requestIDPre + raw_input('input the desired ID or hit enter if non-applicable: ') + requestIDPost
-    if optionsPrint[input][0] is Verbs.Post or Verbs.Put: 
-      requestPayload = requestPayloadPre + raw_input('input the json payload or hit enter if non-applicable: ') + requestPayloadPost
+    if optionsPrint[input][0] is Verbs.Put or optionsPrint[input][0] is Verbs.Get or optionsPrint[input][0] is Verbs.Delete:
+      temp = raw_input('input the desired ID or hit enter if non-applicable: ')
+      if temp == '' and (input is not 1 and input is not 15):
+        while temp == '':
+          temp = raw_input('ID required. Input the desired ID: ')
+      else:
+        requestID = requestIDPre + temp + requestIDPost  
+      
+    if optionsPrint[input][0] is Verbs.Post or optionsPrint[input][0] is Verbs.Put: 
+      temp = raw_input('input the json payload or hit enter if non-applicable: ')
+      if temp == '':
+        while jsonValidate() is False:
+          temp = raw_input('Payload required. input valid json payload: ')
+      else:
+        requestPayload = requestPayloadPre + temp + requestPayloadPost
 
     updatedDict = {
       1: getRequest + tagUrl + requestEnding, 
@@ -97,7 +117,7 @@ def processSelection(input):
       15: getRequest + groupUrl + requestEnding,
       16: putRequest + groupUrl + requestID + requestPayload + requestEnding,
       17: deleteRequest + groupUrl + requestID + requestEnding,
-      18: postRequest + userUrl + requestID + permissionUrl + requestPayload + requestEnding,
+      18: putRequest + userUrl + requestID + permissionUrl + requestPayload + requestEnding,
       19: getRequest + userUrl + requestID + permissionUrl + requestEnding
     }
     exec(updatedDict[input])
