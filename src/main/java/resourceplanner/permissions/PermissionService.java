@@ -194,6 +194,10 @@ public class PermissionService {
 
     // Filters resource permissions to only include those that the user is allowed to see/reserve. 
     private void filterResourcePermissions(int userId, List<UserResourcePermission> userResourcePermissions, List<GroupResourcePermission> groupResourcePermissions){
+        if(userId == 1){
+            return;
+        }
+
     	List<Integer> userViewableResources = getUserViewableResources(userId);
     	List<Integer> groupViewableResources = getGroupViewableResources(userId);
     	
