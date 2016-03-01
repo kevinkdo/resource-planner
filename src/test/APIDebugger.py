@@ -3,8 +3,8 @@ import json
 from enum import Enum
 
 protocol = 'https' # change to http for non SSL
-host = 'localhost' 
-#host = 'easywebapi.com'
+#host = 'localhost' 
+host = 'easywebapi.com'
 baseUrl = protocol + '://' + host
 resetUrl = '"/admin/init"' 
 tagUrl = '"/api/tags"'
