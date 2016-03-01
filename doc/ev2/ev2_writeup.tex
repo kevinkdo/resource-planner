@@ -84,15 +84,19 @@ TODO: Finish
 
 \subsection{Security}
 \subsubsection{Retrospective}
-TODO
+Our old security framework remained intact while tacking on Duke Shibboleth. We declined to use the tokens provided by Duke Shibboleth as they were undocumented and uncustomizable. 
+
 \subsubsection{Current Design}
-TODO
+Evolution 2 introduced integration with Duke Shibboleth as a new requirement. We decided to keep our existing JSON web token (JWT) authentication framework and simply add Duke OAuth2 to our login. 
 
-The application has multiple layers of protection. When a user is created by the admin, a random salt is generated and appended to the password, which is then SHA-1 hashed. Upon login, the salt is appended to the entered password, hashed, and compared to the stored hash. 
+The evolution 2 spec requires that the old login stay intact for the admin, so we simply added a new button on the login page that redirected the user to a Duke-based authentication server. Depending on whether the user successfully authenticates using his or her NetID, the Duke server routes the user to a 'success' endpoint or a 'failure' endpoint. The failure endpoint is essentially the resource planner login page (with an added error message), while the success endpoint is a new endpoint which verifies the authcode returned by the Duke server using another Duke service. If this verification is successful, the user is logged in and given a JWT and directed to a page inside the resource manager. If this verification fails, the user is again redirected to the resource manager login. 
 
-Upon login, a JSON Web Token (JWT) is generated, which stores the User ID and permission level of the logged-in user. This JWT, which is signed by a secret key known only to the server, authenticates future API calls without accessing the database. Instead of a database lookup, the authenticity of the JWT is confirmed using the secret key, and the User ID and permission level stored in the JWT can be used directly. 
+One major difference with the introduction of Duke Shibboleth authentication is the lack of user registration, since users can no longer be created by the admin. Instead, a user is 'created' the first time he or she logs into the resource planner. Besides the hashing and salting of the admin password, there is also no more password storage in our database as the resource planner no longer handles authentication directly, instead allowing Duke Shibboleth to simply pass us to an authcode after a successful user login that we can verify to ensure the user is valid. 
+
+Upon login, a JSON Web Token (JWT) is generated, which stores the User ID and permission level of the logged-in user. This JWT, which is signed by a secret key known only to the server, authenticates future API calls without accessing the database. Instead of a database lookup, the authenticity of the JWT is confirmed using the secret key, and the User ID and permissions stored in the JWT can be used directly. 
 
 For encrypting the communication between the client and the server, we decided to go with SSL as Spring provided support for it. We used Java's built in keytool to generate a Java keystore and self-signed certificate using RSA algorithm. We used a self-signed certificate rather than one signed by a legitimate CA because it was free. We also made it so that it can run on both HTTP and HTTPS at the same time for ease of testing. Non-SSL HTTP support can easily be disabled with a global switch.
+
 
 \subsection{Testing}
 \subsubsection{Retrospective}
@@ -125,16 +129,13 @@ The above structure allows our backend to be flexible in the face of requirement
 \subsection{Groups}
 \label{sec:GROUPS}
 \subsubsection{Current Design}
-TODO - Davis/Jiawei
+Groups are a new evolution 2 feature. Our implementation allows for two groups to have the same name (though they are unique as they have different IDs). A group is affiliated with zero or more members and the three types of system-wide permissions - resource permission, reservation permission, and user permission. The users with user permission have the ability to create groups, edit groups, edit group membership, and delete groups. 
+
+TODO - Davis feel free to add whatever to this section
 
 \subsection{Permissions}
 \subsubsection{Current Design}
 TODO - Davis
-
-\subsection{OATH}
-\subsubsection{Current Design}
-TODO - Jiawei
-
 
 \section{REST API}
 \label{sec:REST}
@@ -188,7 +189,7 @@ Kevin Do maintained the frontend, advocated for the frontend's needs in discussi
 
 Davis Treybig implemented much of the permission-related code, including new permission endpoints and permission-based checks for other API endpoints. 
 
-Jiawei Zhang implemented the OAuth system and the group management endpoints and TODO.
+Jiawei Zhang integrated Duke OAuth2 and implemented the group endpoints and system-wide permissions for users and groups.
 
 Michael Han wrote and maintained the automated backend tests, and he also implemented the group manager UI TODO.
 
