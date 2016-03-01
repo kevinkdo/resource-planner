@@ -231,66 +231,94 @@ Michael Han wrote and maintained the automated backend tests and implemented the
     \end{enumerate}
     \item Resource Tests
     \begin{enumerate}
-        \item Create valid resource with no tags with resource management permissions
-        \item Create valid resource with no tags without resource management permissions
-        \item Create valid resource with tags with resource management permissions
-        \item Create invalid resource with no name with resource management permissions
-        \item Create valid resource with no description with resource management permissions
-        \item Get resource with valid ID with resource management permissions with view access
-        \item Get resource with valid ID with resource management permissions without view access
-        \item Get resource with valid ID without resource management permissions with view access
-        \item Get resource with valid ID without resource management permissions without view access
-        \item Get resource with invalid ID with resource management permissions with view access
-        \item Get resources with valid query with resource management permissions with view access
-        \item Get resources with query with non existing tags with resource management permissions with view access
-        \item Put resource with valid ID with all fields updated with resource management permissions with view access
-        \item Put resource with valid ID with all fields updated with resource management permissions without view access
-        \item Put resource with valid ID with all fields updated without resource management permissions with view access
-        \item Put resource with valid ID with all fields updated without resource management permissions without view access
-        \item Put resource with valid ID no fields updated with resource management permissions with view access
-        \item Put resource with invalid ID with resource management permissions with view access
-        \item Delete resource with valid ID with resource management permissions with view access
-        \item Delete resource with valid ID with resource management permissions without view access
-        \item Delete resource with valid ID without resource management permissions with view access
-        \item Delete resource with valid ID without resource management permissions without view access
-        \item Delete resource with invalid ID with resource management permissions with view access
-        \item Get resources canDelete with valid ID with resource management permissions with view access
-        \item Get resources canDelete with valid ID with resource management permissions without view access
-        \item Get resources canDelete with valid ID without resource management permissions with view access
-        \item Get resources canDelete with valid ID without resource management permissions without view access
-        \item Get resources canDelete with invalid ID with resource management permissions with view access
+        \item Create
+        \begin{enumerate}
+            \item Create valid resource with no tags with resource management permissions
+            \item Create valid resource with no tags without resource management permissions
+            \item Create valid resource with tags with resource management permissions
+            \item Create invalid resource with no name with resource management permissions
+            \item Create valid resource with no description with resource management permissions
+        \end{enumerate}
+        \item Get
+        \begin{enumerate}
+            \item Get resource with valid ID with resource management permissions with view access
+            \item Get resource with valid ID with resource management permissions without view access
+            \item Get resource with valid ID without resource management permissions with view access
+            \item Get resource with valid ID without resource management permissions without view access
+            \item Get resource with invalid ID with resource management permissions with view access
+            \item Get resources with valid query with resource management permissions with view access
+            \item Get resources with query with non existing tags with resource management permissions with view access    
+        \end{enumerate}
+        \item Put
+        \begin{enumerate}
+            \item Put resource with valid ID with all fields updated with resource management permissions with view access
+            \item Put resource with valid ID with all fields updated with resource management permissions without view access
+            \item Put resource with valid ID with all fields updated without resource management permissions with view access
+            \item Put resource with valid ID with all fields updated without resource management permissions without view access
+            \item Put resource with valid ID no fields updated with resource management permissions with view access
+            \item Put resource with invalid ID with resource management permissions with view access
+        \end{enumerate}
+        \item Delete
+        \begin{enumerate}
+            \item Delete resource with valid ID with resource management permissions with view access
+            \item Delete resource with valid ID with resource management permissions without view access
+            \item Delete resource with valid ID without resource management permissions with view access
+            \item Delete resource with valid ID without resource management permissions without view access
+            \item Delete resource with invalid ID with resource management permissions with view access
+        \end{enumerate}
+        
+        \item canDelete
+            \begin{enumerate}
+            \item Get resources canDelete with valid ID with resource management permissions with view access
+            \item Get resources canDelete with valid ID with resource management permissions without view access
+            \item Get resources canDelete with valid ID without resource management permissions with view access
+            \item Get resources canDelete with valid ID without resource management permissions without view access
+            \item Get resources canDelete with invalid ID with resource management permissions with view access
+            \end{enumerate}
     \end{enumerate}
     \item Reservation Tests
     \begin{enumerate}
-        \item Create valid reservation with valid user ID with reservation management permissions with reserve access
-        \item Create valid reservation with valid user ID with reservation management permissions without reserve access
-        \item Create valid reservation with valid user ID without reservation management permissions with reserve access
-        \item Create valid reservation with valid user ID without reservation management permissions without reserve access
-        \item Create valid reservation with invalid user ID with reservation management permissions with reserve access
-        \item Create reservation with touching time intervals with reservation management permissions with reserve access
-        \item Create invalid reservation with invalid resource ID with reservation management permissions with reserve access
-        \item Create invalid reservation with invalid time range with reservation management permissions with reserve access
-        \item Get reservation with valid ID with reservation management permissions with reserve access
-        \item Get reservation with valid ID with reservation management permissions without reserve access
-        \item Get reservation with valid ID without reservation management permissions with reserve access
-        \item Get reservation with valid ID without reservation management permissions without reserve access
-        \item Get reservation with invalid ID with reservation management permissions with reserve access
-        \item Get reservation with valid query with resource and user lists with reservation management permissions with reserve access
-        \item Get reservation with valid query with valid time range with reservation management permissions with reserve access
-        \item Get reservation with valid query with invalid time range with reservation management permissions with reserve access
-        \item Put reservation with valid ID update all fields with reservation management permissions with reserve access
-        \item Put reservation with valid ID update all fields with reservation management permissions without reserve access
-        \item Put reservation with valid ID update all fields without reservation management permissions with reserve access
-        \item Put reservation with valid ID update all fields without reservation management permissions without reserve access
-        \item Put reservation with valid ID update no fields with reservation management permissions with reserve access
-        \item Put reservation with invalid ID with reservation management permissions with reserve access
-        \item Put reservation with valid ID of another user with reservation management permissions with reserve access
-        \item Put reservation with valid ID of another user without reservation management permissions with reserve access 
-        \item Delete reservation with valid ID with reservation management permissions with reserve access
-        \item Delete reservation with valid ID with reservation management permissions without reserve access
-        \item Delete reservation with valid ID without reservation management permissions with reserve access
-        \item Delete reservation with valid ID without reservation management permissions without reserve access
-        \item Delete reservation with invalid ID with reservation management permissions with reserve access
+        \item Create
+        \begin{enumerate}
+            \item Create valid reservation with valid user ID with reservation management permissions with reserve access
+            \item Create valid reservation with valid user ID with reservation management permissions without reserve access
+            \item Create valid reservation with valid user ID without reservation management permissions with reserve access
+            \item Create valid reservation with valid user ID without reservation management permissions without reserve access
+            \item Create valid reservation with invalid user ID with reservation management permissions with reserve access
+            \item Create reservation with touching time intervals with reservation management permissions with reserve access
+            \item Create invalid reservation with invalid resource ID with reservation management permissions with reserve access
+            \item Create invalid reservation with invalid time range with reservation management permissions with reserve access    
+        \end{enumerate}
+        \item Get
+        \begin{enumerate}
+            \item Get reservation with valid ID with reservation management permissions with reserve access
+            \item Get reservation with valid ID with reservation management permissions without reserve access
+            \item Get reservation with valid ID without reservation management permissions with reserve access
+            \item Get reservation with valid ID without reservation management permissions without reserve access
+            \item Get reservation with invalid ID with reservation management permissions with reserve access
+            \item Get reservation with valid query with resource and user lists with reservation management permissions with reserve access
+            \item Get reservation with valid query with valid time range with reservation management permissions with reserve access
+            \item Get reservation with valid query with invalid time range with reservation management permissions with reserve access    
+        \end{enumerate}
+        \item Put
+        \begin{enumerate}
+            \item Put reservation with valid ID update all fields with reservation management permissions with reserve access
+            \item Put reservation with valid ID update all fields with reservation management permissions without reserve access
+            \item Put reservation with valid ID update all fields without reservation management permissions with reserve access
+            \item Put reservation with valid ID update all fields without reservation management permissions without reserve access
+            \item Put reservation with valid ID update no fields with reservation management permissions with reserve access
+            \item Put reservation with invalid ID with reservation management permissions with reserve access
+            \item Put reservation with valid ID of another user with reservation management permissions with reserve access
+            \item Put reservation with valid ID of another user without reservation management permissions with reserve access     
+        \end{enumerate}
+        \item Delete
+        \begin{enumerate}
+            \item Delete reservation with valid ID with reservation management permissions with reserve access
+            \item Delete reservation with valid ID with reservation management permissions without reserve access
+            \item Delete reservation with valid ID without reservation management permissions with reserve access
+            \item Delete reservation with valid ID without reservation management permissions without reserve access
+            \item Delete reservation with invalid ID with reservation management permissions with reserve access    
+        \end{enumerate}
     \end{enumerate}
     \item Tags Tests
     \begin{enumerate}
