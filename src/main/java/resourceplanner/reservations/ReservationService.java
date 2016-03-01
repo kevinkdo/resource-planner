@@ -44,7 +44,7 @@ public class ReservationService{
 	@Autowired
 	private JdbcTemplate jt;
 
-    public StandardResponse getMatchingReservations(GetAllMatchingReservationRequest req){
+    public StandardResponse getMatchingReservations(GetAllMatchingReservationRequest req, int requesterId){
         String getMatchingReservations = "SELECT * FROM reservations WHERE ";
 
         //If any query parameters were specified, we need to limit our query to those resources and users
@@ -83,6 +83,9 @@ public class ReservationService{
 			return new StandardResponse(true, "Error retrieving reservations");
 		}
 
+        if(requesterId != 1){
+            filterViewableReservations(reservations, requesterId);
+        }
 		return new StandardResponse(false, "Matching reservations retrieved", reservations);
     }
 
@@ -283,6 +286,16 @@ public class ReservationService{
         return allReservableResources.contains(resourceId) || userId == 1;
     }
 
+    private boolean viewableResource(int userId, int resourceId){
+        List<Integer> userViewable = permissionService.getUserViewableResources(userId);
+        List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
+
+        Set<Integer> allViewableResources = new TreeSet<Integer>(userViewable); 
+        allViewableResources.addAll(groupViewable);
+
+        return allViewableResources.contains(resourceId);
+    }
+
 
     private Boolean isOverlappingReservation(Timestamp start, Timestamp end, int resource_id, Integer currentReservation_id){
         Connection c = JDBC.connect();
@@ -325,13 +338,19 @@ public class ReservationService{
         return isOverlappingReservation(start, end, resource_id, null);
     }
 
-    public StandardResponse getReservationByIdDB(int reservationId) {
+    public StandardResponse getReservationByIdDB(int reservationId, int requesterId) {
     	Reservation reservation = getReservationObjectById(reservationId);
+
     	if (reservation == null){
     		return new StandardResponse(true, "Reservation with given ID not found");
     	}
     	else{
-    		return new StandardResponse(false, "Reservation with given ID found", reservation);
+            if(requesterId == 1 || viewableResource(reservation.getUser().getUser_id(), reservation.getResource().getResource_id())){
+                return new StandardResponse(false, "Reservation with given ID found", reservation);
+            }
+    		else{
+                return new StandardResponse(true, "Reservation is of non-viewable resource");
+            }
     	}
     }
 
@@ -434,6 +453,23 @@ public class ReservationService{
                     }
                 });
     	return reservationIds;
+    }
+
+    private void filterViewableReservations(List<Reservation> reservations, int requesterId){
+        List<Integer> userViewable = permissionService.getUserViewableResources(requesterId);
+        List<Integer> groupViewable = permissionService.getGroupViewableResources(requesterId);
+
+        Set<Integer> allViewableResources = new TreeSet<Integer>(userViewable); 
+        allViewableResources.addAll(groupViewable);
+
+        List<Reservation> reservationsToRemove = new ArrayList<Reservation>();
+        for(Reservation r : reservations){
+            if(!allViewableResources.contains(r.getResource().getResource_id())){
+                reservationsToRemove.add(r);
+            }
+        }
+
+        reservations.removeAll(reservationsToRemove);
     }
 
 }
