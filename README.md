@@ -72,3 +72,9 @@ These are located in the `admin` folder
 1. To run all tests verbosely `python -m unittest discover -v`
 2. To run all tests non-verbosely `python -m unittest discover`
 3. To run an individual test `python nameoftest.py -v`
+
+# API Debugger
+1. `cd src/test`
+2. python APIDebugger.py
+
+Additional instructions in the console
