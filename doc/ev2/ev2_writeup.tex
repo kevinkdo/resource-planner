@@ -35,13 +35,21 @@
 \section{Summary}
 \begin{figure}[h]
 \begin{center}
-\includegraphics[height=4in]{ev2_design.pdf}
+\includegraphics[height=4in]{ev2_design_cropped.pdf}
 \end{center}
 \caption{Diagram of system architecture}
 \label{fig:design}
 \end{figure}
 
-Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. 
+Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 1. As can be seen in the diagram above, the two primary changes are:
+\begin{enumerate}
+    \item The inclusion of an API Debugger. This is just a python script that interacts with our backend, similarly to the way our python API tests function. 
+    \item The inclusion of OAuth2 to handle duke net-id based authentication. TODO: Jiawei briefly explain this
+\end{enumerate}
+
+The rest of the changes required for evolution 2 fit nicely into our existing frameworks. In the backend, permissions were handled with a few new API calls on top of our evolution 1 API calls, and a few new DB tables were added to support these calls. Similarly, groups were implemented via the addition of another controller and service. In the frontend, new views for permissions and groups were added.  
+
+For retrospectives on our former backend choices and more detail about our backend additions, see the \hyperref[sec:Backend]{backend section}. For retrospectives on our former frontend choices and more detail about our frontend additions, see the \hyperref[sec:Frontend]{frontend section}. Finally, see \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for our updated backend test strategy,  \hyperref[appendix:frontendtest]{Appendix \ref{appendix:frontendtest}} for our updated frontend test strategy, \hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}} for our updated API specification, and \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}} for our updated database design. 
 
 \section{Backend}
 \label{sec:Backend}
@@ -180,7 +188,7 @@ As a result of our success with the manual UI testing from evolution 1, the only
 \section{Member contributions}
 Kevin Do maintained the frontend, advocated for the frontend's needs in discussions with the backend team, and implemented the permissions manager.
 
-Davis Treybig implemented the permissions management endpoints and TODO.
+Davis Treybig implemented much of the permission-related code, including new permission endpoints and permission-based checks for other API endpoints. 
 
 Jiawei Zhang implemented the OAuth system and the group management endpoints and TODO.
 
