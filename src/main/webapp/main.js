@@ -340,7 +340,7 @@ const GroupEditor = React.createClass({
     var me = this;
     send_xhr("GET", "/api/groups/" + this.props.id, localStorage.getItem("session"), null,
       function(obj) {
-        obj.data.user_ids.push("")
+        obj.data.user_ids.push("");
         me.setState({
           group_name: obj.data.group_name,
           user_ids: obj.data.user_ids,
