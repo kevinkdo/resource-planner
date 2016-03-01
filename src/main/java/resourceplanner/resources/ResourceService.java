@@ -156,7 +156,7 @@ public class ResourceService {
 
 
         Set<Integer> allViewableResources = getViewableResources(userId);
-        if(allViewableResources.contains(resourceId)){
+        if(allViewableResources.contains(resourceId) || userId == 1){
             return new StandardResponse(false, "Successfully retrieved resource", resource);
         }
         else{
@@ -274,15 +274,19 @@ public class ResourceService {
             response.add(processList.get(i));
         }
 
-        Set<Integer> allViewableResources = getViewableResources(userId);
-        List<Resource> finalResponse = new ArrayList<Resource>();
-        for(Resource r : response){
-            if(allViewableResources.contains(r.getResource_id())){
-                finalResponse.add(r);
+        if(userId != 1){
+            Set<Integer> allViewableResources = getViewableResources(userId);
+            List<Resource> finalResponse = new ArrayList<Resource>();
+            for(Resource r : response){
+                if(allViewableResources.contains(r.getResource_id())){
+                    finalResponse.add(r);
+                }
             }
+            return new StandardResponse(false, "Successfully retrieved resources", new Resources(finalResponse));
         }
-
-        return new StandardResponse(false, "Successfully retrieved resources", new Resources(finalResponse));
+        else{
+            return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
+        }
     }
 
     private static class RT {
