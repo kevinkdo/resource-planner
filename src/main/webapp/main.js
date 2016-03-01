@@ -406,7 +406,7 @@ const GroupEditor = React.createClass({
                       )}
                       <ListInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member ID" editFunc={this.setMember} hasAddon={true}/>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-4 col-md-offset-4">
                       <label>All users</label>
                       <table className="table table-hover">
                         <thead>
