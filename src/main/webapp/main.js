@@ -485,7 +485,9 @@ const Settings = React.createClass({
 const PermissionsManager = React.createClass({
   getInitialState() {
     return {
-      initial_load: true
+      initial_load: true,
+      error_msg: "",
+      is_error: true
     }
   },
 
@@ -598,11 +600,12 @@ const PermissionsManager = React.createClass({
     send_xhr("PUT", "/api/users/" + userId() + "/editablePermissions", localStorage.getItem("session"),
       JSON.stringify(me.state.data),
       function(obj) {
-        me.setState({sending: false});
+        me.setState({sending: false, error_msg: "Last saved " + new Date().toLocaleString(), is_error: false});
       },
       function(obj) {
         me.setState({
           sending: false,
+          is_error: true,
           error_msg: obj.error_msg
         });
       }
@@ -688,6 +691,11 @@ const PermissionsManager = React.createClass({
         <h3>Permissions Manager
           <span className="padleft"><button type="button" className="btn btn-success" onClick={() => this.save()}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button></span>
         </h3>
+        {!this.state.error_msg ? <div></div> :
+          <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
+            <strong>{this.state.error_msg}</strong>
+          </div>
+        }
         {this.state.initial_load ? <Loader /> : this.makeTable()}
       </div>
     );
