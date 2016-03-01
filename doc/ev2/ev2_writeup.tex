@@ -78,9 +78,15 @@ PostgreSQL served us well for evolution 2. While perhaps more planning and setup
 In regards to choosing PostreSQL over some other SQL DB, we have not needed to interact with the DB in such a way that some other SQL DB would have provided us better tools than PostreSQL. Thus, we are still totally happy with PostreSQL as a DB. 
 
 \subsubsection{Current Design}
-Our DB schema did change for evolution 2. For the most part,
+The following changes were made to our DB schema for evolution 2:
+\begin{enumerate}
+    \item A Group table was added which tracks group settings and names. 
+    \item A group members table was added. This tracks all the members of each group. 
+    \item A user resource permissions table and a group resource permissions were added. These track resource permissions for each user and each group, respectively. 
+    \item The user table was updated to include user permissions
+\end{enumerate}
 
-TODO: Finish
+You can see a full diagram of this updated schema in  \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}}. 
 
 \subsection{Security}
 \subsubsection{Retrospective}
