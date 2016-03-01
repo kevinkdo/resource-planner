@@ -258,6 +258,41 @@ public class PermissionService {
     	return groupViewableResources;
     }
 
+    //Returns all resources that a user can view due to personal permissions
+    //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM A GROUP HE IS IN)
+    public List<Integer> getUserReservableResources(int userId){
+        String userReservableQueryString = "SELECT resource_id FROM userresourcepermissions WHERE user_id = " + userId +
+            " AND permission_level > 1;"; 
+
+        List<Integer> userReservableResources = jt.query(
+                userReservableQueryString,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Integer(rs.getInt("resource_id"));
+                    }
+                });
+
+        return userReservableResources;
+    }
+
+    //Returns all resources a user can view due to group memberships
+    //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM PERSONAL PERMISSIONS)
+    public List<Integer> getGroupReservableResources(int userId){
+        String groupReservableQueryString = "SELECT resource_id FROM groupresourcepermissions WHERE group_id IN " +
+                "(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
+                "permission_level > 1;";
+        
+        List<Integer> groupReservableResources = jt.query(
+                groupReservableQueryString,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Integer(rs.getInt("resource_id"));
+                    }
+                });
+        return groupReservableResources;
+    }
+
+
     private List<UserSystemPermission> getUserSystemPermissions(){
     	List<UserSystemPermission> userSystemPermissions = jt.query(
                 "SELECT user_id, resource_p, reservation_p, user_p FROM users;",

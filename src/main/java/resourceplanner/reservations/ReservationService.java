@@ -18,6 +18,8 @@ import resourceplanner.authentication.UserData.User;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import resourceplanner.permissions.PermissionService;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
@@ -35,6 +37,9 @@ public class ReservationService{
 
 	@Autowired
 	private ResourceService resourceService;
+
+    @Autowired
+    private PermissionService permissionService;
 
 	@Autowired
 	private JdbcTemplate jt;
@@ -188,30 +193,34 @@ public class ReservationService{
             return new StandardResponse(true, "Resource does not exist");
         }
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jt.update(
-                new PreparedStatementCreator() {
-                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                        PreparedStatement ps = connection.prepareStatement(
-                                "INSERT INTO reservations (user_id, resource_id, begin_time, end_time, should_email) VALUES (?, ?, ?, ?, ?);",
-                                new String[]{"reservation_id"});
-                        ps.setInt(1, req.getUser_id());
-                        ps.setInt(2, req.getResource_id());
-                        ps.setTimestamp(3, req.getBegin_time());
-                        ps.setTimestamp(4, req.getEnd_time());
-                        ps.setBoolean(5, req.getShould_email());
-                        return ps;
-                    }
-                },
-                keyHolder);
+        if(reservableResource(req.getUser_id(), req.getResource_id())){
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jt.update(
+                    new PreparedStatementCreator() {
+                        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                            PreparedStatement ps = connection.prepareStatement(
+                                    "INSERT INTO reservations (user_id, resource_id, begin_time, end_time, should_email) VALUES (?, ?, ?, ?, ?);",
+                                    new String[]{"reservation_id"});
+                            ps.setInt(1, req.getUser_id());
+                            ps.setInt(2, req.getResource_id());
+                            ps.setTimestamp(3, req.getBegin_time());
+                            ps.setTimestamp(4, req.getEnd_time());
+                            ps.setBoolean(5, req.getShould_email());
+                            return ps;
+                        }
+                    },
+                    keyHolder);
 
 
-        int resId = keyHolder.getKey().intValue();
-        ReservationWithIDsData newReservation = new ReservationWithIDsData(resId, req.getUser_id(), req.getResource_id(),
-                req.getBegin_time(), req.getEnd_time(), req.getShould_email());
-        emailService.scheduleEmailUpdate(newReservation);
-        return new StandardResponse(false, "Reservation inserted successfully", newReservation);
-
+            int resId = keyHolder.getKey().intValue();
+            ReservationWithIDsData newReservation = new ReservationWithIDsData(resId, req.getUser_id(), req.getResource_id(),
+                    req.getBegin_time(), req.getEnd_time(), req.getShould_email());
+            emailService.scheduleEmailUpdate(newReservation);
+            return new StandardResponse(false, "Reservation inserted successfully", newReservation);
+        }
+        else{
+            return new StandardResponse(true, "Resource cannot be reserved by user");
+        }
     }
 
     public StandardResponse updateReservationDB(ReservationRequest req, int reservationId, HttpServletRequest request){
@@ -244,21 +253,36 @@ public class ReservationService{
             return new StandardResponse(true, "New user or resource id is not valid");
         }
 
-        Object[] updateObject = new Object[]{existingRes.getUser_id(), existingRes.getResource_id(), existingRes.getBegin_time(),
+        if(reservableResource(req.getUser_id(), req.getResource_id())){
+            Object[] updateObject = new Object[]{existingRes.getUser_id(), existingRes.getResource_id(), existingRes.getBegin_time(),
                             existingRes.getEnd_time(), existingRes.getShould_email(), reservationId};
 
-        int rows = jt.update("UPDATE reservations SET user_id = ?, resource_id = ?, begin_time = ?, end_time = ?, should_email = ? WHERE reservation_id = ?;",
-                            updateObject);
-        if(rows == 1){
-            ReservationWithIDsData reservationToReturn = new ReservationWithIDsData(existingRes);
-            emailService.rescheduleEmails(reservationToReturn);
-            return new StandardResponse(false, "Successfully updated reservation", reservationToReturn);
+            int rows = jt.update("UPDATE reservations SET user_id = ?, resource_id = ?, begin_time = ?, end_time = ?, should_email = ? WHERE reservation_id = ?;",
+                                updateObject);
+            if(rows == 1){
+                ReservationWithIDsData reservationToReturn = new ReservationWithIDsData(existingRes);
+                emailService.rescheduleEmails(reservationToReturn);
+                return new StandardResponse(false, "Successfully updated reservation", reservationToReturn);
+            }
+            else{
+                return new StandardResponse(true, "Error updating database entry for reservation");
+            }
         }
         else{
-            return new StandardResponse(true, "Error updating database entry for reservation");
+            return new StandardResponse(true, "Resource not reservable by user");
         }
-
     }
+
+    private boolean reservableResource(int userId, int resourceId){
+        List<Integer> userReservable = permissionService.getUserReservableResources(userId);
+        List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
+
+        Set<Integer> allReservableResources = new TreeSet<Integer>(userReservable); 
+        allReservableResources.addAll(groupReservable);
+
+        return allReservableResources.contains(resourceId) || userId == 1;
+    }
+
 
     private Boolean isOverlappingReservation(Timestamp start, Timestamp end, int resource_id, Integer currentReservation_id){
         Connection c = JDBC.connect();
