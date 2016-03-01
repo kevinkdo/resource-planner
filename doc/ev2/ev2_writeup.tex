@@ -112,19 +112,11 @@ We spent the time to create and maintain an automated testing script because it 
 
 \subsection{Code Structure}
 \subsubsection{Retrospective}
-TODO
+Our code structure went through a large, though simple refactoring. For evolution 1, we had all our backend code divided into filters, controllers, services, and utilities. This led to some issues where when a change was made in a controller, you would have to locate the corresponding service and make changes there. 
 \subsubsection{Current Design}
-TODO
+For evolution 2, we decided to stay with a type of MVC. All backend code is either part of a utility, a 'module' or 'main'. The utility code remained essentially unchanged from evolution 1. A module is a package consisting of a controller, one or more services that serve that controller, and models that serve I/O or storage functions. For example, a group module has a group-controller which specifies the endpoints, a service module which performs the actions required for the requests send to the service from the endpoints, and a number of request and response object formats (models). Main essentially consists of non-utility code that is used across modules, such as filters and email services. 
 
-Our backend code is primarily divided into Filters, Controllers, Services, and Utilities. These components have the following responsibilities: 
-\begin{enumerate}
-    \item Filters act upon nearly all incoming requests. For instance, we must verify that most API requests contain an appropriate authorization token. 
-    \item Requests are then routed to the appropriate method in the appropriate Controller based on the request's URL.
-    \item Services handle the actual logic of each request, interacting with the database as needed. 
-    \item Finally, each Service may call on one or more Utility classes, which contain common functionality used across multiple services, such as converting time data structures or hashing passwords. 
-\end{enumerate}
-
-The above structure allows our backend to be flexible in the face of requirement changes. Because we separate out request filtering (Filters), request routing (Controllers), request logic (Services), and common functionalities used across multiple request types (Utilities), we are easily able to add new filters, add or change API endpoints, or modify our backend logic for individual requests without having to change multiple classes or methods. 
+This design allowed us to make changes to a module much more quickly, as we didn't have to look through other modules to find the specific module we wanted to modify. This further compartmentalization of our code allows us to retain a MVC design, albeit a module-based MVC rather than a backend-based MVC. This change made the already easy-to-use design even more intuitive and efficient. The new design is as extensible, if not more so than before. 
 
 \subsection{Groups}
 \label{sec:GROUPS}
