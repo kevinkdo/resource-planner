@@ -30,7 +30,8 @@ public class ReservationController extends Controller {
         @RequestParam(value = "required_tags", required = false) String[] required_tags,
         @RequestParam(value = "excluded_tags", required = false) String[] excluded_tags,
         @RequestParam(value = "start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-        @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+        final HttpServletRequest request) {
 
         //Cannonical way to convert LocalDateTime to Timestamp
         Timestamp startTimestamp = Timestamp.valueOf(start);
@@ -38,7 +39,7 @@ public class ReservationController extends Controller {
         GetAllMatchingReservationRequest req = new GetAllMatchingReservationRequest(resource_ids, user_ids, 
             required_tags, excluded_tags, startTimestamp, endTimestamp);
         if(req.isValid()){
-            return reservationService.getMatchingReservations(req);
+            return reservationService.getMatchingReservations(req, getRequesterID(request));
         }
         else{
             return new StandardResponse(true, "Invalid input parameters (Issue with start and end times)");
@@ -49,8 +50,8 @@ public class ReservationController extends Controller {
 	@RequestMapping(value = "/{reservationId}",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse getReservationById(@PathVariable final int reservationId) {
-        return reservationService.getReservationByIdDB(reservationId);
+    public StandardResponse getReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
+        return reservationService.getReservationByIdDB(reservationId, getRequesterID(request));
     }
 
     @RequestMapping(value = "",
