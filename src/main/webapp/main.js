@@ -182,9 +182,10 @@ const Navbar = React.createClass({
 const GroupManager = React.createClass({
   getInitialState() {
     return {
-      initial_load: false,
+      initial_load: true,
       new_group_name: "",
-      groups: {}
+      groups: {},
+      error_msg: ""
     };
   },
 
@@ -222,12 +223,13 @@ const GroupManager = React.createClass({
         });
         me.setState({
           groups: new_groups,
-          loading_table: false,
+          initial_load: false
         });
       },
       function(obj) {
         me.setState({
-          error_msg: obj.error_msg
+          error_msg: obj.error_msg,
+          initial_load: false
         })
       }
     );
@@ -286,6 +288,11 @@ const GroupManager = React.createClass({
           <h3>Groups
               <button type="button" className="btn btn-success pull-right" onClick={this.newGroup}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New group</button>
           </h3>
+          {!this.state.error_msg ? <div></div> :
+            <div className="alert alert-danger">
+              <strong>{this.state.error_msg}</strong>
+            </div>
+          }
           {table}
         </div>
       </div>
@@ -624,6 +631,7 @@ const PermissionsManager = React.createClass({
       function(obj) {
         me.setState({
           initial_load: false,
+          is_error: true,
           error_msg: obj.error_msg
         });
       }
