@@ -44,7 +44,7 @@
 Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 1. As can be seen in the diagram above, the two primary changes are:
 \begin{enumerate}
     \item The inclusion of an API Debugger. This is just a python script that interacts with our backend, similarly to the way our python API tests function. 
-    \item The inclusion of OAuth2 to handle duke net-id based authentication. TODO: Jiawei briefly explain this
+    \item The inclusion of OAuth2 to handle duke net-id based authentication.
 \end{enumerate}
 
 The rest of the changes required for evolution 2 fit nicely into our existing frameworks. In the backend, permissions were handled with a few new API calls on top of our evolution 1 API calls, and a few new DB tables were added to support these calls. Similarly, groups were implemented via the addition of another controller and service. In the frontend, new views for permissions and groups were added.  
@@ -106,20 +106,15 @@ For encrypting the communication between the client and the server, we decided t
 
 \subsection{Testing}
 \subsubsection{Retrospective}
-For evolution 1 backend testing, we used a suite of API tests ran from a series of python scripts. This strategy worked extremely well for us - by having a set of tests which covered the vast majority of API cases, we could quickly make changes and verify that nothing was broken. We stand by our decision to focus on testing only the API contract, and not the backend internals, because ultimately the API is what must be working for the web application to work correctly. Realistically, any major bug in the internals of the backend should affect the API tests as well. 
+For evolution 1 backend testing, we used a suite of API tests ran from a series of python scripts. This strategy worked extremely well for us - by having a set of tests which covered the vast majority of API cases, we could quickly make changes and verify that nothing was broken. We stand by our decision to focus on testing only the API contract, and not the backend internals, because ultimately the API is what must be working for the web application to work correctly. Realistically, any major bug in the internals of the backend should affect the API tests as well.
 
 
 Now, there as some exceptions to this. For instance, email is be very hard to test via python scripts, and so our testing suite does not fully cover email. Similarly, since it is nearly impossible for an API testing suite to be 100 percent comprehensive, there are potentially situations where a backend bug would not break any tests, but would affect the web application. Nevertheless, we feel the chances of such issues ocurring is so low that they are not worth worrying about. Given the fact that our presentation for evolution 1 had no issues and that our evolution 1 passed all grader test cases, we still feel quite confident in this strategy. 
 
+We also stand by our decision to use Python, as Python scripts are simple to write and can be run quickly. In addition, our Python testing framework  \texttt{unittest} has proven very easy to use, and Python has numerous libraries that allow you to easily send HTTP requests. 
 
 \subsubsection{Current Design}
-TODO
-
-For backend testing, we wrote automated tests using Python (\hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}}). We chose not to use Spring's built-in testing because it is exceptionally difficult to get working correctly. In contrast, Python scripts are easy to run, simple to understand, and easy to rapidly update and add more tests to. Python's testing framework \texttt{unittest} also has a test discovery function which runs every test with ``test'' in the function name. This feature means that we do not have to manually update a separate testing script whenever we add a new test, thus improving our design.
-
-Our testing script currently tests only the API contract, and not any internals of the backend. This choice is for two reasons. First, the API contract is ultimately the layer that must be working for our front-end application to work, and thus if it works, it is highly likely that there are no significant issues or bugs in our backend code. To some extent, if the application is working from the perspective of the end-user, then it is working correctly. Secondly, it is much harder to test the internals of the back-end, mostly because of our issues using Spring's testing paradigm. That being said, it may be in our best interest to add unit tests in the future if we can figure out how. 
-
-We spent the time to create and maintain an automated testing script because it helps us identify newly introduced bugs much more quickly, and gives each member of the team assurance that they can quickly make changes to the backend without having to manually test after every change. This assurance speeds up our development cycle. In addition, because automated tests perform the same steps every time, the expected results are consistent which is not always the case with manual testing.
+For evolution 2, we simply expanded our suite of tests to include groups, permissions, and the new login protocol with net-ids. These can be found in the classes test_AuthorizationTestCases.py, test_GroupsTestCases.py, and test_PermissionsTestCases.py. See (\hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}}) for the full suite of tests. 
 
 \subsection{Code Structure}
 \subsubsection{Retrospective}
@@ -134,11 +129,35 @@ This design allowed us to make changes to a module much more quickly, as we didn
 \subsubsection{Current Design}
 Groups are a new evolution 2 feature. Our implementation allows for two groups to have the same name (though they are unique as they have different IDs). A group is affiliated with zero or more members and the three types of system-wide permissions - resource permission, reservation permission, and user permission. The users with user permission have the ability to create groups, edit groups, edit group membership, and delete groups. 
 
-TODO - Davis feel free to add whatever to this section
+There were not any particularly complex or challenging design decisions to make when implementing groups. From a database perspective, using one table for group settings and one table for group members is the most logical implementation. From a functionality perspective, the evolution 2 specification was very clear in what a group is. Finally, from a code perspective, we simply added another Controller and Service pair for groups, and its implementation very closely mimicked the UserController and UserService classes. This further demonsrates how well Spring and an MVC backend have worked for us. 
+
 
 \subsection{Permissions}
 \subsubsection{Current Design}
-TODO - Davis
+We debated heavily how to handle permissions for evolution 2. The largest question was whether to add a full set of permission endpoints to allow the frontend to query and modify specific permissions, or to consolidate permission editing and querying into a single call and thus a single view on the frontend. To clarify, the former case would involve numerous endpoints like GET /userResourcePermissions/\{user\_id\}, GET /groupSystemPermissions/\{group\_id\}, etc. whereas the latter would involve a single endpoint that would return a table of all permissions. 
+
+The benefits of the former case include:
+\begin{enumerate}
+    \item More 'extensibility' in the sense that future requirements may further change how permissions work. In such a case, it may be better to have a number of discretized permission endpoints, rather than all permissions lumped into a single endpoint. 
+    \item A less monolithic permission frontend. Multiple endpoints allow, for instance, one view for group system permissions, one view to edit the permissions for a resource, etc. 
+\end{enumerate}
+
+That being said, we ended up choosing to do the latter case, and the primary reason was simplicity. We have a single location where a user can edit all permissions on the front-end, we have a single API endpoint to query for all permissions that a user can change, and we have a single API endpoint to alter all permissions that a user can change. Doing things this way prevented us from having to alter every piece of the UI on the frontend, and also allowed us to consolidate permission code nicely in the backend. In addition, we feel it actually makes for a very nice user experience - the user always knows precisely where to go to change permissions. 
+
+In addition, this strategy is still extensible in the sense that we can always easily add new permissions to this single permission manager table very easily. As such, we argue that this strategy is actually more extensible than the multiple endpoint strategy for future permission changes that are not radically different from current permission behavior. The multiple endpoint strategy would have to modify a lot of front-end code to adapt, whereas we could change almost nothing on the frontend. 
+
+The downside, however, is that we are less capable of adapting to radically different permission guidelines. However, we feel this is a risk worth taking for now. 
+
+\subsubsection{Assumptions}
+Given the ambiguity of some of the permission guidelines, we want to outline our assumptions for permission behavior:
+\begin{enumerate}
+    \item The admin always has full permissions on everything. This can never be changed. 
+    \item A new user or new group will, by default, have no system permissions. A user with user system permissions will need to go in and give them permissions. 
+    \item A newly created resource defaults to VIEW permission for the user that created it, and no permission for all other users and groups. 
+    \item A user with reservation management permissions can modify ANY reservation, including reservations for resources that the user does not himself have view or reserve access for. That being said, a user with reservation management permissions can not break any permission constraints when modifying a reservation (as an example, a user with reservation management permissions could not edit a reservation such that the edited reservation pairs a user with a resource that user does not have reserve access for). 
+\end{enumerate}
+
+
 
 \section{REST API}
 \label{sec:REST}
