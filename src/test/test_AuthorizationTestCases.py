@@ -36,7 +36,7 @@ class AuthorizationTestCases(unittest.TestCase):
       r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(userLogin), headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {"token":'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI', u'userId': 1}
+      assert decoded['data'] == {u'username': u'admin', u'token': u'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOjEsInN1cGVyX3AiOnRydWUsInJlc291cmNlX3AiOmZhbHNlLCJyZXNlcnZhdGlvbl9wIjpmYWxzZSwidXNlcl9wIjpmYWxzZX0.ftBgC8KfB5GyQy68I7HdQQZjUdBvkF-il93Z87BwKfg', u'userId': 1}
       assert decoded['error_msg'] == 'Successfully authenticated'
 
   def test_LoginInvalidUserWrongPassword(self):
@@ -47,21 +47,13 @@ class AuthorizationTestCases(unittest.TestCase):
       assert decoded['data'] == None
       assert decoded['error_msg'] == 'Failed to validate password'
 
-  def test_LoginInvalidUserInvalidEmail(self):
-      userLogin = {'email':'admin123@admin.com', 'username':'admin', 'password':'admin'}
-      r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(userLogin), headers = params.headers, verify = False)
-      decoded = r.json()
-      assert decoded['is_error'] == False
-      assert decoded['data'] == {"token":'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI', u'userId': 1}
-      assert decoded['error_msg'] == 'Successfully authenticated'
-
   def test_LoginInvalidUserInvalidUsername(self):
       userLogin = {'email':'admin@admin.com', 'username':'admin123', 'password':'admin'}
       r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(userLogin), headers = params.headers, verify = False)
       decoded = r.json()
-      assert decoded['is_error'] == False
-      assert decoded['data'] == {"token":'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI', u'userId': 1}
-      assert decoded['error_msg'] == 'Successfully authenticated'
+      assert decoded['is_error'] == True
+      assert decoded['data'] == None
+      assert decoded['error_msg'] == 'Account does not exist'
 
 if __name__ == '__main__':
     unittest.main()
