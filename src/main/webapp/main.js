@@ -337,9 +337,11 @@ const GroupEditor = React.createClass({
   getInitialState() {
     return {
       group_name: "",
-      initial_load: false,
+      initial_load_group: true,
+      initial_load_users: true,
       error_msg: "",
-      user_ids: [""]
+      user_ids: [""],
+      all_users: []
     };
   },
 
@@ -351,16 +353,29 @@ const GroupEditor = React.createClass({
         me.setState({
           group_name: obj.data.group_name,
           user_ids: obj.data.user_ids,
-          error_msg: ""
+          error_msg: "",
+          initial_load_group: false
         });
       },
       function(obj) {
-        me.setState({initial_load: false, error_msg: obj.error_msg});
+        me.setState({initial_load_group: false, error_msg: obj.error_msg});
+      }
+    );
+    send_xhr("GET", "/api/users/", localStorage.getItem("session"), null,
+      function(obj) {
+        me.setState({
+          all_users: obj.data,
+          initial_load_users: false
+        });
+      },
+      function(obj) {
+        me.setState({initial_load_users: false, error_msg: obj.error_msg});
       }
     );
   },
 
   render() {
+    var me = this;
     var last_member = this.state.user_ids[this.state.user_ids.length-1];
     return (
       <div>
@@ -369,7 +384,7 @@ const GroupEditor = React.createClass({
         <div className="container">
           <div className="row">
             <div className="col-md-6 col-md-offset-3">
-              {this.state.initial_load ? <Loader /> :
+              {this.state.initial_load_group || this.state.initial_load_users ? <Loader /> :
                 <form>
                   <legend>Edit group {this.props.id}</legend>
                   {!this.state.error_msg ? <div></div> :
@@ -382,13 +397,28 @@ const GroupEditor = React.createClass({
                     <input type="text" className="form-control" placeholder="Name" value={this.state.group_name} onChange={(evt) => this.set("group_name", evt.target.value)}/>
                   </div>
                   <div className="form-group">
-                  <label>Members</label>
+                  
                   <div className="row">
                     <div className="col-md-4">
+                      <label>Members</label>
                       {this.state.user_ids.slice(0, -1).map((x,i) =>
-                        <ListInput key={i} addFunc={this.addMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member" hasAddon={false}/>
+                        <ListInput key={i} addFunc={this.addMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member ID" hasAddon={false}/>
                       )}
-                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member" editFunc={this.setMember} hasAddon={true}/>
+                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member ID" editFunc={this.setMember} hasAddon={true}/>
+                    </div>
+                    <div className="col-md-4">
+                      <label>All users</label>
+                      <table className="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>User ID</th>
+                            <th>Username</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {me.state.all_users.map(x => <tr><td>{x.user_id}</td><td>{x.username}</td></tr>)}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
