@@ -195,7 +195,7 @@ const GroupManager = React.createClass({
     if (new_group_name != null && new_group_name.length > 0) {
       this.setState({sending: true});
       send_xhr("POST", "/api/groups", localStorage.getItem("session"),
-      JSON.stringify({group_name:new_group_name, user_ids: [], resource_p: false, reservation_p: false, user_p: false}),
+      JSON.stringify({group_name:new_group_name, user_ids: []}),
       function(obj) {
         me.refresh();
       },
@@ -271,7 +271,7 @@ const GroupManager = React.createClass({
             return <tr key={"group " + x.group_id}>
               <td>{x.group_id}</td>
               <td>{x.group_name}</td>
-             {/* <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>*/}
+              <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteGroup(x.group_id)}>Delete</a></td>
             </tr>
           })}
@@ -310,7 +310,7 @@ const GroupEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/groups/" + this.props.id, localStorage.getItem("session"),
-      JSON.stringify({group_name: this.state.group_name, user_ids:this.state.user_ids}),
+      JSON.stringify({group_name: this.state.group_name, user_ids: this.state.user_ids.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({route: "group_manager"});
       },
@@ -341,6 +341,23 @@ const GroupEditor = React.createClass({
       error_msg: "",
       user_ids: [""]
     };
+  },
+
+  componentDidMount() {
+    var me = this;
+    send_xhr("GET", "/api/groups/" + this.props.id, localStorage.getItem("session"), null,
+      function(obj) {
+        obj.data.user_ids.push("");
+        me.setState({
+          group_name: obj.data.group_name,
+          user_ids: obj.data.user_ids,
+          error_msg: ""
+        });
+      },
+      function(obj) {
+        me.setState({initial_load: false, error_msg: obj.error_msg});
+      }
+    );
   },
 
   render() {
