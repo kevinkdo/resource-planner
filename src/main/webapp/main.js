@@ -309,6 +309,8 @@ const GroupEditor = React.createClass({
   editGroup(evt) {
     var me = this;
     this.setState({sending: true});
+
+    console.log(this.state.user_ids)
     send_xhr("PUT", "/api/groups/" + this.props.id, localStorage.getItem("session"),
       JSON.stringify({group_name: this.state.group_name, user_ids: this.state.user_ids.filter(x => x.length > 0)}),
       function(obj) {
@@ -349,7 +351,11 @@ const GroupEditor = React.createClass({
     var me = this;
     send_xhr("GET", "/api/groups/" + this.props.id, localStorage.getItem("session"), null,
       function(obj) {
+        //console.log(obj.data.user_ids)
         obj.data.user_ids.push("");
+        for (var i = 0; i < obj.data.user_ids.length; i++) {
+          obj.data.user_ids[i] = obj.data.user_ids[i].toString();
+        }
         me.setState({
           group_name: obj.data.group_name,
           user_ids: obj.data.user_ids,
