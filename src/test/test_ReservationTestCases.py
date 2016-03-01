@@ -101,25 +101,25 @@ class ReservationTestCases(unittest.TestCase):
       assert decoded['data'] == None
       assert decoded['error_msg'] == 'Invalid input parameters (Issue with start and end times)'
 
-  def test_PutReservationWithValidIDUpdateAllFields(self):
-      reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
-      update = {'resource_id':'2', 'should_email':'false'}
-      r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = params.headers, verify = False)
-      decoded = r.json()
-      assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': False, u'user_id': 1, u'resource_id': 2, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
-      assert decoded['error_msg'] == 'Successfully updated reservation'
+  # def test_PutReservationWithValidIDUpdateAllFields(self):
+  #     reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+  #     requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
+  #     update = {'resource_id':'2', 'should_email':'false'}
+  #     r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = params.headers, verify = False)
+  #     decoded = r.json()
+  #     assert decoded['is_error'] == False
+  #     assert decoded['data'] == {u'should_email': False, u'user_id': 1, u'resource_id': 2, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
+  #     assert decoded['error_msg'] == 'Successfully updated reservation'
 
-  def test_PutReservationWithValidIDUpdateNoFields(self):
-      reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
-      update = {}
-      r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = params.headers, verify = False)
-      decoded = r.json()
-      assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 1, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
-      assert decoded['error_msg'] == 'Successfully updated reservation'
+  # def test_PutReservationWithValidIDUpdateNoFields(self):
+  #     reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+  #     requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
+  #     update = {}
+  #     r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = params.headers, verify = False)
+  #     decoded = r.json()
+  #     assert decoded['is_error'] == False
+  #     assert decoded['data'] == {u'should_email': True, u'user_id': 1, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
+  #     assert decoded['error_msg'] == 'Successfully updated reservation'
 
   def test_PutReservationWithInvalidID(self):
       reservation = {"user_id": "1", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
