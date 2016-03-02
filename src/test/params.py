@@ -10,6 +10,7 @@ loginUrl = '/auth/login'
 reserveUrl = '/api/reservations'
 userUrl = '/api/users'
 permissionsUrl = '/editablePermissions'
+groupUrl = '/api/groups'
 headers = {
   'Accept': 'application/json',
   "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOjEsInN1cGVyX3AiOmZhbHNlLCJyZXNvdXJjZV9wIjp0cnVlLCJyZXNlcnZhdGlvbl9wIjpmYWxzZSwidXNlcl9wIjp0cnVlfQ.186D0TeuA1Nw14W9f4QrYTFAKdU7epPURmQjegj89jQ",
@@ -41,6 +42,12 @@ userWithReserve = {
   "should_email": "false",
   "username": "reserve"
 }
+userWithNone = {
+  "email": "none@a.com",
+  "password": "password",
+  "should_email": "false",
+  "username": "none"	
+}
 
 #user login json
 loginWithAdmin = {
@@ -66,6 +73,11 @@ loginWithReserve = {
   "username": "reserve",
   "password": "password",
   "email": "reserve@a.com"
+}
+loginWithNone = {
+  "username": "none",
+  "password": "password",
+  "email": "none@a.com"
 }
 
 #user permissions json
