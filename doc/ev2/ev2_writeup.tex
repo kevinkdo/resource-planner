@@ -43,8 +43,8 @@
 
 Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 1. As can be seen in the diagram above, the two primary changes are:
 \begin{enumerate}
-    \item The inclusion of an API Debugger. This is just a python script that interacts with our backend, similarly to the way our python API tests function. 
-    \item The inclusion of OAuth2 to handle duke net-id based authentication.
+    \item The inclusion of an API Debugger. This is just a Python script that interacts with our backend, similarly to the way our Python API tests function. 
+    \item The inclusion of OAuth2 to handle Duke NetID-based authentication.
 \end{enumerate}
 
 The rest of the changes required for evolution 2 fit nicely into our existing frameworks. In the backend, permissions were handled with a few new API calls on top of our evolution 1 API calls, and a few new DB tables were added to support these calls. Similarly, groups were implemented via the addition of another controller and service. In the frontend, new views for permissions and groups were added.  
@@ -106,17 +106,17 @@ For encrypting the communication between the client and the server, we decided t
 
 \subsection{Testing}
 \subsubsection{Retrospective}
-For evolution 1 backend testing, we used a suite of API tests ran from a series of python scripts. This strategy worked extremely well for us - by having a set of tests which covered the vast majority of API cases, we could quickly make changes and verify that nothing was broken. We stand by our decision to focus on testing only the API contract, and not the backend internals, because ultimately the API is what must be working for the web application to work correctly. Realistically, any major bug in the internals of the backend should affect the API tests as well.
+For evolution 1 backend testing, we used a suite of API tests ran from a series of Python scripts. This strategy worked extremely well for us - by having a set of tests which covered the vast majority of API cases, we could quickly make changes and verify that nothing was broken. We stand by our decision to focus on testing only the API contract, and not the backend internals, because ultimately the API is what must be working for the web application to work correctly. Realistically, any major bug in the internals of the backend should affect the API tests as well.
 
 
-Now, there as some exceptions to this. For instance, email is be very hard to test via python scripts, and so our testing suite does not fully cover email. Similarly, since it is nearly impossible for an API testing suite to be 100 percent comprehensive, there are potentially situations where a backend bug would not break any tests, but would affect the web application. Nevertheless, we feel the chances of such issues oCcurring is so low that they are not worth worrying about. Given the fact that our presentation for evolution 1 had no issues and that our evolution 1 passed all grader test cases, we still feel quite confident in this strategy. 
+Now, there as some exceptions to this. For instance, email is be very hard to test via Python scripts, and so our testing suite does not fully cover email. Similarly, since it is nearly impossible for an API testing suite to be 100 percent comprehensive, there are potentially situations where a backend bug would not break any tests, but would affect the web application. Nevertheless, we feel the chances of such issues occurring is so low that they are not worth worrying about. Given the fact that our presentation for evolution 1 had no issues and that our evolution 1 passed all grader test cases, we still feel quite confident in this strategy. 
 
 We also stand by our decision to use Python, as Python scripts are simple to write and can be run quickly. In addition, our Python testing framework  \texttt{unittest} has proven very easy to use, and Python has numerous libraries that allow you to easily send HTTP requests. 
 
 \subsubsection{Current Design}
-For Evolution 2, we updated the test cases to reflect the new permissions, groups, and login protocol with net-id requirements. We added separate tests for groups and permissions but also integrated the new requirements into the existing tests, updating them as needed. In addition, we created the API Debugger which allows for easy testing of the endpoints. For simplicity, while we allow testing of the login endpoint, we run the other endpoint tests as admin. We chose to use the token from the admin because a basic debugger should show that the endpoints accomplish the tasks that they are designed for and not focus so much on who is trying to accomplish the tasks. The API debugger was also written in python due to ease of sending requests and testing via unittest. 
+For Evolution 2, we updated the test cases to reflect the new permissions, groups, and login protocol with NetID requirements. We added separate tests for groups and permissions but also integrated the new requirements into the existing tests, updating them as needed. In addition, we created the API Debugger which allows for easy testing of the endpoints. For simplicity, while we allow testing of the login endpoint, we run the other endpoint tests as admin. We chose to use the token from the admin because a basic debugger should show that the endpoints accomplish the tasks that they are designed for and not focus so much on who is trying to accomplish the tasks. The API debugger was also written in Python due to ease of sending requests and testing via \texttt{unittest}. 
 
-We chose to not implement every test case in the (\hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}}) for backend testing because we felt that the current tests gave a fairly comprehensive view of functionality. That said, we did manually test all of the cases listed in the See (\hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}}).
+We chose to not implement every test case in \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for backend testing because we felt that the current tests gave a fairly comprehensive view of functionality. That said, we did manually test all of the cases listed there.
 
 
 \subsection{Code Structure}
@@ -550,6 +550,6 @@ Returns a JSON object with is\_error (boolean) and error\_msg (possibly empty st
 \includegraphics[height=4in]{Evolution2DB.pdf}
 \end{center}
 \caption{DB Schema}
-
+\end{figure}
 
 \end{document}
