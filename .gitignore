@@ -9,6 +9,7 @@ main-build.js
 *.log
 *.synctex.gz
 *.out
+src/main/webapp/main-concat.js
 
 # Created by https://www.gitignore.io/api/gradle,eclipse,intellij
 
