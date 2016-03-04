@@ -47,7 +47,7 @@ if error:
   gmail_user = 'ResourceManagerAlerts@gmail.com'
   gmail_pwd = 'resourcemanager'
   FROM = gmail_user
-  recipient = 'mh291@duke.edu; kkd10@duke.edu; davis.treybig@duke.edu; jiawei.zhang@duke.edu'
+  recipient = ['mh291@duke.edu', 'kkd10@duke.edu', 'davis.treybig@duke.edu', 'jiawei.zhang@duke.edu']
   TO = recipient if type(recipient) is list else [recipient]
   SUBJECT = 'PROD ERROR'
   TEXT = reduce(lambda x, y: str(x) + '\n' + str(y), errMsg)
