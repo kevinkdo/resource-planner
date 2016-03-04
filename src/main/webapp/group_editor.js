@@ -32,6 +32,11 @@ const GroupEditor = React.createClass({
     this.setState({user_ids: this.state.user_ids});
   },
 
+  removeMember(evt, i) {
+    this.state.user_ids.splice(i, 1);
+    this.setState({user_ids: this.state.user_ids});
+  },
+
   getInitialState() {
     return {
       group_name: "",
@@ -98,14 +103,14 @@ const GroupEditor = React.createClass({
                   <div className="form-group">
                   
                   <div className="row">
-                    <div className="col-md-4">
+                    <div className="col-xs-4 col-md-4">
                       <label>Members</label>
                       {this.state.user_ids.slice(0, -1).map((x,i) =>
-                        <ListInput key={i} addFunc={this.addMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member ID" hasAddon={false}/>
+                        <ListMinusInput key={i} minusFunc={this.removeMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member ID" hasAddon={false}/>
                       )}
-                      <ListInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member ID" editFunc={this.setMember} hasAddon={true}/>
+                      <ListPlusInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member ID" editFunc={this.setMember} hasAddon={true}/>
                     </div>
-                    <div className="col-md-4 col-md-offset-4">
+                    <div className="col-xs-4 col-xs-offset-4 col-md-4 col-md-offset-4">
                       <label>All users</label>
                       <table className="table table-hover">
                         <thead>
