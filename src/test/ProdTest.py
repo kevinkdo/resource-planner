@@ -50,7 +50,7 @@ if error:
   recipient = ['mh291@duke.edu', 'kkd10@duke.edu', 'davis.treybig@duke.edu', 'jiawei.zhang@duke.edu']
   TO = recipient if type(recipient) is list else [recipient]
   SUBJECT = 'PROD ERROR'
-  TEXT = reduce(lambda x, y: str(x) + '\n' + str(y), errMsg)
+  TEXT = reduce(lambda x, y: str(x) + '\n' + str(y), logMsg)
 
   # Prepare actual message
   message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
