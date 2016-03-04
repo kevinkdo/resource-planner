@@ -20,10 +20,12 @@ CREATE TABLE users (
   should_email  BOOLEAN             NOT NULL
 );
 
+
 INSERT INTO users (email, username, passhash, super_p, resource_p, reservation_p, user_p, should_email)
 VALUES ('admin@admin.com', 'admin',
-        '1000:9816dd56235c68a566b1f50a1815ab96761ebf7ad33d84cd:5b209a5f9b1628fbd80cdffb0aa50b7ec58f07e93f9b18fc',
+        '1000:7feed90fbc68c64e5a514c39d9c8825b1a148b19eb58cc2f:b539cfbd7e09dc97bb5817f9160fb262d4d964be12ac8206',
         TRUE, TRUE, TRUE, TRUE, FALSE);
+        
 
 
 CREATE TABLE resources (
