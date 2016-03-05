@@ -167,10 +167,10 @@ const ResourceList = React.createClass({
 
         <div className="container">
           <div className="row">
-            <div className="col-md-3">
+            <div className="col-xs-4 col-md-3">
               {leftpane}
             </div>
-            <div className="col-md-9">
+            <div className="col-xs-8 col-md-9">
               <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "resource_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
               {!this.state.error_msg ? <div></div> :
                 <div className="alert alert-danger">
