@@ -170,7 +170,7 @@ const PermissionsManager = React.createClass({
             var user_id = user.user_id;
             return (
               <tr key={"tr user" + user_id}>
-                <td>{user.username}</td>
+                <td>{"User: " + user.username}</td>
                 {user_management ? <td className={me.getBackgroundColor(me.getSystemUserPermission("resource_p", user_id)) + " pointer noselect"} onClick={() => me.cycleSystemUserPermission("resource_p", user_id)}>{me.getSystemUserPermission("resource_p", user_id)}</td> : null}
                 {user_management ? <td className={me.getBackgroundColor(me.getSystemUserPermission("reservation_p", user_id)) + " pointer noselect"} onClick={() => me.cycleSystemUserPermission("reservation_p", user_id)}>{me.getSystemUserPermission("reservation_p", user_id)}</td> : null}
                 {user_management ? <td className={me.getBackgroundColor(me.getSystemUserPermission("user_p", user_id)) + " pointer noselect"} onClick={() => me.cycleSystemUserPermission("user_p", user_id)}>{me.getSystemUserPermission("user_p", user_id)}</td> : null}
@@ -185,7 +185,7 @@ const PermissionsManager = React.createClass({
             var group_id = group.group_id;
             return (
               <tr key={"tr group" + group_id}>
-                <td>{group.group_name}</td>
+                <td>{"Group: " + group.group_name}</td>
                 {user_management ? <td className={me.getBackgroundColor(me.getSystemGroupPermission("resource_p", group_id)) + " pointer noselect"} onClick={() => me.cycleSystemGroupPermission("resource_p", group_id)}>{me.getSystemGroupPermission("resource_p", group_id)}</td> : null}
                 {user_management ? <td className={me.getBackgroundColor(me.getSystemGroupPermission("reservation_p", group_id)) + " pointer noselect"} onClick={() => me.cycleSystemGroupPermission("reservation_p", group_id)}>{me.getSystemGroupPermission("reservation_p", group_id)}</td> : null}
                 {user_management ? <td className={me.getBackgroundColor(me.getSystemGroupPermission("user_p", group_id)) + " pointer noselect"} onClick={() => me.cycleSystemGroupPermission("user_p", group_id)}>{me.getSystemGroupPermission("user_p", group_id)}</td> : null}
