@@ -10,10 +10,10 @@ const GroupEditor = React.createClass({
     send_xhr("PUT", "/api/groups/" + this.props.pstate.view_id, localStorage.getItem("session"),
       JSON.stringify({group_name: this.state.group_name, user_ids: this.state.user_ids.filter(x => x.length > 0)}),
       function(obj) {
-        me.props.setPstate({route: "group_manager"});
+        me.props.setPstate({route: "group_manager", is_error: false, error_msg: "Successfully edited group!"});
       },
       function(obj) {
-        me.setState({sending: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -43,6 +43,7 @@ const GroupEditor = React.createClass({
       initial_load_group: true,
       initial_load_users: true,
       error_msg: "",
+      is_error: false,
       user_ids: [""],
       all_users: []
     };
@@ -62,7 +63,7 @@ const GroupEditor = React.createClass({
         });
       },
       function(obj) {
-        me.setState({initial_load_group: false, error_msg: obj.error_msg});
+        me.setState({initial_load_group: false, error_msg: obj.error_msg, is_error: true});
       }
     );
     send_xhr("GET", "/api/users/", localStorage.getItem("session"), null,
@@ -73,7 +74,7 @@ const GroupEditor = React.createClass({
         });
       },
       function(obj) {
-        me.setState({initial_load_users: false, error_msg: obj.error_msg});
+        me.setState({initial_load_users: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -92,7 +93,7 @@ const GroupEditor = React.createClass({
                 <form>
                   <legend>Edit group {this.props.id}</legend>
                   {!this.state.error_msg ? <div></div> :
-                    <div className="alert alert-danger">
+                    <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                       <strong>{this.state.error_msg}</strong>
                     </div>
                   }
@@ -127,7 +128,7 @@ const GroupEditor = React.createClass({
                   </div>
                 </div>
                   <div className="btn-toolbar">
-                    <button type="submit" className="btn btn-primary" onClick={this.editGroup} disabled={this.state.sending}>Edit group</button>
+                    <button type="submit" className="btn btn-primary" onClick={this.editGroup} disabled={this.state.sending}>Save changes</button>
                     <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                   </div>
                 </form>

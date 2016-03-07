@@ -1,10 +1,14 @@
 const GroupManager = React.createClass({
-  getInitialState() {
+  getInitialState() {  
+    var error_msg = this.props.pstate.error_msg;
+    var is_error = this.props.pstate.is_error;
+    this.props.setPstate({error_msg: ""});
     return {
       initial_load: true,
       new_group_name: "",
       groups: {},
-      error_msg: ""
+      error_msg: error_msg,
+      is_error: is_error
     };
   },
 
@@ -19,7 +23,7 @@ const GroupManager = React.createClass({
         me.refresh();
       },
       function(obj) {
-        me.setState({sending: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg, is_error: true});
       }
     );
     }
@@ -48,6 +52,7 @@ const GroupManager = React.createClass({
       function(obj) {
         me.setState({
           error_msg: obj.error_msg,
+          is_error: true,
           initial_load: false
         })
       }
@@ -63,7 +68,7 @@ const GroupManager = React.createClass({
       },
       function(obj) {
         me.refresh();
-        me.setState({error_msg: obj.error_msg});
+        me.setState({error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -108,7 +113,7 @@ const GroupManager = React.createClass({
               <button type="button" className="btn btn-success pull-right" onClick={this.newGroup}><span className="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New group</button>
           </h3>
           {!this.state.error_msg ? <div></div> :
-            <div className="alert alert-danger">
+            <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
               <strong>{this.state.error_msg}</strong>
             </div>
           }

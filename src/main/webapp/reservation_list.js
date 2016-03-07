@@ -8,7 +8,10 @@ const ReservationList = React.createClass({
     var start_date = formatDate(start);
     var start_time = formatTime(start);
     var end_date = formatDate(end);
-    var end_time = formatTime(end);    
+    var end_time = formatTime(end);   
+    var error_msg = this.props.pstate.error_msg;
+    var is_error = this.props.pstate.is_error;
+    this.props.setPstate({error_msg: ""});
     return {
       loading_tags: true,
       loading_table: true,
@@ -18,7 +21,8 @@ const ReservationList = React.createClass({
       end_date: end_date,
       end_time: end_time,
       reservations: {},
-      error_msg: "",
+      error_msg: error_msg,
+      is_error: is_error,
       resource_id: ""
     };
   },
@@ -77,7 +81,7 @@ const ReservationList = React.createClass({
       },
       function(obj) {
         me.refresh();
-        me.setState({error_msg: obj.error_msg});
+        me.setState({error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -94,14 +98,14 @@ const ReservationList = React.createClass({
           });
         me.setState({
           reservations: new_reservations,
-          loading_table: false,
-          //error_msg: ""
+          loading_table: false
         });
       },
       function(obj) {
         me.setState({
           loading_table: false,
-          error_msg: obj.error_msg
+          error_msg: obj.error_msg,
+          is_error: true
         });
       }
     );
@@ -120,7 +124,8 @@ const ReservationList = React.createClass({
       function(obj) {
         me.setState({
           loading_tags: false,
-          error_msg: obj.error_msg
+          error_msg: obj.error_msg,
+          is_error: true
         });
       }
     );
@@ -202,7 +207,7 @@ const ReservationList = React.createClass({
             <div className="col-xs-8 col-md-9">
               <h3>Reservations</h3>
               {!this.state.error_msg ? <div></div> :
-                <div className="alert alert-danger">
+                <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                   <strong>{this.state.error_msg}</strong>
                 </div>
               }

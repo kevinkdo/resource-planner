@@ -1,11 +1,15 @@
 const ResourceList = React.createClass({
   getInitialState() {
+    var error_msg = this.props.pstate.error_msg;
+    var is_error = this.props.pstate.is_error;
+    this.props.setPstate({error_msg: ""});
     return {
       loading_tags: true,
       loading_table: true,
       tags: {},
       resources: {},
-      error_msg: ""
+      error_msg: error_msg,
+      is_error: is_error,
     };
   },
 
@@ -46,14 +50,14 @@ const ResourceList = React.createClass({
             },
             function(obj) {
               me.refresh();
-              me.setState({error_msg: obj.error_msg});
+              me.setState({error_msg: obj.error_msg, is_error: true});
             }
           );
         }
       },
       function(obj) {
         me.refresh();
-        me.setState({error_msg: obj.error_msg});
+        me.setState({error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -70,14 +74,11 @@ const ResourceList = React.createClass({
         });
         me.setState({
           resources: new_resources,
-          loading_table: false,
-          //error_msg: ""
+          loading_table: false
         });
       },
       function(obj) {
-        me.setState({
-          error_msg: obj.error_msg
-        });
+        me.setState({error_msg: obj.error_msg, is_error: true});
       }
     );
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
@@ -94,7 +95,8 @@ const ResourceList = React.createClass({
       function(obj) {
         me.setState({
           loading_tags: false,
-          error_msg: error_msg
+          error_msg: error_msg,
+          is_error: true
         });
       }
     );
@@ -173,7 +175,7 @@ const ResourceList = React.createClass({
             <div className="col-xs-8 col-md-9">
               <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "resource_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
               {!this.state.error_msg ? <div></div> :
-                <div className="alert alert-danger">
+                <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                   <strong>{this.state.error_msg}</strong>
                 </div>
               }

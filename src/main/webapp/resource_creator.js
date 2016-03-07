@@ -6,10 +6,10 @@ const ResourceCreator = React.createClass({
     send_xhr("POST", "/api/resources", localStorage.getItem("session"),
       JSON.stringify({name:this.state.name, description:this.state.description, tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
-        me.props.setPstate({ route: "resource_list" });
+        me.props.setPstate({ route: "resource_list", is_error: false, error_msg: "Successfully created resource!" });
       },
       function(obj) {
-        me.setState({sending: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -46,7 +46,8 @@ const ResourceCreator = React.createClass({
       name: "",
       description: "",
       tags: [""],
-      error_msg: ""
+      error_msg: "",
+      is_error: false
     };
   },
 
@@ -62,7 +63,7 @@ const ResourceCreator = React.createClass({
               <form>
                 <legend>New resource</legend>
                 {!this.state.error_msg ? <div></div> :
-                  <div className="alert alert-danger">
+                  <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                     <strong>{this.state.error_msg}</strong>
                   </div>
                 }

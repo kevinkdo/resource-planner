@@ -6,10 +6,10 @@ const ResourceEditor = React.createClass({
     send_xhr("PUT", "/api/resources/" + this.props.pstate.view_id, localStorage.getItem("session"),
       JSON.stringify({name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
-        me.props.setPstate({ route: "resource_list" });
+        me.props.setPstate({ route: "resource_list", is_error: false, error_msg: "Successfully edited resource!" });
       },
       function(obj) {
-        me.setState({sending: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -48,7 +48,8 @@ const ResourceEditor = React.createClass({
       name: "",
       description: "",
       tags: [""],
-      error_msg: ""
+      error_msg: "",
+      is_error: false
     };
   },
 
@@ -61,7 +62,7 @@ const ResourceEditor = React.createClass({
         me.setState(obj.data);
       },
       function(obj) {
-        me.setState({initial_load: false, error_msg: obj.error_msg});
+        me.setState({initial_load: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -79,7 +80,7 @@ const ResourceEditor = React.createClass({
                 <form>
                   <legend>Edit resource {this.props.pstate.view_id}</legend>
                   {!this.state.error_msg ? <div></div> :
-                    <div className="alert alert-danger">
+                    <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                       <strong>{this.state.error_msg}</strong>
                     </div>
                   }

@@ -11,10 +11,10 @@ const Settings = React.createClass({
     send_xhr("PUT", "/api/users/" + userId(), localStorage.getItem("session"),
       JSON.stringify({/*email:this.state.email, username:this.state.username, password:this.state.password, */should_email: this.state.should_email}),
       function(obj) {
-        me.props.setPstate({ route: "reservation_list" });
+        me.props.setPstate({ route: "reservation_list", is_error: false, error_msg: "Successfully saved user settings!" });
       },
       function(obj) {
-        me.setState({sending: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -33,7 +33,8 @@ const Settings = React.createClass({
       username: "",
       password: "",
       should_email: "",
-      error_msg: ""
+      error_msg: "",
+      is_error: false
     };
   },
 
@@ -45,7 +46,7 @@ const Settings = React.createClass({
         me.setState(obj.data);
       },
       function(obj) {
-        me.setState({initial_load: false, error_msg: obj.error_msg});
+        me.setState({initial_load: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -62,7 +63,7 @@ const Settings = React.createClass({
                 <form>
                   <legend>User Settings</legend>
                   {!this.state.error_msg ? <div></div> :
-                    <div className="alert alert-danger">
+                    <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                       <strong>{this.state.error_msg}</strong>
                     </div>
                   }

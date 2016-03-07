@@ -6,10 +6,10 @@ const ReservationCreator = React.createClass({
     send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
       JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
       function(obj) {
-        me.props.setPstate({ route: "reservation_list" });
+        me.props.setPstate({ route: "reservation_list", is_error: false, error_msg: "Successfully created reservation!" });
       },
       function(obj) {
-        me.setState({sending: false, error_msg: obj.error_msg});
+        me.setState({sending: false, error_msg: obj.error_msg, is_error: true});
       }
     );
   },
@@ -52,7 +52,8 @@ const ReservationCreator = React.createClass({
       end_date: end_date,
       end_time: end_time,
       should_email: false,
-      error_msg: ""
+      error_msg: "",
+      is_error: false
     };
   },
 
@@ -67,7 +68,7 @@ const ReservationCreator = React.createClass({
               <form>
                 <legend>New reservation</legend>
                 {!this.state.error_msg ? <div></div> :
-                  <div className="alert alert-danger">
+                  <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                     <strong>{this.state.error_msg}</strong>
                   </div>
                 }
