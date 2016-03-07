@@ -3,7 +3,7 @@ const ResourceEditor = React.createClass({
     evt.preventDefault();
     var me = this;
     this.setState({sending: true});
-    send_xhr("PUT", "/api/resources/" + this.props.id, localStorage.getItem("session"),
+    send_xhr("PUT", "/api/resources/" + this.props.pstate.view_id, localStorage.getItem("session"),
       JSON.stringify({name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({ route: "resource_list" });
@@ -54,7 +54,7 @@ const ResourceEditor = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/resources/" + this.props.id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/" + this.props.pstate.view_id, localStorage.getItem("session"), null,
       function(obj) {
         obj.data.initial_load = false;
         obj.data.tags.push("");
@@ -77,7 +77,7 @@ const ResourceEditor = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               {this.state.initial_load ? <Loader /> :
                 <form>
-                  <legend>Edit resource {this.props.id}</legend>
+                  <legend>Edit resource {this.props.pstate.view_id}</legend>
                   {!this.state.error_msg ? <div></div> :
                     <div className="alert alert-danger">
                       <strong>{this.state.error_msg}</strong>

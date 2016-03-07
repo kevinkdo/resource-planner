@@ -36,6 +36,11 @@ const ResourceCreator = React.createClass({
     this.setState({tags: this.state.tags});
   },
 
+  removeTag(evt, i) {
+    this.state.tags.splice(i, 1);
+    this.setState({tags: this.state.tags});
+  },
+
   getInitialState() {
     return {
       name: "",
@@ -74,9 +79,9 @@ const ResourceCreator = React.createClass({
                   <div className="row">
                     <div className="col-md-4">
                       {this.state.tags.slice(0, -1).map((x,i) =>
-                        <ListInput key={i} addFunc={this.addTag} value={x} index={i} editFunc={this.setTag} placeholder="Optional tag"hasAddon={false}/>
+                        <ListMinusInput key={i} minusFunc={this.removeTag} value={x} index={i} editFunc={this.setTag} hasAddon={false} placeholder="Optional tag"/>
                       )}
-                      <ListInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} placeholder="Optional tag" editFunc={this.setTag} hasAddon={true}/>
+                      <ListPlusInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} editFunc={this.setTag} hasAddon={true} placeholder="Optional tag"/>
                     </div>
                   </div>
                 </div>

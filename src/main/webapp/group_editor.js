@@ -7,7 +7,7 @@ const GroupEditor = React.createClass({
   editGroup(evt) {
     var me = this;
     this.setState({sending: true});
-    send_xhr("PUT", "/api/groups/" + this.props.id, localStorage.getItem("session"),
+    send_xhr("PUT", "/api/groups/" + this.props.pstate.view_id, localStorage.getItem("session"),
       JSON.stringify({group_name: this.state.group_name, user_ids: this.state.user_ids.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({route: "group_manager"});
@@ -50,7 +50,7 @@ const GroupEditor = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/groups/" + this.props.id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/groups/" + this.props.pstate.view_id, localStorage.getItem("session"), null,
       function(obj) {
         obj.data.user_ids = obj.data.user_ids.map(x => x.toString());
         obj.data.user_ids.push("");

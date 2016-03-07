@@ -14,23 +14,23 @@ const Router = React.createClass({
       case "group_manager":
         return <GroupManager setPstate={this.setState.bind(this)} pstate={this.state} />
       case "group_editor":
-        return <GroupEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id} />
+        return <GroupEditor setPstate={this.setState.bind(this)} pstate={this.state} />
       case "settings":
         return <Settings setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_list":
         return <ReservationList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_creator":
-        return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} resource_id={this.state.view_id} />
+        return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} />
       case "reservation_editor":
-        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
+        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_list":
         return <ResourceList setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_creator":
         return <ResourceCreator setPstate={this.setState.bind(this)} pstate={this.state} />
       case "resource_editor":
-        return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
+        return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} />
       case "permissions_manager":
-        return <PermissionsManager setPstate={this.setState.bind(this)} pstate={this.state} id={this.state.view_id}/>
+        return <PermissionsManager setPstate={this.setState.bind(this)} pstate={this.state} />
     }
     return <div>ERROR</div>;
   }

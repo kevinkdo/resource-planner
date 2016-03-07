@@ -45,7 +45,7 @@ const ReservationCreator = React.createClass({
     var end_time = formatTime(now)
     return {
       sending: false,
-      resource_id: this.props.resource_id ? this.props.resource_id : 0,
+      resource_id: this.props.pstate.view_id ? this.props.pstate.view_id : 0,
       user_id: userId(),
       start_date: start_date,
       start_time: start_time,

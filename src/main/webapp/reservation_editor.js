@@ -3,7 +3,7 @@ const ReservationEditor = React.createClass({
     evt.preventDefault();
     var me = this;
     this.setState({sending: true});
-    send_xhr("PUT", "/api/reservations/" + this.props.id, localStorage.getItem("session"),
+    send_xhr("PUT", "/api/reservations/" + this.props.pstate.view_id, localStorage.getItem("session"),
       JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list" });
@@ -59,7 +59,7 @@ const ReservationEditor = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/reservations/" + this.props.id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/reservations/" + this.props.pstate.view_id, localStorage.getItem("session"), null,
       function(obj) {
         me.setState({
           resource_id: obj.data.resource.resource_id,
@@ -89,7 +89,7 @@ const ReservationEditor = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               {this.state.initial_load ? <Loader /> :
                 <form>
-                  <legend>Edit reservation {this.props.id}</legend>
+                  <legend>Edit reservation {this.props.pstate.view_id}</legend>
                   {!this.state.error_msg ? <div></div> :
                     <div className="alert alert-danger">
                       <strong>{this.state.error_msg}</strong>
