@@ -205,7 +205,7 @@ const ReservationList = React.createClass({
               {leftpane}
             </div>
             <div className="col-xs-8 col-md-9">
-              <h3>Reservations</h3>
+              <h3>Reservations <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "reservation_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New reservation</button></h3>
               {!this.state.error_msg ? <div></div> :
                 <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                   <strong>{this.state.error_msg}</strong>

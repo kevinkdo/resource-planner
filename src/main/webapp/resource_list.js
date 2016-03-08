@@ -142,7 +142,6 @@ const ResourceList = React.createClass({
             <th>Tags</th>
             <th></th>
             <th></th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -155,7 +154,6 @@ const ResourceList = React.createClass({
               <td>{x.tags.join(",")}</td>
               <td><a role="button" onClick={() => this.editResource(id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
-              <td><a role="button" onClick={() => this.props.setPstate({route: "reservation_creator", view_id: id})}>Reserve</a></td>
             </tr>
           })}
           {Object.keys(me.state.resources).length > 0 ? null :
