@@ -26,6 +26,7 @@ public class EmailScheduler implements Runnable{
 
 
 	public void run(){
+		/*
 		String subject;
 		String message;
 		String beginTime = TimeUtility.prettyEST(reservation.getBegin_time());
@@ -44,6 +45,7 @@ public class EmailScheduler implements Runnable{
 			return;
 		}
 		emailUtility.sendMessage(reservation.getUser().getEmail(), fromString, subject, message);
+		*/
 	}
 
 }

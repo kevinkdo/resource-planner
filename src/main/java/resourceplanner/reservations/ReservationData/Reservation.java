@@ -5,37 +5,51 @@ import resourceplanner.authentication.UserData.User;
 import utilities.TimeUtility;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * Created by Davis Treybig on 1/24/2016.
  */
 public class Reservation {
+    private String title;
+    private String description;
     private int reservation_id;
     private User user;
-    private Resource resource;
+    private List<Resource> resources;
     private String begin_time;
     private String end_time;
     private boolean should_email;
 
-    public Reservation(int reservation_id, User user, Resource resource, Timestamp begin_time,
+    public Reservation(String title, String description, int reservation_id, User user, List<Resource> resources, Timestamp begin_time,
         Timestamp end_time, boolean should_email) {
+        this.title = title;
+        this.description = description;
         this.reservation_id = reservation_id;
         this.user = user;
-        this.resource = resource;
+        this.resources = resources;
         this.begin_time = TimeUtility.timestampToString(begin_time);
         this.end_time = TimeUtility.timestampToString(end_time);
         this.should_email = should_email;
     }
 
-    public Reservation(ReservationWithIDs reservation, User user, Resource resource){
+    public Reservation(ReservationWithIDs reservation, User user, List<Resource> resources){
+        this.title = reservation.getTitle();
+        this.description = reservation.getDescription();
         this.reservation_id = reservation.getReservation_id();
         this.user = user;
-        this.resource = resource;
+        this.resources = resources;
         this.begin_time = TimeUtility.timestampToString(reservation.getBegin_time());
         this.end_time = TimeUtility.timestampToString(reservation.getEnd_time());
         this.should_email = reservation.getShould_email();
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 
     public int getReservation_id(){
         return reservation_id;
@@ -45,8 +59,8 @@ public class Reservation {
         return user;
     }
 
-    public Resource getResource(){
-        return resource;
+    public List<Resource> getResources(){
+        return resources;
     }
 
     public String getBegin_time() {

@@ -21,6 +21,15 @@ public class ReservationController extends Controller {
 
     @Autowired
     private ReservationService reservationService;
+
+    @RequestMapping(value = "/test/{resourceId}",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse deleteReservationById(@PathVariable final int resourceId, final HttpServletRequest request) {
+        return reservationService.reservationTest(resourceId);
+    }
+
+    /*
 	
     @RequestMapping(value = "/",
             method = RequestMethod.GET)
@@ -108,5 +117,6 @@ public class ReservationController extends Controller {
     		return new StandardResponse(true, "Non-Admin user attempting to delete reservation for another user");
     	}
     }
+    */
 
 }

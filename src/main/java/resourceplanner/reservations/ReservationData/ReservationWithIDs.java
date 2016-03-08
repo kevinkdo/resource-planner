@@ -5,6 +5,8 @@ import java.sql.Timestamp;
  * Created by Davis Treybig on 1/24/2016.
  */
 public class ReservationWithIDs {
+    private String title;
+    private String description;
     private int reservation_id;
     private int user_id;
     private int resource_id;
@@ -12,8 +14,10 @@ public class ReservationWithIDs {
     private Timestamp end_time;
     private boolean should_email;
 
-    public ReservationWithIDs(int reservation_id, int user_id, int resource_id, Timestamp begin_time,
+    public ReservationWithIDs(String title, String description, int reservation_id, int user_id, int resource_id, Timestamp begin_time,
         Timestamp end_time, boolean should_email) {
+        this.title = title;
+        this.description = description;
         this.reservation_id = reservation_id;
         this.user_id = user_id;
         this.resource_id = resource_id;
@@ -22,6 +26,13 @@ public class ReservationWithIDs {
         this.should_email = should_email;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 
     public int getReservation_id(){
         return reservation_id;
@@ -45,6 +56,14 @@ public class ReservationWithIDs {
 
     public boolean getShould_email(){
         return should_email;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setUser_id(int user_id){

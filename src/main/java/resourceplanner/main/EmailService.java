@@ -46,7 +46,9 @@ public class EmailService {
     }
 
     public void scheduleEmailUpdate(ReservationWithIDsData res){
-    	Reservation completeReservation = reservationService.getReservationObjectById(res.getReservation_id());
+		return;
+
+    	/*Reservation completeReservation = reservationService.getReservationObjectById(res.getReservation_id());
 
     	if(completeReservation.getShould_email() && completeReservation.getUser().isShould_email()){
     		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.BEGIN_ALERT);
@@ -86,6 +88,7 @@ public class EmailService {
     			scheduledEmailMap.put(completeReservation.getReservation_id(), newFutures);
     		}
     	}
+    	*/
     }
 
     private boolean verifyDateInFuture(Date date){
@@ -94,6 +97,7 @@ public class EmailService {
     }
 
     public void upateEmailAfterUserChange(int userId){
+		/*
     	List<Integer> reservationIds = reservationService.getReservationsOfUser(userId);
     	List<ReservationWithIDsData> reservations = new ArrayList<ReservationWithIDsData>();
     	for(int i = 0; i < reservationIds.size(); i++){
@@ -101,20 +105,24 @@ public class EmailService {
     	}
     	for(ReservationWithIDsData r : reservations){
     		rescheduleEmails(r);
-    	}
+    	}*/
     }
 
     public void cancelEmailsForReservationsOfUser(int userId){
+		/*
     	List<Integer> reservationIds = reservationService.getReservationsOfUser(userId);
     	for(int i = 0; i < reservationIds.size(); i++){
     		removeScheduledEmails(reservationIds.get(i));
     	}
+    	*/
     }
 
     public void cancelEmailsForReservationsWithResource(int resourceId){
+		/*
     	List<Integer> reservationIds = reservationService.getReservationsWithResource(resourceId);
     	for(int i = 0; i < reservationIds.size(); i++){
     		removeScheduledEmails(reservationIds.get(i));
     	}
+    	*/
     }
 }
