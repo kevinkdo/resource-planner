@@ -185,7 +185,7 @@ public class ReservationService{
     }
 
 
-    public StandardResponse createReservationDB(ReservationRequest req){
+    public StandardResponse createReservationDB(final ReservationRequest req){
         if(isOverlappingReservation(req.getBegin_time(), req.getEnd_time(), req.getResource_id())){
             return new StandardResponse(true, "Reservation for that resource overlaps with specified times");
         }

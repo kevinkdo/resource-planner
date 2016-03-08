@@ -37,24 +37,14 @@ public class OAuthService {
         RestTemplate rt = new RestTemplate();
         Map<String, Object> variables = new HashMap<String, Object>();
 
-        //variables.put("grant_type", "authorization_code");
-        //variables.put("code", authCode);
-        //variables.put("redirect_uri", "https://colab-sbx-304.oit.duke.edu/oauth");
-        //variables.put("client_id", 1234); // TODO
-        //variables.put("client_secret", "some client secret");
-
         variables.put("access_token", authCode);
 
         OAuth res = null;
         try {
             res = rt.getForObject("https://oauth.oit.duke.edu/oauth/resource.php?access_token=" + authCode, OAuth.class);
         } catch (Exception e) {
-            //e.printStackTrace();
             return new StandardResponse(true, "Failed to authenticate");
         }
-        System.out.println(res);
-        System.out.println(res.getError());
-        System.out.println(res.getEppn());
 
         // get stuff from the OAuth object if possible
         if (res.getEppn() == null) {
@@ -77,7 +67,6 @@ public class OAuthService {
             }
         }
         //users.get(0).setUser_id(userId);
-        System.out.println("Authenticated");
         String token = TokenCreator.generateToken(users.get(0), netId);
         Login login = new Login(token, users.get(0).getUser_id(), netId);
         return new StandardResponse(false, "Successfully authenticated", login);
@@ -85,7 +74,6 @@ public class OAuthService {
     }
 
     private int createUser(final String netId) {
-        System.out.println("Creating user");
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
                 new PreparedStatementCreator() {

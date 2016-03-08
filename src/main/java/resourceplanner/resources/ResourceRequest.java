@@ -11,9 +11,10 @@ public class ResourceRequest {
     private String name;
     private String description;
     private List<String> tags;
+    private Boolean restricted;
 
     public boolean isValid() {
-        return name != null && description != null && tags != null;
+        return name != null && description != null && tags != null && restricted != null;
     }
 
     public String getName() {
@@ -33,5 +34,9 @@ public class ResourceRequest {
     public List<String> getTags() {
         tags = new ArrayList<String>(new LinkedHashSet<String>(tags));
         return tags;
+    }
+
+    public Boolean isRestricted() {
+        return restricted;
     }
 }
