@@ -58,10 +58,11 @@ public class ResourceService {
                 new PreparedStatementCreator() {
                     public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                         PreparedStatement ps = connection.prepareStatement(
-                                "INSERT INTO resources (name, description) VALUES (?, ?);",
+                                "INSERT INTO resources (name, description, restricted) VALUES (?, ?, ?);",
                                 new String[]{"resource_id"});
                         ps.setString(1, req.getName());
                         ps.setString(2, req.getDescription());
+                        ps.setBoolean(3, req.isRestricted());
                         return ps;
                     }
                 },
@@ -83,7 +84,7 @@ public class ResourceService {
         addDefaultResourcePermissions(resourceId, userId);
 
         return new StandardResponse(false, "Successfully inserted resource", new Resource(resourceId, req.getName(),
-                req.getDescription(), req.getTags()));
+                req.getDescription(), req.getTags(), req.isRestricted()));
     }
 
     private void addDefaultResourcePermissions(int resourceId, int userId){
@@ -130,13 +131,14 @@ public class ResourceService {
 
     public StandardResponse getResourceById(final int resourceId, int userId) {
         List<Resource> resources = jt.query(
-                "SELECT name, description FROM resources WHERE resource_id = ?;",
+                "SELECT name, description, restricted FROM resources WHERE resource_id = ?;",
                 new Object[]{resourceId},
                 new RowMapper<Resource>() {
                     public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
                         Resource resource = new Resource();
                         resource.setName(rs.getString("name"));
                         resource.setDescription(rs.getString("description"));
+                        resource.setRestricted(rs.getBoolean("restricted"));
                         return resource;
                     }
                 });
@@ -166,13 +168,14 @@ public class ResourceService {
 
     public StandardResponse getResourceByIdIgnoringPermissions(final int resourceId) {
         List<Resource> resources = jt.query(
-                "SELECT name, description FROM resources WHERE resource_id = ?;",
+                "SELECT name, description, restricted FROM resources WHERE resource_id = ?;",
                 new Object[]{resourceId},
                 new RowMapper<Resource>() {
                     public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
                         Resource resource = new Resource();
                         resource.setName(rs.getString("name"));
                         resource.setDescription(rs.getString("description"));
+                        resource.setRestricted(rs.getBoolean("restricted"));
                         return resource;
                     }
                 });
@@ -228,7 +231,7 @@ public class ResourceService {
                 if (current.tag != null) {
                     tagList.add(current.tag);
                 }
-                Resource r = new Resource(current.resourceId, current.name, current.description, tagList);
+                Resource r = new Resource(current.resourceId, current.name, current.description, tagList, current.restricted);
                 processList.put(current.resourceId, r);
             }
         }
@@ -294,11 +297,12 @@ public class ResourceService {
         private String description;
         private int resourceId;
         private String tag;
+        private boolean restricted;
     }
 
     private List<RT> getResourcesWithTags() {
         final String statement =
-                "SELECT resources.name, resources.description, resources.resource_id, resourcetags.tag " +
+                "SELECT resources.name, resources.description, resources.restricted, resources.resource_id, resourcetags.tag " +
                         "FROM resourcetags INNER JOIN resources " +
                         "ON resourcetags.resource_id = resources.resource_id " +
                         "ORDER BY resourcetags.resource_id ASC ;";
@@ -310,6 +314,7 @@ public class ResourceService {
                         RT rt = new RT();
                         rt.name = rs.getString("name");
                         rt.description = rs.getString("description");
+                        rt.restricted = rs.getBoolean("restricted");
                         rt.resourceId = rs.getInt("resource_id");
                         rt.tag = rs.getString("tag");
                         return rt;
@@ -320,7 +325,7 @@ public class ResourceService {
 
     private List<RT> getResourcesWithoutTags() {
         final String noTagsStatement =
-                "SELECT name, description, resource_id " +
+                "SELECT name, description, restricted, resource_id " +
                         "FROM resources " +
                         "WHERE NOT EXISTS (SELECT 1 FROM resourcetags WHERE resourcetags.resource_id = resources.resource_id) " +
                         "ORDER BY resource_id ASC ;";
@@ -332,6 +337,7 @@ public class ResourceService {
                         RT rt = new RT();
                         rt.name = rs.getString("name");
                         rt.description = rs.getString("description");
+                        rt.restricted = rs.getBoolean("restricted");
                         rt.resourceId = rs.getInt("resource_id");
                         rt.tag = null;
                         return rt;
@@ -351,9 +357,10 @@ public class ResourceService {
             return new StandardResponse(true, "Resource does not exist");
         }
 
-        jt.update("UPDATE resources SET name = ?, description = ? WHERE resource_id = ?;",
+        jt.update("UPDATE resources SET name = ?, description = ?, restricted = ? WHERE resource_id = ?;",
                 req.getName(),
                 req.getDescription(),
+                req.isRestricted(),
                 resourceId);
 
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
@@ -370,7 +377,7 @@ public class ResourceService {
                 batch);
 
         return new StandardResponse(false, "Successfully updated resource", new Resource(resourceId, req.getName(),
-                req.getDescription(), req.getTags()));
+                req.getDescription(), req.getTags(), req.isRestricted()));
     }
 
     public StandardResponse deleteResource(int resourceId) {

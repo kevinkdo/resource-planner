@@ -73,7 +73,7 @@ public class Controller {
 	}
 
 	
-	private boolean hasSpecificPermission(int userId, String permissionType){
+	private boolean hasSpecificPermission(int userId, final String permissionType){
 		List<Boolean> individualPermission = jt.query(
                 "SELECT " + permissionType + " FROM users WHERE user_id = " + userId + 
                 " AND " + permissionType + " = true;",

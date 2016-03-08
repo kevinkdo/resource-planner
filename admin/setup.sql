@@ -31,7 +31,8 @@ VALUES ('admin@admin.com', 'admin',
 CREATE TABLE resources (
   resource_id     SERIAL PRIMARY KEY NOT NULL,
   name            VARCHAR(255)       NOT NULL,
-  description     VARCHAR(2000)
+  description     VARCHAR(2000),
+  restricted      BOOLEAN            NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE resourcetags (
