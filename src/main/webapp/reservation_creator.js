@@ -4,7 +4,7 @@ const ReservationCreator = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
-      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_id, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
+      JSON.stringify({user_id: this.state.user_id, resource_id:this.state.resource_ids[0], begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list", is_error: false, error_msg: "Successfully created reservation!" });
       },
@@ -21,6 +21,16 @@ const ReservationCreator = React.createClass({
   set(field, value) {
     this.state[field] = value;
     this.setState(this.state);
+  },
+
+  addResource() {
+    this.state.resource_ids.push(this.state.all_resources[0].resource_id);
+    this.setState({resource_ids: this.state.resource_ids});
+  },
+
+  removeResource() {
+    this.state.resource_ids.pop();
+    this.setState({resource_ids: this.state.resource_ids});
   },
 
   getDateObject(dateStr, timeStr) {
@@ -45,7 +55,7 @@ const ReservationCreator = React.createClass({
     var end_time = formatTime(now)
     return {
       sending: false,
-      resource_id: this.props.pstate.view_id ? this.props.pstate.view_id : 0,
+      resource_ids: [],
       user_id: userId(),
       start_date: start_date,
       start_time: start_time,
@@ -67,7 +77,7 @@ const ReservationCreator = React.createClass({
         } else {
           me.setState({
             all_resources: obj.data.resources,
-            resource_id: obj.data.resources[0].resource_id,
+            resource_ids: [obj.data.resources[0].resource_id],
             initial_load_resources: false
           });
         }
@@ -92,12 +102,18 @@ const ReservationCreator = React.createClass({
                 </div>
               }
               <div className="form-group">
-                <label htmlFor="reservation_creator_resource">Resource ID</label>
-                <select className="form-control" defaultValue={me.state.resource_id} onChange={(evt)=>this.set("resource_id", evt.target.value)}>
-                  {me.state.all_resources.map(x => 
-                    <option value={x.resource_id}>{x.name}</option>
-                  )}
-                </select>
+                <button type="button" className="btn btn-link" onClick={this.addResource}>Add a resource</button>
+                <button type="button" className="btn btn-link" onClick={this.removeResource}>Remove a resource</button>
+              </div>
+              <div className="form-group">
+                <label htmlFor="reservation_creator_resource">Resources</label>
+                {me.state.resource_ids.map((resource_id, index) =>
+                  <select className="form-control" defaultValue={resource_id} onChange={(evt)=>this.setResourceIdAtIndex(evt.target.value, index)}>
+                    {me.state.all_resources.map(x =>
+                      <option value={x.resource_id}>{x.name}</option>
+                    )}
+                  </select>
+                )}
               </div>
               {/*<div className="form-group">
                 <label htmlFor="reservation_creator_user_id">Reserving User's ID (yours by default)</label>
