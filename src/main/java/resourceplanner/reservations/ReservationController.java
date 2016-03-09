@@ -38,7 +38,7 @@ public class ReservationController extends Controller {
         // Verify that the user_id in the reservation == current user OR the current user is the admin
 
         if(hasReservationP(request) || getRequesterID(request) == req.getUser_id()){
-            return reservationService.createReservation(req);
+            return reservationService.createReservation(req, getRequesterID(request));
         }
         else{
             return new StandardResponse(true, "Non-Admin user attempting to make reservation for another user");
@@ -49,7 +49,16 @@ public class ReservationController extends Controller {
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse getReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
-        return reservationService.getReservationById(reservationId);
+        return reservationService.getReservationById(reservationId, getRequesterID(request));
+    }
+
+    @RequestMapping(value = "/{reservationId}",
+            method = RequestMethod.PUT,
+            headers = {"Content-type=application/json"})
+    @ResponseBody
+    public StandardResponse updateReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request,
+                                              @PathVariable final int reservationId){
+        return reservationService.updateReservation(req, reservationId, hasReservationP(request), getRequesterID(request));
     }
 
 
@@ -58,8 +67,9 @@ public class ReservationController extends Controller {
     @ResponseBody
     public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
         return reservationService.deleteReservation(reservationId, hasReservationP(request), getRequesterID(request));
-
     }
+
+
 
     /*
 	
@@ -85,23 +95,6 @@ public class ReservationController extends Controller {
         else{
             return new StandardResponse(true, "Invalid input parameters (Issue with start and end times)");
         }
-    }
-
-    @RequestMapping(value = "/{reservationId}",
-            method = RequestMethod.PUT,
-            headers = {"Content-type=application/json"})
-    @ResponseBody
-    public StandardResponse updateReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request,
-            @PathVariable final int reservationId){
-        ReservationWithIDs existingRes = reservationService.getReservationWithIdsObjectById(reservationId);
-        if(existingRes == null){
-            return new StandardResponse(true, "No reservation with given ID exists");
-        }
-        if(getRequesterID(request) != existingRes.getUser_id() && !hasReservationP(request)){
-            return new StandardResponse(true, "Non-admin trying to alter another user's reservation");
-        }
-
-        return reservationService.updateReservationDB(req, reservationId, request);
     }
 
     */
