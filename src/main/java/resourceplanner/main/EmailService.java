@@ -29,7 +29,7 @@ public class EmailService {
 	private ReservationService reservationService;
 
 
-	public void rescheduleEmails(ReservationWithIDsData reservation){
+	public void rescheduleEmails(Reservation reservation){
     	removeScheduledEmails(reservation.getReservation_id());
     	scheduleEmailUpdate(reservation);
     }
@@ -45,7 +45,7 @@ public class EmailService {
     	}
     }
 
-    public void scheduleEmailUpdate(ReservationWithIDsData res){
+    public void scheduleEmailUpdate(Reservation res){
 		return;
 
     	/*Reservation completeReservation = reservationService.getReservationObjectById(res.getReservation_id());

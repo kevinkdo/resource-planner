@@ -53,11 +53,14 @@ public class ReservationRequest {
         return should_email;
     }
 
-    public boolean isValidCreateRequest(){
+    public boolean isValid(){
         return title != null && description != null && user_id != null && resource_ids != null && begin_time != null && end_time != null
-            && should_email != null && getBegin_time().before(getEnd_time());
+            && should_email != null;
     }
 
+    public boolean isValidTimes() {
+        return getBegin_time().before(getEnd_time());
+    }
 
 }
 

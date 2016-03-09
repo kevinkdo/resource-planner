@@ -25,8 +25,40 @@ public class ReservationController extends Controller {
     @RequestMapping(value = "/test/{resourceId}",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse deleteReservationById(@PathVariable final int resourceId, final HttpServletRequest request) {
+    public StandardResponse test(@PathVariable final int resourceId, final HttpServletRequest request) {
         return reservationService.reservationTest(resourceId);
+    }
+
+    @RequestMapping(value = "",
+            method = RequestMethod.POST,
+            headers = {"Content-type=application/json"})
+    @ResponseBody
+    public StandardResponse createReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request){
+        //An admin can make a reservation for anyone. A normal user can only make a reservation for himself.
+        // Verify that the user_id in the reservation == current user OR the current user is the admin
+
+        if(hasReservationP(request) || getRequesterID(request) == req.getUser_id()){
+            return reservationService.createReservation(req);
+        }
+        else{
+            return new StandardResponse(true, "Non-Admin user attempting to make reservation for another user");
+        }
+    }
+
+    @RequestMapping(value = "/{reservationId}",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
+        return reservationService.getReservationById(reservationId);
+    }
+
+
+    @RequestMapping(value = "/{reservationId}",
+            method = RequestMethod.DELETE)
+    @ResponseBody
+    public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
+        return reservationService.deleteReservation(reservationId, hasReservationP(request), getRequesterID(request));
+
     }
 
     /*
@@ -55,34 +87,6 @@ public class ReservationController extends Controller {
         }
     }
 
-
-	@RequestMapping(value = "/{reservationId}",
-            method = RequestMethod.GET)
-    @ResponseBody
-    public StandardResponse getReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
-        return reservationService.getReservationByIdDB(reservationId, getRequesterID(request));
-    }
-
-    @RequestMapping(value = "",
-            method = RequestMethod.POST,
-            headers = {"Content-type=application/json"})
-    @ResponseBody
-    public StandardResponse createReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request){
-    	//An admin can make a reservation for anyone. A normal user can only make a reservation for himself. 
-    	// Verify that the user_id in the reservation == current user OR the current user is the admin
-
-        if(!req.isValidCreateRequest()){
-            return new StandardResponse(true, "Begin time after end time");
-        }
-
-    	if(hasReservationP(request) || getRequesterID(request) == req.getUser_id()){
-    		return reservationService.createReservationDB(req);
-    	}
-    	else{
-    		return new StandardResponse(true, "Non-Admin user attempting to make reservation for another user");
-    	}
-    }
-
     @RequestMapping(value = "/{reservationId}",
             method = RequestMethod.PUT,
             headers = {"Content-type=application/json"})
@@ -100,23 +104,6 @@ public class ReservationController extends Controller {
         return reservationService.updateReservationDB(req, reservationId, request);
     }
 
-    @RequestMapping(value = "/{reservationId}",
-            method = RequestMethod.DELETE)
-    @ResponseBody
-    public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
-    	//We must do an initial get to check for the user of the reservation.    
-        ReservationWithIDs reservation = reservationService.getReservationWithIdsObjectById(reservationId);
-        if(reservation == null){
-            return new StandardResponse(true, "No reservation with given ID exists");
-        }
-        //Admin can delete ANY reservation, user can only delete his/her own
-    	if(hasReservationP(request) || getRequesterID(request) == reservation.getUser_id()){
-    		return reservationService.deleteReservationByIdDB(reservationId);
-    	}
-    	else{
-    		return new StandardResponse(true, "Non-Admin user attempting to delete reservation for another user");
-    	}
-    }
     */
 
 }
