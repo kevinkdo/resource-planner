@@ -9,7 +9,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import resourceplanner.main.Controller;
 import resourceplanner.main.StandardResponse;
-import resourceplanner.reservations.ReservationData.ReservationWithIDs;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
@@ -52,6 +51,25 @@ public class ReservationController extends Controller {
         return reservationService.getReservationById(reservationId, getRequesterID(request));
     }
 
+    @RequestMapping(value = "/",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getReservations(@RequestParam(value = "resource_ids", required = false) Integer[] resource_ids,
+                                                    @RequestParam(value = "user_ids", required = false) Integer[] user_ids,
+                                                    @RequestParam(value = "required_tags", required = false) String[] required_tags,
+                                                    @RequestParam(value = "excluded_tags", required = false) String[] excluded_tags,
+                                                    @RequestParam(value = "start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                    @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+                                                    final HttpServletRequest request) {
+
+        //Cannonical way to convert LocalDateTime to Timestamp
+        Timestamp startTimestamp = Timestamp.valueOf(start);
+        Timestamp endTimestamp = Timestamp.valueOf(end);
+        QueryReservationRequest req = new QueryReservationRequest(resource_ids, user_ids,
+                required_tags, excluded_tags, startTimestamp, endTimestamp);
+        return reservationService.getReservations(req, getRequesterID(request));
+    }
+
     @RequestMapping(value = "/{reservationId}",
             method = RequestMethod.PUT,
             headers = {"Content-type=application/json"})
@@ -68,35 +86,5 @@ public class ReservationController extends Controller {
     public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
         return reservationService.deleteReservation(reservationId, hasReservationP(request), getRequesterID(request));
     }
-
-
-
-    /*
-	
-    @RequestMapping(value = "/",
-            method = RequestMethod.GET)
-    @ResponseBody
-    public StandardResponse getMatchingReservations(@RequestParam(value = "resource_ids", required = false) Integer[] resource_ids, 
-        @RequestParam(value = "user_ids", required = false) Integer[] user_ids,
-        @RequestParam(value = "required_tags", required = false) String[] required_tags,
-        @RequestParam(value = "excluded_tags", required = false) String[] excluded_tags,
-        @RequestParam(value = "start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-        @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
-        final HttpServletRequest request) {
-
-        //Cannonical way to convert LocalDateTime to Timestamp
-        Timestamp startTimestamp = Timestamp.valueOf(start);
-        Timestamp endTimestamp = Timestamp.valueOf(end);
-        GetAllMatchingReservationRequest req = new GetAllMatchingReservationRequest(resource_ids, user_ids, 
-            required_tags, excluded_tags, startTimestamp, endTimestamp);
-        if(req.isValid()){
-            return reservationService.getMatchingReservations(req, getRequesterID(request));
-        }
-        else{
-            return new StandardResponse(true, "Invalid input parameters (Issue with start and end times)");
-        }
-    }
-
-    */
 
 }

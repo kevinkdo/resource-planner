@@ -5,7 +5,7 @@ import java.sql.Timestamp;
  * Created by Davis Treybig on 1/26/2016.
  */
 
-public class GetAllMatchingReservationRequest {
+public class QueryReservationRequest {
     
     private Integer[] resource_ids;
     private Integer[] user_ids;
@@ -14,8 +14,8 @@ public class GetAllMatchingReservationRequest {
     private Timestamp start;
     private Timestamp end;
 
-    public GetAllMatchingReservationRequest(Integer[] resource_ids, Integer[] user_ids, String[] required_tags, 
-            String[] excluded_tags, Timestamp start, Timestamp end){
+    public QueryReservationRequest(Integer[] resource_ids, Integer[] user_ids, String[] required_tags,
+                                   String[] excluded_tags, Timestamp start, Timestamp end){
         this.resource_ids = resource_ids;
         this.user_ids = user_ids;
         this.required_tags = required_tags;

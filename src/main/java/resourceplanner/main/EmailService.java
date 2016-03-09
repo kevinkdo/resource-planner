@@ -6,11 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import resourceplanner.reservations.ReservationService;
 import resourceplanner.reservations.ReservationData.Reservation;
-import resourceplanner.reservations.ReservationData.ReservationWithIDsData;
-import utilities.EmailScheduler;
-import utilities.TimeUtility;
 
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
