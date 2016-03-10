@@ -102,11 +102,9 @@ const ReservationCreator = React.createClass({
                 </div>
               }
               <div className="form-group">
-                <button type="button" className="btn btn-link" onClick={this.addResource}>Add a resource</button>
-                <button type="button" className="btn btn-link" onClick={this.removeResource}>Remove a resource</button>
-              </div>
-              <div className="form-group">
                 <label htmlFor="reservation_creator_resource">Resources</label>
+                <button type="button" className="btn btn-link" onClick={this.addResource}>Add a resource to this reservation</button>
+                <button type="button" className="btn btn-link" onClick={this.removeResource}>Remove a resource from this reservation</button>
                 {me.state.resource_ids.map((resource_id, index) =>
                   <select className="form-control" defaultValue={resource_id} onChange={(evt)=>this.setResourceIdAtIndex(evt.target.value, index)}>
                     {me.state.all_resources.map(x =>

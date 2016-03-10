@@ -86,6 +86,10 @@ const ReservationList = React.createClass({
     );
   },
 
+  approveReservation(id) {
+    alert('TODO APPROVE RESERVATION');
+  },
+
   refresh() {
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
@@ -169,10 +173,12 @@ const ReservationList = React.createClass({
         <thead>
           <tr>
             <th>ID</th>
+            <th>Title</th>
             <th>Resource</th>
             <th>User</th>
             <th>Start</th>
             <th>End</th>
+            <th></th>
             <th></th>
             <th></th>
           </tr>
@@ -182,12 +188,14 @@ const ReservationList = React.createClass({
             var x = me.state.reservations[id];
             return <tr key={"reservation " + x.reservation_id}>
               <td>{x.reservation_id}</td>
+              <td>TODO RESERVATION TITLE</td>
               <td>{x.resource.name}</td>
               <td>{x.user.username}</td>
               <td>{new Date(x.begin_time).toLocaleString()}</td>
               <td>{new Date(x.end_time).toLocaleString()}</td>
               <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>Edit</a></td>
               <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
+              <td><a role="button" onClick={() => this.approveReservation(x.reservation_id)}>TODO Approve</a></td>
             </tr>
           })}
           {Object.keys(me.state.reservations).length > 0 ? null :
