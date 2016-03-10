@@ -4,7 +4,7 @@ const ResourceCreator = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("POST", "/api/resources", localStorage.getItem("session"),
-      JSON.stringify({name:this.state.name, description:this.state.description, tags: this.state.tags.filter(x => x.length > 0)}),
+      JSON.stringify({restricted: this.state.restricted, name:this.state.name, description:this.state.description, tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({ route: "resource_list", is_error: false, error_msg: "Successfully created resource!" });
       },
@@ -23,12 +23,9 @@ const ResourceCreator = React.createClass({
     this.setState({tags: this.state.tags});
   },
 
-  setName(evt) {
-    this.setState({name: evt.target.value});
-  },
-
-  setDescription(evt) {
-    this.setState({description: evt.target.value});
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
   },
 
   setTag(evt, i) {
@@ -46,6 +43,7 @@ const ResourceCreator = React.createClass({
       name: "",
       description: "",
       tags: [""],
+      restricted: false,
       error_msg: "",
       is_error: false
     };
@@ -69,11 +67,14 @@ const ResourceCreator = React.createClass({
                 }
                 <div className="form-group">
                   <label htmlFor="resource_creator_name">Name</label>
-                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
+                  <input type="text" className="form-control" id="resource_creator_name" placeholder="Name" value={this.state.name} onChange={(evt)=>this.set("name", evt.target.value)}/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_description">Description</label>
-                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
+                  <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" value={this.state.description} onChange={(evt)=>this.set("description", evt.target.value)}/>
+                </div>
+                <div className="checkbox">
+                  <label><input type="checkbox" checked={this.state.restricted} onChange={(evt)=>this.set("restricted", evt.target.checked)}/> Restricted resource</label>
                 </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_tags">Tags</label>

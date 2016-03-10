@@ -147,12 +147,12 @@ const ResourceList = React.createClass({
         <tbody>
           {Object.keys(me.state.resources).map(id => {
             var x = me.state.resources[id];
-            return <tr key={"resource " + id}>
+            return <tr key={"resource " + id} className={x.restricted ? "danger" : ""}>
               <td>{id}</td>
               <td>{x.name}</td>
               <td>{x.description}</td>
               <td>{x.tags.join(",")}</td>
-              <td><a role="button" onClick={() => this.editResource(id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.editResource(id)}>View/Edit Details</a></td>
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
             </tr>
           })}

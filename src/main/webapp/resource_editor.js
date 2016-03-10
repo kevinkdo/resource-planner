@@ -4,7 +4,7 @@ const ResourceEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/resources/" + this.props.pstate.view_id, localStorage.getItem("session"),
-      JSON.stringify({name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0)}),
+      JSON.stringify({restricted: this.state.restricted, name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({ route: "resource_list", is_error: false, error_msg: "Successfully edited resource!" });
       },
@@ -18,17 +18,14 @@ const ResourceEditor = React.createClass({
     this.props.setPstate({ route: "resource_list" });
   },
 
+  set(field, value) {
+    this.state[field] = value;
+    this.setState(this.state);
+  },
+
   addTag() {
     this.state.tags.push("");
     this.setState({tags: this.state.tags});
-  },
-
-  setName(evt) {
-    this.setState({name: evt.target.value});
-  },
-
-  setDescription(evt) {
-    this.setState({description: evt.target.value});
   },
 
   setTag(evt, i) {
@@ -49,6 +46,7 @@ const ResourceEditor = React.createClass({
       description: "",
       tags: [""],
       error_msg: "",
+      restricted: false,
       is_error: false
     };
   },
@@ -86,12 +84,15 @@ const ResourceEditor = React.createClass({
                   }
                   <div className="form-group">
                     <label htmlFor="resource_editor_name">Name</label>
-                    <input type="text" className="form-control" id="resource_editor_name" placeholder="Name" value={this.state.name} onChange={this.setName}/>
+                    <input type="text" className="form-control" id="resource_editor_name" placeholder="Name" value={this.state.name} onChange={(evt)=>this.set("name", evt.target.value)}/>
                   </div>
                   <div className="form-group">
                     <label htmlFor="resource_editor_description">Description</label>
-                    <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={this.setDescription}/>
+                    <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={(evt)=>this.set("description", evt.target.value)}/>
                   </div>
+                  <div className="checkbox">
+                  <label><input type="checkbox" checked={this.state.restricted} onChange={(evt)=>this.set("restricted", evt.target.checked)}/> Restricted resource</label>
+                </div>
                   <div className="form-group">
                     <label htmlFor="resource_editor_tags">Tags</label>
                     <div className="row">
@@ -104,8 +105,8 @@ const ResourceEditor = React.createClass({
                     </div>
                   </div>
                   <div className="btn-toolbar">
-                    <button type="submit" className="btn btn-primary" onClick={this.editResource} disabled={this.state.sending}>Edit resource</button>
-                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                    <button type="submit" className="btn btn-primary" onClick={this.editResource} disabled={this.state.sending}>Save changes</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Go back</button>
                   </div>
                 </form>
               }
