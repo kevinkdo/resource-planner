@@ -22,8 +22,7 @@ const ReservationList = React.createClass({
       end_time: end_time,
       reservations: {},
       error_msg: error_msg,
-      is_error: is_error,
-      resource_id: ""
+      is_error: is_error
     };
   },
 
@@ -94,7 +93,7 @@ const ReservationList = React.createClass({
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
-    send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str + "&resource_ids=" + this.state.resource_id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
           obj.data.forEach(function(x) {
@@ -152,8 +151,6 @@ const ReservationList = React.createClass({
             <h4>End</h4>
               <input type="date" className="form-control" id="reservation_list_end_date" value={this.state.end_date} onChange={(evt) => this.set('end_date', evt.target.value)}/>
               <input type="time" className="form-control" id="reservation_list_end_time" value={this.state.end_time} onChange={(evt) => this.set('end_time', evt.target.value)}/>
-            <h4>Resource ID</h4>
-              <input type="number" className="form-control" id="reservation_list_resource_id" value={this.state.resource_id} onChange={(evt) => this.set("resource_id", evt.target.value)}/>
             <h4>Tags</h4>
             {this.state.loading_tags ? <Loader /> : <div>
               <ul className="list-group">
@@ -193,7 +190,7 @@ const ReservationList = React.createClass({
               <td>{x.user.username}</td>
               <td>{new Date(x.begin_time).toLocaleString()}</td>
               <td>{new Date(x.end_time).toLocaleString()}</td>
-              <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>View/Edit</a></td>
               <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
               <td><a role="button" onClick={() => this.approveReservation(x.reservation_id)}>TODO Approve</a></td>
             </tr>

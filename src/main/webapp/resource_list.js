@@ -152,7 +152,7 @@ const ResourceList = React.createClass({
               <td>{x.name}</td>
               <td>{x.description}</td>
               <td>{x.tags.join(",")}</td>
-              <td><a role="button" onClick={() => this.editResource(id)}>View/Edit Details</a></td>
+              <td><a role="button" onClick={() => this.editResource(id)}>View/Edit</a></td>
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
             </tr>
           })}

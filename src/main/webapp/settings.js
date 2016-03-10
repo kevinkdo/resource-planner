@@ -86,7 +86,7 @@ const Settings = React.createClass({
                     <label htmlFor="settings_should_email"><input type="checkbox" id="settings_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Enable email reminders</label>
                   </div>
                   <div className="btn-toolbar">
-                    <button type="submit" className="btn btn-primary" onClick={this.editSettings} disabled={this.state.sending}>Edit user</button>
+                    <button type="submit" className="btn btn-primary" onClick={this.editSettings} disabled={this.state.sending}>Save changes</button>
                     <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
                   </div>
                 </form>

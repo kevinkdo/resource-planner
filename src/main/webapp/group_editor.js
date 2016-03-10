@@ -91,7 +91,7 @@ const GroupEditor = React.createClass({
             <div className="col-md-6 col-md-offset-3">
               {this.state.initial_load_group || this.state.initial_load_users ? <Loader /> :
                 <form>
-                  <legend>Edit group {this.props.id}</legend>
+                  <legend>Edit group {this.props.pstate.view_id}</legend>
                   {!this.state.error_msg ? <div></div> :
                     <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                       <strong>{this.state.error_msg}</strong>
@@ -129,7 +129,7 @@ const GroupEditor = React.createClass({
                 </div>
                   <div className="btn-toolbar">
                     <button type="submit" className="btn btn-primary" onClick={this.editGroup} disabled={this.state.sending}>Save changes</button>
-                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Go back</button>
                   </div>
                 </form>
               }

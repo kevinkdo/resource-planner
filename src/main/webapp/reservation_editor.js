@@ -124,8 +124,8 @@ const ReservationEditor = React.createClass({
                     <label htmlFor="reservation_creator_should_email"><input type="checkbox" id="reservation_creator_should_email" checked={this.state.should_email} onChange={(evt)=>this.set("should_email", evt.target.checked)}/> Email reminder</label>
                   </div>
                   <div className="btn-toolbar">
-                    <button type="submit" className="btn btn-primary" onClick={this.editReservation} disabled={this.state.sending}>Edit reservation</button>
-                    <button type="button" className="btn btn-default" onClick={this.cancel}>Cancel</button>
+                    <button type="submit" className="btn btn-primary" onClick={this.editReservation} disabled={this.state.sending}>Save changes</button>
+                    <button type="button" className="btn btn-default" onClick={this.cancel}>Go back</button>
                   </div>
                 </form>
               }

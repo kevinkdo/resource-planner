@@ -95,7 +95,7 @@ const GroupManager = React.createClass({
             return <tr key={"group " + x.group_id}>
               <td>{x.group_id}</td>
               <td>{x.group_name}</td>
-              <td><a role="button" onClick={() => this.editGroup(x.group_id)}>Edit</a></td>
+              <td><a role="button" onClick={() => this.editGroup(x.group_id)}>View/Edit</a></td>
               <td><a role="button" onClick={() => this.deleteGroup(x.group_id)}>Delete</a></td>
             </tr>
           })}

@@ -206,7 +206,7 @@ const PermissionsManager = React.createClass({
         <Navbar setPstate={this.props.setPstate} pstate={this.props.pstate}/>
 
         <h3>Permissions Manager
-          <span className="padleft"><button type="button" className="btn btn-success" onClick={() => this.save()}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button></span>
+          <span className="padleft"><button type="button" className="btn btn-primary" onClick={() => this.save()}><span className="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button></span>
         </h3>
         {!this.state.error_msg ? <div></div> :
           <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
