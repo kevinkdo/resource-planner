@@ -54,10 +54,7 @@ public class ReservationController extends Controller {
     @RequestMapping(value = "/",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse getReservations(@RequestParam(value = "resource_ids", required = false) Integer[] resource_ids,
-                                                    @RequestParam(value = "user_ids", required = false) Integer[] user_ids,
-                                                    @RequestParam(value = "required_tags", required = false) String[] required_tags,
-                                                    @RequestParam(value = "excluded_tags", required = false) String[] excluded_tags,
+    public StandardResponse getReservations(@RequestParam(value = "resource_id", required = false) Integer resource_id,
                                                     @RequestParam(value = "start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
                                                     @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
                                                     final HttpServletRequest request) {
@@ -65,8 +62,7 @@ public class ReservationController extends Controller {
         //Cannonical way to convert LocalDateTime to Timestamp
         Timestamp startTimestamp = Timestamp.valueOf(start);
         Timestamp endTimestamp = Timestamp.valueOf(end);
-        QueryReservationRequest req = new QueryReservationRequest(resource_ids, user_ids,
-                required_tags, excluded_tags, startTimestamp, endTimestamp);
+        QueryReservationRequest req = new QueryReservationRequest(resource_id, startTimestamp, endTimestamp);
         return reservationService.getReservations(req, getRequesterID(request));
     }
 

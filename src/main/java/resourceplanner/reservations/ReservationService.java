@@ -13,7 +13,9 @@ import resourceplanner.main.EmailService;
 import resourceplanner.main.StandardResponse;
 import resourceplanner.permissions.PermissionService;
 import resourceplanner.reservations.ReservationData.Reservation;
+import resourceplanner.reservations.ReservationData.ResourceReservations;
 import resourceplanner.resources.ResourceData.Resource;
+import resourceplanner.resources.ResourceService;
 
 import java.sql.*;
 import java.util.*;
@@ -24,6 +26,9 @@ public class ReservationService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ResourceService resourceService;
 
     @Autowired
     private PermissionService permissionService;
@@ -163,7 +168,55 @@ public class ReservationService {
     }
 
     public StandardResponse getReservations(QueryReservationRequest req, int userId) {
-        return new StandardResponse(true, "Fail");
+        // make sure resource_id is valid
+        // TODO
+
+        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservationresources WHERE resource_id = ?;",
+                new Object[]{req.getResource_id()}, Integer.class);
+
+        List<Reservation> reservations = new ArrayList<Reservation>();
+
+        for (int reservationId : reservationIds) {
+            TempRes t = jt.query(
+                    "SELECT * FROM reservations WHERE reservation_id = ?;",
+                    new Object[]{reservationId},
+                    new RowMapper<TempRes>() {
+                        public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            TempRes t = new TempRes();
+                            t.reservation_id = rs.getInt("reservation_id");
+                            t.title = rs.getString("title");
+                            t.description = rs.getString("description");
+                            t.user_id = rs.getInt("user_id");
+                            t.begin_time = rs.getTimestamp("begin_time");
+                            t.end_time = rs.getTimestamp("end_time");
+                            t.should_email = rs.getBoolean("should_email");
+                            t.complete = rs.getBoolean("complete");
+                            return t;
+                        }
+                    }).get(0);
+
+            List<Resource> rList = getResources(reservationId);
+
+            List<Integer> userViewable = permissionService.getUserViewableResources(userId);
+            List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
+
+            Set<Integer> allViewableResources = new HashSet<Integer>(userViewable);
+            allViewableResources.addAll(groupViewable);
+
+            for (Resource r : rList) {
+                if (!allViewableResources.contains(r.getResource_id())) {
+                    continue;
+                }
+            }
+
+            User u = getUser(t.user_id);
+
+            Reservation r = new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
+            reservations.add(r);
+        }
+
+        ResourceReservations reservationResponse = new ResourceReservations(reservations);
+        return new StandardResponse(false, "Successfully retrieved reservations for the resource", reservationResponse);
     }
 
     public StandardResponse updateReservation(ReservationRequest req, int reservationId, boolean isAdmin, int userId) {
