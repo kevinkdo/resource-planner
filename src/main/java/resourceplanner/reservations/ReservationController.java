@@ -13,6 +13,7 @@ import resourceplanner.main.StandardResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import resourceplanner.reservations.ReservationData.*;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -82,5 +83,28 @@ public class ReservationController extends Controller {
     public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
         return reservationService.deleteReservation(reservationId, hasReservationP(request), getRequesterID(request));
     }
+
+    @RequestMapping(value = "/approvableReservations",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getApprovableReservations(final HttpServletRequest request) {
+        return reservationService.getApprovableReservations(getRequesterID(request)), hasResourceP(request));
+    }
+
+    @RequestMapping(value = "/canceledWithApproval/{reservationId}",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getCanceledWithApproval(@PathVariable final int reservationId, final HttpServletRequest request) {
+        return reservationService.getCanceledWithApproval(reservationId);
+    }
+
+    @RequestMapping(value = "/approveReservation/{reservationId}",
+            method = RequestMethod.POST)
+    @ResponseBody
+    public StandardResponse approveReservation(@RequestBody final ReservationApproval req, @PathVariable final int reservationId, 
+            final HttpServletRequest request) {
+        return reservationService.approveReservation(req, reservationId, getRequesterID(request));
+    }
+
 
 }

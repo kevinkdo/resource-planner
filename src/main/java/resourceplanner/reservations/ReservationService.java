@@ -16,6 +16,7 @@ import resourceplanner.reservations.ReservationData.Reservation;
 import resourceplanner.reservations.ReservationData.ResourceReservations;
 import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.resources.ResourceService;
+import resourceplanner.reservations.ReservationData.*;
 
 import java.sql.*;
 import java.util.*;
@@ -501,6 +502,117 @@ public class ReservationService {
                         return user;
                     }
                 }).get(0);
+    }
+
+    private Reservation getReservationFromTempRes(TempRes t){
+        return new Reservation(t.title, t.description, t.reservation_id, getUser(t.user_id), getResources(t.reservation_id), t.begin_time, t.end_time, t.should_email, t.complete);
+    }
+
+    private List<Reservation> convertTempListToReservationList(List<TempRes> temps){
+        List<Reservation> reservations = new ArrayList<Reservation>();
+        for(TempRes t : temps){
+            reservations.add(getReservationFromTempRes(t));
+        }
+        return reservations;
+    }
+
+     private TempRes getTempResFromId(int reservationId){
+        List<TempRes> reservations = jt.query(
+            "SELECT * FROM reservations WHERE reservation_id = " + reservationId + ";".
+            new Object[]{TempRes},
+            new RowMapper<TempRes>() {
+                    public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempRes t = new TempRes();
+                        t.reservation_id = rs.getInt("reservation_id");
+                        t.title = rs.getString("title");
+                        t.description = rs.getString("description");
+                        t.user_id = rs.getInt("user_id");
+                        t.begin_time = rs.getTimestamp("begin_time");
+                        t.end_time = rs.getTimestamp("end_time");
+                        t.should_email = rs.getBoolean("should_email");
+                        t.complete = rs.getBoolean("complete");
+                        return t;
+                    }
+                });
+        return reservations.get(0);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////Incomplete Reservation Endpoints//////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //Returns all incomplete reservations for which the user can approve at least one non-approved resource
+    public StandardResponse getApprovableReservations(int userId, boolean hasResourceP){
+        List<TempRes> incompleteReservations = getIncompleteReservations();
+        List<TempRes> reservationsToRemove = new ArrayList<TempRes>();
+       
+        //If the user is admin or has system resource permission, he can approve anything
+        //else, have to filter
+        if(userId != 1 && !hasResourceP){
+            for(TempRes t : incompleteReservations){
+                //TODO: FILTER list WITH resource manager data. 
+            }
+        }
+
+        return new StandardResponse(false, "Approvable reservations returned", convertTempListToReservationList(incompleteReservations));
+    }
+
+    //Returns all incomplete reservations which would be canceled if the given reservation were approved
+    public StandardResponse getCanceledWithApproval(int reservationId){
+        TempRes currentRes = getTempResFromId(reservationId);
+        List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes);
+        List<Reservation> overlappingReservations = convertTempListToReservationList(overlapping);
+        return new StandardResponse(false, "To-be-canceled reservations returned", overlappingReservations);
+    }
+
+    //Approves or denies the resources for a given reservation that the user is allowed to approve/deny. 
+    public StandardResponse approveReservation(ReservationApproval approval, int reservationId, int userId){
+        return new StandardResponse(true, "Not yet implemented");
+    }
+
+
+    private List<TempRes> getIncompleteReservations(){
+        return jt.query(
+            "SELECT * FROM reservations WHERE complete = false;".
+            new Object[]{TempRes},
+            new RowMapper<TempRes>() {
+                    public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempRes t = new TempRes();
+                        t.reservation_id = rs.getInt("reservation_id");
+                        t.title = rs.getString("title");
+                        t.description = rs.getString("description");
+                        t.user_id = rs.getInt("user_id");
+                        t.begin_time = rs.getTimestamp("begin_time");
+                        t.end_time = rs.getTimestamp("end_time");
+                        t.should_email = rs.getBoolean("should_email");
+                        t.complete = rs.getBoolean("complete");
+                        return t;
+                    }
+                });
+    }
+
+    private List<TempRes> getOverlappingIncompleteReservations(TempRes t){
+        List<TempRes> reservations = jt.query(
+            "SELECT * FROM reservations WHERE reservation_id != " + t.reservation_id + 
+            " AND complete = false AND ((reservations.begin_time >= " + t.begin_time + " AND reservations.begin_time < " + t.end_time + 
+            ") OR (reservations.end_time > " + t.begin_time + " AND reservations.end_time <= " + t.end_time + 
+            ") OR (reservations.end_time > " + t.end_time + " AND reservations.begin_time < " + t.begin_time + 
+            "));",
+            new Object[]{TempRes},
+            new RowMapper<TempRes>() {
+                    public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempRes t = new TempRes();
+                        t.reservation_id = rs.getInt("reservation_id");
+                        t.title = rs.getString("title");
+                        t.description = rs.getString("description");
+                        t.user_id = rs.getInt("user_id");
+                        t.begin_time = rs.getTimestamp("begin_time");
+                        t.end_time = rs.getTimestamp("end_time");
+                        t.should_email = rs.getBoolean("should_email");
+                        t.complete = rs.getBoolean("complete");
+                        return t;
+                    }
+                });
     }
 
 }
