@@ -49,7 +49,7 @@ permissions = {
 class GroupsTestCases(unittest.TestCase):
   def setUp(self):
       requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)  
-      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[]}
+      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[], 'restricted': False}
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(reserveAcessResource), headers = params.headers, verify = False)     
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithAll), headers = params.headers, verify = False)
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithResource), headers = params.headers, verify = False)

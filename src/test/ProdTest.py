@@ -13,8 +13,11 @@ registerUrl = '/auth/register'
 loginUrl = '/auth/login'
 reserveUrl = '/api/reservations'
 userUrl = '/api/users'
-headers = {'Accept': 'application/json', "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcl9pZCI6MSwicGVybWlzc2lvbiI6MX0.r68KlS3szkDOUYvyGTf1HUG1nkF2U8WMM5u3AN0AFfI", "Content-Type": "application/json" }
-userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'admin'}
+headers = {'Accept': 'application/json', "Authorization": "", "Content-Type": "application/json" }
+userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'iLtPiC!_ece458'}
+r = requests.post(baseUrl + loginUrl, data = json.dumps(userLogin), headers = headers, verify = False)
+headers["Authorization"] = "Bearer " + r.json()["data"]["token"]
+
 
 error = False
 req = []

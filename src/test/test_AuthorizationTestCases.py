@@ -32,7 +32,7 @@ class AuthorizationTestCases(unittest.TestCase):
   #     assert decoded['error_msg'] == 'Password must be between 1 and 250 characters long'
 
   def test_LoginValidUser(self):
-      userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'admin'}
+      userLogin = {'email':'admin@admin.com', 'username':'admin', 'password':'iLtPiC!_ece458'}
       r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(userLogin), headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False

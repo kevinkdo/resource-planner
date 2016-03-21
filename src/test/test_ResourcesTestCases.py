@@ -38,8 +38,8 @@ permissions = {
 class ResourceTestCases(unittest.TestCase):
   def setUp(self):
       r = requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
-      viewResource = {'name':'view', 'description':'', 'tags':[]}
-      noviewResource = {'name':'no', 'description':'', 'tags':[]}
+      viewResource = {'name':'view', 'description':'', 'tags':[], 'restricted': False}
+      noviewResource = {'name':'no', 'description':'', 'tags':[], 'restricted': False}
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(viewResource), headers = params.headers, verify = False)     
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(noviewResource), headers = params.headers, verify = False)     
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithAll), headers = params.headers, verify = False)
@@ -55,23 +55,23 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.put(params.baseUrl + params.userUrl + "/1" + params.permissionsUrl, data = json.dumps(permissions), headers = adminHeaders, verify = False)   
 
   def test_CreateValidResourceNoTagsWithResourceManagementPermissions(self):
-      resource = {'name':'test', 'description':'', 'tags':[]}
+      resource = {'name':'test', 'description':'', 'tags':[], "restricted": False}
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(resource), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'', u'tags': [], u'name': u'test', u'resource_id': 3}
+      assert decoded['data'] == {'restricted': False, u'description': u'', u'tags': [], u'name': u'test', u'resource_id': 3}
       assert decoded['error_msg'] == u'Successfully inserted resource'
 
   def test_CreateValidResourceNoTagsWithoutResourceManagementPermissions(self):
-      resource = {'name':'test', 'description':'', 'tags':[]}
+      resource = {'name':'test', 'description':'', 'tags':[], "restricted": False }
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(resource), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
-      assert decoded['data'] == {u'valid': True, u'tags': [], u'name': u'test', u'description': u''}
+      assert decoded['data'] == {u'restricted': False, u'valid': True, u'tags': [], u'name': u'test', u'description': u''}
       assert decoded['error_msg'] == 'You are not authorized.'
 
   def test_CreateInvalidResourceNoNameWithResourceManagementPermissions(self):
-      resource = {'name':'', 'description':'', 'tags':[]}
+      resource = {'name':'', 'description':'', 'tags':[], "restricted": False}
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(resource), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
@@ -82,7 +82,7 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.resourceUrl + "/1", headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'', u'tags': [], u'name': u'view', u'resource_id': 1}
+      assert decoded['data'] == {'restricted': False, u'description': u'', u'tags': [], u'name': u'view', u'resource_id': 1}
       assert decoded['error_msg'] == 'Successfully retrieved resource'
 
   def test_GetResourceWithValidIDWithResourceManagementPermissionsWithoutViewAccess(self):
@@ -96,7 +96,7 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.resourceUrl + "/1", headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'', u'tags': [], u'name': u'view', u'resource_id': 1}
+      assert decoded['data'] == {'restricted': False, u'description': u'', u'tags': [], u'name': u'view', u'resource_id': 1}
       assert decoded['error_msg'] == 'Successfully retrieved resource'
 
   def test_GetResourceWithValidIDWithoutResourceManagementPermissionsWithoutViewAccess(self):
@@ -114,9 +114,9 @@ class ResourceTestCases(unittest.TestCase):
       assert decoded['error_msg'] == 'Resource does not exist'
 
   def test_GetResourcesWithValidQueryWithResourceManagementPermissionsWithViewAccess(self):
-      validResource1 = {'name':'resource1', 'description':'resource description', 'tags':['tag1', 'tag2']}
-      validResource2 = {'name':'resource2', 'description':'resource description', 'tags':['tag2']}
-      validResource3 = {'name':'resource3', 'description':'resource description', 'tags':['tag2', 'tag3']}
+      validResource1 = {'name':'resource1', 'description':'resource description', 'tags':['tag1', 'tag2'], 'restricted': False}
+      validResource2 = {'name':'resource2', 'description':'resource description', 'tags':['tag2'], 'restricted': False}
+      validResource3 = {'name':'resource3', 'description':'resource description', 'tags':['tag2', 'tag3'], 'restricted': False}
       requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(validResource1), headers = allHeaders, verify = False)
       requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(validResource2), headers = allHeaders, verify = False)
       requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(validResource3), headers = allHeaders, verify = False)
@@ -124,13 +124,13 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.resourceUrl + queryUrl, headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'resources': [{u'description': u'resource description', u'tags': [u'tag1', u'tag2'], u'name': u'resource1', u'resource_id': 3}]}
+      assert decoded['data'] == {u'resources': [{'restricted': False, u'description': u'resource description', u'tags': [u'tag1', u'tag2'], u'name': u'resource1', u'resource_id': 3}]}
       assert decoded['error_msg'] == 'Successfully retrieved resources'
 
   def test_GetResourcesWithQueryWithNonExistentTagsWithResourceManagementPermissionsWithViewAccess(self):
-      validResource1 = {'name':'resource1', 'description':'resource description', 'tags':['tag1', 'tag2']}
-      validResource2 = {'name':'resource2', 'description':'resource description', 'tags':['tag2']}
-      validResource3 = {'name':'resource3', 'description':'resource description', 'tags':['tag2', 'tag3']}
+      validResource1 = {'name':'resource1', 'description':'resource description', 'tags':['tag1', 'tag2'], 'restricted': False}
+      validResource2 = {'name':'resource2', 'description':'resource description', 'tags':['tag2'], 'restricted': False}
+      validResource3 = {'name':'resource3', 'description':'resource description', 'tags':['tag2', 'tag3'], 'restricted': False}
       requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(validResource1), headers = params.headers, verify = False)
       requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(validResource2), headers = params.headers, verify = False)
       requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(validResource3), headers = params.headers, verify = False)
@@ -142,39 +142,39 @@ class ResourceTestCases(unittest.TestCase):
       assert decoded['error_msg'] == 'Successfully retrieved resources'
 
   def test_PutResourceWithValidIDAllFieldsUpdatedWithResourceManagementPermissionsWithViewAccess(self):
-      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4']}
+      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4'], 'restricted': False}
       r = requests.put(params.baseUrl + params.resourceUrl + '/1', data = json.dumps(update), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'new description', u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'resource_id': 1}
+      assert decoded['data'] == {'restricted': False, u'description': u'new description', u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'resource_id': 1}
       assert decoded['error_msg'] == 'Successfully updated resource'
 
   def test_PutResourceWithValidIDAllFieldsUpdatedWithResourceManagementPermissionsWithoutViewAccess(self):
-      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4']}
+      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4'], 'restricted': False}
       r = requests.put(params.baseUrl + params.resourceUrl + '/2', data = json.dumps(update), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'new description', u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'resource_id': 2}
+      assert decoded['data'] == {'restricted': False, u'description': u'new description', u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'resource_id': 2}
       assert decoded['error_msg'] ==  'Successfully updated resource'
 
   def test_PutResourceWithValidIDAllFieldsUpdatedWithoutResourceManagementPermissionsWithViewAccess(self):
-      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4']}
+      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4'], 'restricted': False}
       r = requests.put(params.baseUrl + params.resourceUrl + '/1', data = json.dumps(update), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
-      assert decoded['data'] == {u'valid': True, u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'description': u'new description'}
+      assert decoded['data'] == {'restricted': False, u'valid': True, u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'description': u'new description'}
       assert decoded['error_msg'] == 'You are not authorized'
 
   def test_PutResourceWithValidIDAllFieldsUpdatedWithoutResourceManagementPermissionsWithoutViewAccess(self):
-      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4']}
+      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4'], 'restricted': False}
       r = requests.put(params.baseUrl + params.resourceUrl + '/2', data = json.dumps(update), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
-      assert decoded['data'] == {u'valid': True, u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'description': u'new description'}
+      assert decoded['data'] == {'restricted': False, u'valid': True, u'tags': [u'tag3', u'tag4'], u'name': u'newname', u'description': u'new description'}
       assert decoded['error_msg'] == 'You are not authorized'
 
   def test_PutResourceWithInvalidIDWithResourceManagementPermissionsWithViewAccess(self):
-      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4']}
+      update = {'name':'newname', 'description':'new description', 'tags':['tag3', 'tag4'], 'restricted': False}
       r = requests.put(params.baseUrl + params.resourceUrl + '/10', data = json.dumps(update), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True

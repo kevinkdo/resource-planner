@@ -52,7 +52,7 @@ userWithNone = {
 #user login json
 loginWithAdmin = {
   "username": "admin",
-  "password": "admin",
+  "password": "iLtPiC!_ece458",
 }
 loginWithAll = {
   "username": "all",

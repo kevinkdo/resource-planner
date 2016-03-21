@@ -42,15 +42,13 @@ permissions = {
 class ReservationTestCases(unittest.TestCase):
   def setUp(self):
       r = requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
-      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[]}
-      noReserveAccessResource = {'name':'noaccess', 'description':'', 'tags':[]}
+      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[], 'restricted': False}
+      noReserveAccessResource = {'name':'noaccess', 'description':'', 'tags':[], 'restricted': False}
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(reserveAcessResource), headers = params.headers, verify = False)
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(noReserveAccessResource), headers = params.headers, verify = False)
-
       
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithAll), headers = params.headers, verify = False)
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithResource), headers = params.headers, verify = False)
-
 
       r = requests.post(params.baseUrl + params.loginUrl, data = json.dumps(params.loginWithAdmin), headers = params.headers, verify = False)
       adminHeaders["Authorization"] = "Bearer " + r.json()["data"]["token"]
@@ -128,7 +126,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.reserveUrl + "/1", headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'resource': {u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}
+      assert decoded['data'] == {u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}
       assert decoded['error_msg'] == 'Reservation with given ID found'
 
   def test_GetReservationWithValidIDWithoutReservationManagementPermissionsWithReserveAccess(self):
@@ -137,7 +135,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.reserveUrl + "/1", headers = RSMPHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'resource': {u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}
+      assert decoded['data'] == {u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}
       assert decoded['error_msg'] == 'Reservation with given ID found'
 
   def test_GetReservationWithInvalidIDWithReservationManagementPermissionsWithReserveAccess(self):
@@ -156,7 +154,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}]
+      assert decoded['data'] == [{u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}]
       assert decoded['error_msg'] == 'Matching reservations retrieved'
 
   def test_GetReservationWithQueryValidTimeRangeWithReservationManagementPermissionsWithReserveAccess(self):
@@ -166,7 +164,7 @@ class ReservationTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}]
+      assert decoded['data'] == [{u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}]
       assert decoded['error_msg'] == 'Matching reservations retrieved'
 
   def test_GetReservationWtihQueryInvalidTimeRangeWithReservationManagementPermissionsWithReserveAccess(self):
