@@ -518,8 +518,7 @@ public class ReservationService {
 
      private TempRes getTempResFromId(int reservationId){
         List<TempRes> reservations = jt.query(
-            "SELECT * FROM reservations WHERE reservation_id = " + reservationId + ";".
-            new Object[]{TempRes},
+            "SELECT * FROM reservations WHERE reservation_id = " + reservationId + ";",
             new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                         TempRes t = new TempRes();
@@ -573,8 +572,7 @@ public class ReservationService {
 
     private List<TempRes> getIncompleteReservations(){
         return jt.query(
-            "SELECT * FROM reservations WHERE complete = false;".
-            new Object[]{TempRes},
+            "SELECT * FROM reservations WHERE complete = false;",
             new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                         TempRes t = new TempRes();
@@ -598,7 +596,6 @@ public class ReservationService {
             ") OR (reservations.end_time > " + t.begin_time + " AND reservations.end_time <= " + t.end_time + 
             ") OR (reservations.end_time > " + t.end_time + " AND reservations.begin_time < " + t.begin_time + 
             "));",
-            new Object[]{TempRes},
             new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                         TempRes t = new TempRes();
@@ -613,6 +610,7 @@ public class ReservationService {
                         return t;
                     }
                 });
+        return reservations;
     }
 
 }

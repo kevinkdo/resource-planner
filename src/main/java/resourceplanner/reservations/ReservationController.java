@@ -88,7 +88,7 @@ public class ReservationController extends Controller {
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse getApprovableReservations(final HttpServletRequest request) {
-        return reservationService.getApprovableReservations(getRequesterID(request)), hasResourceP(request));
+        return reservationService.getApprovableReservations(getRequesterID(request), hasResourceP(request));
     }
 
     @RequestMapping(value = "/canceledWithApproval/{reservationId}",

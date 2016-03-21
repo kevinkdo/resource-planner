@@ -21,7 +21,7 @@ public class ReservationApproval {
         return approved;
     }
 
-    public Boolean setApproved(boolean approved){
+    public void setApproved(boolean approved){
         this.approved = approved;
     }
 }
