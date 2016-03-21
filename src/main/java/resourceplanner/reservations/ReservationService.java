@@ -547,9 +547,13 @@ public class ReservationService {
        
         //If the user is admin or has system resource permission, he can approve anything
         //else, have to filter
+
+        //TODO: change this to base resource system permission on permission matrix to account for groups
         if(userId != 1 && !hasResourceP){
             for(TempRes t : incompleteReservations){
                 //TODO: FILTER list WITH resource manager data. 
+                //Need to get a list of all resources the person is a resource manager for (both personal based and
+                //group based), and then cross reference that list with the current list of reservations
             }
         }
 
