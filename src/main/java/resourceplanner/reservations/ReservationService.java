@@ -445,6 +445,7 @@ public class ReservationService {
         return cnt != null && cnt > 0;
     }
 
+    /*
     private List<Resource> getResources(int reservationId) {
         List<Integer> resourceIds = jt.queryForList(
                 "SELECT resource_id FROM reservationresources WHERE reservation_id = ?;",
@@ -456,6 +457,42 @@ public class ReservationService {
             rList.add(getResource(resourceId));
         }
         return rList;
+    }
+    */
+
+    private List<Resource> getResources(int reservationId, int specifier){
+        // 0 = all resources
+        // 1 = only approved resources
+        // 2 = only unnapproved resources
+        String queryString = "SELECT resource_id FROM reservationresources WHERE reservation_id = ?";
+        if(specifier == 1){
+            queryString = queryString + " AND resource_approved = true";
+        }
+        else if (specifier == 2){
+            queryString = queryString + " AND resource_approved = false";
+        }
+        queryString = queryString + ";";
+
+        List<Integer> resourceIds = jt.queryForList(
+                queryString,
+                new Object[]{reservationId},
+                Integer.class);
+
+        List<Resource> rList = new ArrayList<Resource>();
+        for (int resourceId : resourceIds) {
+            rList.add(getResource(resourceId));
+        }
+        return rList;
+    }
+
+    private List<Resource> getUnnaprovedResources(int reservationId){
+        return getResources(reservationId, 2);
+    }
+    private List<Resource> getResources(int reservationId){
+        return getResources(reservationId, 0);
+    }
+    private List<Resource> getApprovedResources(int reservationId){
+        return getResources(reservationId, 1);
     }
 
     private Resource getResource(int resourceId) {
@@ -541,23 +578,60 @@ public class ReservationService {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Returns all incomplete reservations for which the user can approve at least one non-approved resource
+    //Briefly, this first gathers a list of ALL incomplete reservations
+    //It also gathers a list of all restricted resources that the user can approve
+    //The program then removes any reservations from the original list that have no resources the user can approve
+    //Finally, it returns a final object that desginates, for each reservation, which resources the user can
+    //approve, and which are already approved. 
     public StandardResponse getApprovableReservations(int userId, boolean hasResourceP){
         List<TempRes> incompleteReservations = getIncompleteReservations();
         List<TempRes> reservationsToRemove = new ArrayList<TempRes>();
        
         //If the user is admin or has system resource permission, he can approve anything
         //else, have to filter
-
-        //TODO: change this to base resource system permission on permission matrix to account for groups
         if(userId != 1 && !hasResourceP){
-            for(TempRes t : incompleteReservations){
-                //TODO: FILTER list WITH resource manager data. 
-                //Need to get a list of all resources the person is a resource manager for (both personal based and
-                //group based), and then cross reference that list with the current list of reservations
-            }
-        }
+            //This is a list of all resources the user can approve that are restricted
+            List<Integer> resourceManagerResources = permissionService.getAllRestrictedResourceManagerResources(userId);
+            List<ApprovableResources> approvableResourcesList = new ArrayList<ApprovableResources>();
 
-        return new StandardResponse(false, "Approvable reservations returned", convertTempListToReservationList(incompleteReservations));
+            for(TempRes t : incompleteReservations){
+                //Each reservation must have at least 1 UNAPPROVED resource the user can approve
+                List<Resource> approvableResources = new ArrayList<Resource>();
+                List<Resource> resourcesForRes = getUnnaprovedResources(t.reservation_id);
+                boolean hasApprovableResource = false;
+
+                for(Resource r : resourcesForRes){
+                    if(resourceManagerResources.contains(r.getResource_id())){
+                        hasApprovableResource = true;
+                        approvableResources.add(r);
+                    }
+                }
+
+                if(!hasApprovableResource){
+                    reservationsToRemove.add(t);
+                }
+                else{
+                    approvableResourcesList.add(new ApprovableResources(t.reservation_id, approvableResources, getApprovedResources(t.reservation_id)));
+                }
+            }
+
+            incompleteReservations.removeAll(reservationsToRemove);
+            List<Reservation> approvableReservations = convertTempListToReservationList(incompleteReservations);
+            ReservationsAndApprovableResources output = new ReservationsAndApprovableResources(approvableReservations, approvableResourcesList);
+            return new StandardResponse(false, "Approvable reservations returned", output);
+        }
+        else{
+            //For admin, you just get the list of unnaproved and approved resources. You can approve all unnaproved
+            //for regular, you get list of unnaproved that you can fix
+            List<ApprovableResources> approvableResourcesList = new ArrayList<ApprovableResources>();
+            List<Reservation> approvableReservations = convertTempListToReservationList(incompleteReservations);
+            for(Reservation r : approvableReservations){
+                int res_id = r.getReservation_id();
+                approvableResourcesList.add(new ApprovableResources(res_id, getUnnaprovedResources(res_id), getApprovedResources(res_id)));
+            }
+            ReservationsAndApprovableResources output = new ReservationsAndApprovableResources(approvableReservations, approvableResourcesList);
+            return new StandardResponse(false, "Approvable reservations returned", output);
+        }
     }
 
     //Returns all incomplete reservations which would be canceled if the given reservation were approved
@@ -570,6 +644,13 @@ public class ReservationService {
 
     //Approves or denies the resources for a given reservation that the user is allowed to approve/deny. 
     public StandardResponse approveReservation(ReservationApproval approval, int reservationId, int userId){
+        if(approval.getApproved()){
+
+        }
+        else{
+            //Delete the reservation "as an admin" to guarentee it is deleted. 
+        }
+
         return new StandardResponse(true, "Not yet implemented");
     }
 

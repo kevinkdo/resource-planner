@@ -140,7 +140,7 @@ public class PermissionService {
         return new StandardResponse(false, "Permissions updated");
     }
 
-
+    //Returns an object containing resource NAMES since resource permissions is just IDs. 
     private List<ResourceAndID> getViewableResourcesAndIDs(ResourcePermissions resourcePermissions){
     	Map<Integer, String> allResources = (Map) jt.query(
     			"SELECT resource_id, name FROM resources;", new ResultSetExtractor() {
@@ -296,6 +296,38 @@ public class PermissionService {
         List<Integer> allResources = new ArrayList<Integer>();
         allResources.addAll(resources);
 
+        return allResources;
+    }
+
+    //Returns all resources a user is resource manager of that are ALSO restricted
+    public List<Integer> getAllRestrictedResourceManagerResources(int userId){
+        String userQueryString = "SELECT resources.resource_id FROM userresourcepermissions, resources WHERE user_id = " + userId +
+            " AND permission_level >= 3 AND resources.resource_id = userresourcepermissions.resource_id AND restricted = true;"; 
+
+        List<Integer> userResources = jt.query(
+                userQueryString,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Integer(rs.getInt("resource_id"));
+                    }
+                });
+
+        String groupQueryString = "SELECT resource_id FROM groupresourcepermissions, resources WHERE group_id IN " +
+                "(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
+                "permission_level >= 3 AND resources.resource_id = groupresourcepermissions.resource_id AND restricted = true;";
+        
+        List<Integer> groupResources = jt.query(
+                groupQueryString,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Integer(rs.getInt("resource_id"));
+                    }
+                });
+        Set<Integer> resources = new HashSet<Integer>();
+        resources.addAll(userResources);
+        resources.addAll(groupResources);
+        List<Integer> allResources = new ArrayList<Integer>();
+        allResources.addAll(resources);
         return allResources;
     }
 
