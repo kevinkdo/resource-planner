@@ -120,9 +120,50 @@ public class ReservationService {
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), complete);
 
-        emailService.scheduleEmailUpdate(res);
         return new StandardResponse(false, "Reservation inserted successfully", res);
 
+    }
+
+    public Reservation getReservationByIdHelper(int reservationId, int userId) {
+        if (!reservationExists(reservationId)) {
+            return null;
+        }
+
+        TempRes t = jt.query(
+                "SELECT * FROM reservations WHERE reservation_id = ?;",
+                new Object[]{reservationId},
+                new RowMapper<TempRes>() {
+                    public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempRes t = new TempRes();
+                        t.reservation_id = rs.getInt("reservation_id");
+                        t.title = rs.getString("title");
+                        t.description = rs.getString("description");
+                        t.user_id = rs.getInt("user_id");
+                        t.begin_time = rs.getTimestamp("begin_time");
+                        t.end_time = rs.getTimestamp("end_time");
+                        t.should_email = rs.getBoolean("should_email");
+                        t.complete = rs.getBoolean("complete");
+                        return t;
+                    }
+                }).get(0);
+
+        List<Resource> rList = getResources(reservationId);
+
+        List<Integer> userViewable = permissionService.getUserViewableResources(userId);
+        List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
+
+        Set<Integer> allViewableResources = new HashSet<Integer>(userViewable);
+        allViewableResources.addAll(groupViewable);
+
+        for (Resource r : rList) {
+            if (!allViewableResources.contains(r.getResource_id())) {
+                return null;
+            }
+        }
+
+        User u = getUser(t.user_id);
+
+        return new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
     }
 
     public StandardResponse getReservationById(int reservationId, int userId) {
@@ -310,6 +351,9 @@ public class ReservationService {
                 batch);
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), t.complete);
+        if (t.complete) {
+            emailService.rescheduleEmails(reservationId);
+        }
         return new StandardResponse(false, "Reservation successfully updated", res);
     }
 
@@ -350,6 +394,8 @@ public class ReservationService {
 
         jt.update("DELETE FROM reservationresources WHERE reservation_id = ?;", reservationId);
         jt.update("DELETE FROM reservations WHERE reservation_id = ?;", reservationId);
+
+        emailService.removeScheduledEmails(reservationId);
         return new StandardResponse(false, "Successfully deleted reservation");
     }
 
@@ -650,6 +696,9 @@ public class ReservationService {
         else{
             //Delete the reservation "as an admin" to guarentee it is deleted. 
         }
+
+        // TODO
+        emailService.scheduleEmail(reservationId);
 
         return new StandardResponse(true, "Not yet implemented");
     }

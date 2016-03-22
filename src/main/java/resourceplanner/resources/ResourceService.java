@@ -387,7 +387,7 @@ public class ResourceService {
             return new StandardResponse(true, "Resource does not exist");
         }
 
-        emailService.cancelEmailsForReservationsWithResource(resourceId);
+        //emailService.cancelEmailsForReservationsWithResource(resourceId);
         // TODO
         jt.update("DELETE FROM reservationresources WHERE resource_id = ?;");
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
