@@ -65,8 +65,10 @@ public class ReservationService {
 
         // for each resource, find out what kind of overlap exists
         for (int i : req.getResource_ids()) {
-            if (!allReservableResources.contains(i)) {
-                return new StandardResponse(true, "You do not have reservation permission for resource with ID " + i);
+            if (userId != 1) {
+                if (!allReservableResources.contains(i)) {
+                    return new StandardResponse(true, "You do not have reservation permission for resource with ID " + i);
+                }
             }
             Resource r = getResource(i);
             rList.add(r);
@@ -124,7 +126,7 @@ public class ReservationService {
 
     }
 
-    public Reservation getReservationByIdHelper(int reservationId, int userId) {
+    public Reservation getReservationByIdAdmin(int reservationId) {
         if (!reservationExists(reservationId)) {
             return null;
         }
@@ -148,18 +150,6 @@ public class ReservationService {
                 }).get(0);
 
         List<Resource> rList = getResources(reservationId);
-
-        List<Integer> userViewable = permissionService.getUserViewableResources(userId);
-        List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
-
-        Set<Integer> allViewableResources = new HashSet<Integer>(userViewable);
-        allViewableResources.addAll(groupViewable);
-
-        for (Resource r : rList) {
-            if (!allViewableResources.contains(r.getResource_id())) {
-                return null;
-            }
-        }
 
         User u = getUser(t.user_id);
 
@@ -191,22 +181,24 @@ public class ReservationService {
 
         List<Resource> rList = getResources(reservationId);
 
-        List<Integer> userViewable = permissionService.getUserViewableResources(userId);
-        List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
+        if (userId != 1) {
+            List<Integer> userViewable = permissionService.getUserViewableResources(userId);
+            List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
 
-        Set<Integer> allViewableResources = new HashSet<Integer>(userViewable);
-        allViewableResources.addAll(groupViewable);
+            Set<Integer> allViewableResources = new HashSet<Integer>(userViewable);
+            allViewableResources.addAll(groupViewable);
 
-        for (Resource r : rList) {
-            if (!allViewableResources.contains(r.getResource_id())) {
-                return new StandardResponse(false, "You can't view this reservation because you don't have viewing rights for all resources in the reservation");
+            for (Resource r : rList) {
+                if (!allViewableResources.contains(r.getResource_id())) {
+                    return new StandardResponse(false, "You can't view this reservation because you don't have viewing rights for all resources in the reservation");
+                }
             }
         }
 
         User u = getUser(t.user_id);
 
         Reservation r = new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
-        return new StandardResponse(false, "Successfully retrieved resource", r);
+        return new StandardResponse(false, "Successfully retrieved reservation", r);
     }
 
     public StandardResponse getReservations(QueryReservationRequest req, int userId) {
@@ -315,20 +307,22 @@ public class ReservationService {
         List<Integer> rListInts = rListToInts(rList);
         User u = getUser(req.getUser_id());
 
-        List<Integer> userReservable = permissionService.getUserReservableResources(userId);
-        List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
+        if (userId != 1) {
+            List<Integer> userReservable = permissionService.getUserReservableResources(userId);
+            List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
 
-        Set<Integer> allReservableResources = new TreeSet<Integer>(userReservable);
-        allReservableResources.addAll(groupReservable);
+            Set<Integer> allReservableResources = new TreeSet<Integer>(userReservable);
+            allReservableResources.addAll(groupReservable);
 
-        for (int resourceId : req.getResource_ids()) {
-            // for each resource, make sure that the resource exists in rList
-            if (!rListInts.contains(resourceId)) {
-                return new StandardResponse(true, "You cannot add a new resource when updating a reservation");
-            }
+            for (int resourceId : req.getResource_ids()) {
+                // for each resource, make sure that the resource exists in rList
+                if (!rListInts.contains(resourceId)) {
+                    return new StandardResponse(true, "You cannot add a new resource when updating a reservation");
+                }
 
-            if (!allReservableResources.contains(resourceId)) {
-                return new StandardResponse(true, "You do not have reservation permission for resource with ID "+resourceId);
+                if (!allReservableResources.contains(resourceId)) {
+                    return new StandardResponse(true, "You do not have reservation permission for resource with ID "+resourceId);
+                }
             }
         }
 

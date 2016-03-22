@@ -45,8 +45,7 @@ public class EmailService {
     }
 
     public void scheduleEmail(int reservationId){
-		Reservation res = reservationService.getReservationByIdHelper(reservationId, 1);
-
+		Reservation res = reservationService.getReservationByIdAdmin(reservationId);
 
     	if(res.getShould_email() && res.getUser().isShould_email()){
     		EmailScheduler startReservationEmailScheduler = new EmailScheduler(res, EmailScheduler.BEGIN_ALERT);
