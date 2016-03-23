@@ -21,7 +21,7 @@ const PermissionsManager = React.createClass({
     this.state.data.resource_permissions.user_permissions.forEach(function(x) {
       if (x.user_id == user_id && x.resource_id == resource_id) {
         x.permission_level += 1;
-        if (x.permission_level > 2)
+        if (x.permission_level > 3)
           x.permission_level = 0;
       }
     });
@@ -42,7 +42,7 @@ const PermissionsManager = React.createClass({
     this.state.data.resource_permissions.group_permissions.forEach(function(x) {
       if (x.group_id == group_id && x.resource_id == resource_id) {
         x.permission_level += 1;
-        if (x.permission_level > 2)
+        if (x.permission_level > 3)
           x.permission_level = 0;
       }
     });
@@ -94,6 +94,8 @@ const PermissionsManager = React.createClass({
       return "View";
     if (x == 2)
       return "Reserve";
+    if (x == 3)
+      return "Manage";
   },
 
   getBackgroundColor(x) {
@@ -104,8 +106,10 @@ const PermissionsManager = React.createClass({
     if (x == 0)
       return "danger";
     if (x == 1)
-      return "info";
+      return "warning";
     if (x == 2)
+      return "info";
+    if (x == 3)
       return "success";
     return "";
   },
