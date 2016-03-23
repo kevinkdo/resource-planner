@@ -103,7 +103,7 @@ public class ReservationController extends Controller {
     @ResponseBody
     public StandardResponse approveReservation(@RequestBody final ReservationApproval req, @PathVariable final int reservationId, 
             final HttpServletRequest request) {
-        return reservationService.approveReservation(req, reservationId, getRequesterID(request));
+        return reservationService.approveReservation(req, reservationId, getRequesterID(request), hasResourceP(request));
     }
 
 

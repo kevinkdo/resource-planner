@@ -65,8 +65,10 @@ public class ReservationService {
 
         // for each resource, find out what kind of overlap exists
         for (int i : req.getResource_ids()) {
-            if (!allReservableResources.contains(i)) {
-                return new StandardResponse(true, "You do not have reservation permission for resource with ID " + i);
+            if (userId != 1) {
+                if (!allReservableResources.contains(i)) {
+                    return new StandardResponse(true, "You do not have reservation permission for resource with ID " + i);
+                }
             }
             Resource r = getResource(i);
             rList.add(r);
@@ -120,9 +122,38 @@ public class ReservationService {
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), complete);
 
-        emailService.scheduleEmailUpdate(res);
         return new StandardResponse(false, "Reservation inserted successfully", res);
 
+    }
+
+    public Reservation getReservationByIdAdmin(int reservationId) {
+        if (!reservationExists(reservationId)) {
+            return null;
+        }
+
+        TempRes t = jt.query(
+                "SELECT * FROM reservations WHERE reservation_id = ?;",
+                new Object[]{reservationId},
+                new RowMapper<TempRes>() {
+                    public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempRes t = new TempRes();
+                        t.reservation_id = rs.getInt("reservation_id");
+                        t.title = rs.getString("title");
+                        t.description = rs.getString("description");
+                        t.user_id = rs.getInt("user_id");
+                        t.begin_time = rs.getTimestamp("begin_time");
+                        t.end_time = rs.getTimestamp("end_time");
+                        t.should_email = rs.getBoolean("should_email");
+                        t.complete = rs.getBoolean("complete");
+                        return t;
+                    }
+                }).get(0);
+
+        List<Resource> rList = getResources(reservationId);
+
+        User u = getUser(t.user_id);
+
+        return new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
     }
 
     public StandardResponse getReservationById(int reservationId, int userId) {
@@ -150,22 +181,24 @@ public class ReservationService {
 
         List<Resource> rList = getResources(reservationId);
 
-        List<Integer> userViewable = permissionService.getUserViewableResources(userId);
-        List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
+        if (userId != 1) {
+            List<Integer> userViewable = permissionService.getUserViewableResources(userId);
+            List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
 
-        Set<Integer> allViewableResources = new HashSet<Integer>(userViewable);
-        allViewableResources.addAll(groupViewable);
+            Set<Integer> allViewableResources = new HashSet<Integer>(userViewable);
+            allViewableResources.addAll(groupViewable);
 
-        for (Resource r : rList) {
-            if (!allViewableResources.contains(r.getResource_id())) {
-                return new StandardResponse(false, "You can't view this reservation because you don't have viewing rights for all resources in the reservation");
+            for (Resource r : rList) {
+                if (!allViewableResources.contains(r.getResource_id())) {
+                    return new StandardResponse(false, "You can't view this reservation because you don't have viewing rights for all resources in the reservation");
+                }
             }
         }
 
         User u = getUser(t.user_id);
 
         Reservation r = new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
-        return new StandardResponse(false, "Successfully retrieved resource", r);
+        return new StandardResponse(false, "Successfully retrieved reservation", r);
     }
 
     public StandardResponse getReservations(QueryReservationRequest req, int userId) {
@@ -274,20 +307,22 @@ public class ReservationService {
         List<Integer> rListInts = rListToInts(rList);
         User u = getUser(req.getUser_id());
 
-        List<Integer> userReservable = permissionService.getUserReservableResources(userId);
-        List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
+        if (userId != 1) {
+            List<Integer> userReservable = permissionService.getUserReservableResources(userId);
+            List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
 
-        Set<Integer> allReservableResources = new TreeSet<Integer>(userReservable);
-        allReservableResources.addAll(groupReservable);
+            Set<Integer> allReservableResources = new TreeSet<Integer>(userReservable);
+            allReservableResources.addAll(groupReservable);
 
-        for (int resourceId : req.getResource_ids()) {
-            // for each resource, make sure that the resource exists in rList
-            if (!rListInts.contains(resourceId)) {
-                return new StandardResponse(true, "You cannot add a new resource when updating a reservation");
-            }
+            for (int resourceId : req.getResource_ids()) {
+                // for each resource, make sure that the resource exists in rList
+                if (!rListInts.contains(resourceId)) {
+                    return new StandardResponse(true, "You cannot add a new resource when updating a reservation");
+                }
 
-            if (!allReservableResources.contains(resourceId)) {
-                return new StandardResponse(true, "You do not have reservation permission for resource with ID "+resourceId);
+                if (!allReservableResources.contains(resourceId)) {
+                    return new StandardResponse(true, "You do not have reservation permission for resource with ID "+resourceId);
+                }
             }
         }
 
@@ -310,6 +345,9 @@ public class ReservationService {
                 batch);
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), t.complete);
+        if (t.complete) {
+            emailService.rescheduleEmails(reservationId);
+        }
         return new StandardResponse(false, "Reservation successfully updated", res);
     }
 
@@ -350,6 +388,8 @@ public class ReservationService {
 
         jt.update("DELETE FROM reservationresources WHERE reservation_id = ?;", reservationId);
         jt.update("DELETE FROM reservations WHERE reservation_id = ?;", reservationId);
+
+        emailService.removeScheduledEmails(reservationId);
         return new StandardResponse(false, "Successfully deleted reservation");
     }
 
@@ -643,13 +683,26 @@ public class ReservationService {
     }
 
     //Approves or denies the resources for a given reservation that the user is allowed to approve/deny. 
-    public StandardResponse approveReservation(ReservationApproval approval, int reservationId, int userId){
+    public StandardResponse approveReservation(ReservationApproval approval, int reservationId, int userId, boolean hasResourceP){
         if(approval.getApproved()){
+            //for all resources in reservation that are not approved, if included in user permission, alter
+            //then check if the reservation is 100% completed, if so update it. 
 
+            //If admin or if has resource permission, automatically aprove entire reservation. 
+            if(userId == 1 || hasResourceP){
+                fullyApproveReservation(reservationId);
+                return new StandardResponse(false, "Reservation approved for resources you have permission on");
+            }   
+            else{
+                List<Integer> resourceManagerResources = permissionService.getAllRestrictedResourceManagerResources(userId);
+                partiallyApproveReservation(reservationId, resourceManagerResources);
+                return new StandardResponse(false, "Reservation approved for resources you have permission on");
+            }
         }
         else{
             //Delete the reservation "as an admin" to guarentee it is deleted. 
-            
+            deleteReservation(reservationId, true, 1);
+            return new StandardResponse(false, "Reservation denied and deleted");
         }
     }
 
@@ -695,6 +748,59 @@ public class ReservationService {
                     }
                 });
         return reservations;
+    }
+
+    private void fullyApproveReservation(int reservationId){
+        String resourceUpdateString = "UPDATE reservationresources SET approved = true WHERE reservation_id = " + reservationId +
+            ";";
+        jt.update(resourceUpdateString);
+
+        String reservationUpdateString = "UPDATE reservations SET complete = true WHERE reservation_id = " + reservationId + ";";
+        jt.update(reservationUpdateString);
+
+        emailService.scheduleEmail(reservationId);
+
+        deleteOverlappingIncompleteReservations(reservationId);
+    }
+
+    private void partiallyApproveReservation(int reservationId, List<Integer> approvableResources){
+        Map<String,Object> params = Collections.singletonMap("ids", approvableResources);  
+
+        String resourceUpdateString = "UPDATE reservationresources SET approved = true WHERE reservation_id = " + reservationId +
+            " AND reservation_id IN (:ids);";
+        jt.update(resourceUpdateString, params);
+
+
+        String shouldUpdateReservation = "SELECT resource_id FROM reservationresources where reservation_id = " + reservationId +
+            " AND approved = false;";
+        List<Integer> remainingUnnaproved = jt.query(shouldUpdateReservation,
+                        new RowMapper<Integer>() {
+                            public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                return rs.getInt("resource_id");
+                            }
+                     });
+
+        //Some remaining resources must be approved, do not change reservation status
+        if(remainingUnnaproved.size() > 0){
+            return;
+        }
+        else{ //all resources approved, can modify reservation status
+            String reservationUpdateString = "UPDATE reservations SET complete = true WHERE reservation_id = " + reservationId + ";";
+            jt.update(reservationUpdateString);
+            emailService.scheduleEmail(reservationId);
+            deleteOverlappingIncompleteReservations(reservationId);
+        }
+    }
+
+    private void deleteOverlappingIncompleteReservations(int reservationId){
+        Reservation r = getReservationByIdAdmin(reservationId);
+        String deleteString = "DELETE FROM reservations WHERE reservation_id != " + r.getReservation_id() + 
+            " AND complete = false AND ((reservations.begin_time >= " + r.getBegin_time() + " AND reservations.begin_time < " + r.getEnd_time() + 
+            ") OR (reservations.end_time > " + r.getBegin_time() + " AND reservations.end_time <= " + r.getEnd_time() + 
+            ") OR (reservations.end_time > " + r.getEnd_time() + " AND reservations.begin_time < " + r.getBegin_time() + 
+            "));";
+    
+        jt.update(deleteString);
     }
 
 }
