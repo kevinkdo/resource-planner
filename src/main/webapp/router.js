@@ -16,7 +16,7 @@ const Router = React.createClass({
   componentDidMount() {
     window.onhashchange = this.onhashchange;
     if (!location.hash) {
-      location.hash = '#reservation_list';
+      location.hash = '#' + this.state.route;
     } else {
       this.setState({
         route: location.hash.substring(1)

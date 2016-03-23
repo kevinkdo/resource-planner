@@ -51,7 +51,7 @@ const Navbar = React.createClass({
                 <ul className="dropdown-menu">
                   <li><a href="#" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
-                  <li><a href="#" onClick={this.logout}>Log Out</a></li>
+                  <li><a href="#login" onClick={this.logout}>Log Out</a></li>
                 </ul>
               </li>
             </ul>
