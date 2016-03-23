@@ -11,11 +11,7 @@ import java.util.List;
  * Created by Davis Treybig on 1/24/2016.
  */
 public class ReservationApproval {
-    private Boolean approved;
-
-    public ReservationApproval(boolean approved){
-        this.approved = approved;
-    }
+    private boolean approved;
 
     public Boolean getApproved(){
         return approved;

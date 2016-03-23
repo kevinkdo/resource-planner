@@ -677,6 +677,9 @@ public class ReservationService {
     //Returns all incomplete reservations which would be canceled if the given reservation were approved
     public StandardResponse getCanceledWithApproval(int reservationId){
         TempRes currentRes = getTempResFromId(reservationId);
+        if(currentRes.complete){
+            return new StandardResponse(true, "Reservation is already approved");
+        }
         List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes);
         List<Reservation> overlappingReservations = convertTempListToReservationList(overlapping);
         return new StandardResponse(false, "To-be-canceled reservations returned", overlappingReservations);
@@ -728,11 +731,11 @@ public class ReservationService {
 
     private List<TempRes> getOverlappingIncompleteReservations(TempRes t){
         List<TempRes> reservations = jt.query(
-            "SELECT * FROM reservations WHERE reservation_id != " + t.reservation_id + 
-            " AND complete = false AND ((reservations.begin_time >= " + t.begin_time + " AND reservations.begin_time < " + t.end_time + 
-            ") OR (reservations.end_time > " + t.begin_time + " AND reservations.end_time <= " + t.end_time + 
-            ") OR (reservations.end_time > " + t.end_time + " AND reservations.begin_time < " + t.begin_time + 
-            "));",
+            "SELECT * FROM reservations WHERE reservation_id != ?" + 
+            " AND complete = false AND ((reservations.begin_time >= ? AND reservations.begin_time < ?)" + 
+            " OR (reservations.end_time > ? AND reservations.end_time <= ?)" + 
+            " OR (reservations.end_time > ? AND reservations.begin_time < ?));",
+            new Object[]{t.reservation_id, t.begin_time, t.end_time, t.begin_time, t.end_time, t.end_time, t.begin_time},
             new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                         TempRes t = new TempRes();
@@ -751,7 +754,7 @@ public class ReservationService {
     }
 
     private void fullyApproveReservation(int reservationId){
-        String resourceUpdateString = "UPDATE reservationresources SET approved = true WHERE reservation_id = " + reservationId +
+        String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
             ";";
         jt.update(resourceUpdateString);
 
@@ -766,13 +769,13 @@ public class ReservationService {
     private void partiallyApproveReservation(int reservationId, List<Integer> approvableResources){
         Map<String,Object> params = Collections.singletonMap("ids", approvableResources);  
 
-        String resourceUpdateString = "UPDATE reservationresources SET approved = true WHERE reservation_id = " + reservationId +
+        String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
             " AND reservation_id IN (:ids);";
         jt.update(resourceUpdateString, params);
 
 
         String shouldUpdateReservation = "SELECT resource_id FROM reservationresources where reservation_id = " + reservationId +
-            " AND approved = false;";
+            " AND resource_approved = false;";
         List<Integer> remainingUnnaproved = jt.query(shouldUpdateReservation,
                         new RowMapper<Integer>() {
                             public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -793,14 +796,13 @@ public class ReservationService {
     }
 
     private void deleteOverlappingIncompleteReservations(int reservationId){
-        Reservation r = getReservationByIdAdmin(reservationId);
-        String deleteString = "DELETE FROM reservations WHERE reservation_id != " + r.getReservation_id() + 
-            " AND complete = false AND ((reservations.begin_time >= " + r.getBegin_time() + " AND reservations.begin_time < " + r.getEnd_time() + 
-            ") OR (reservations.end_time > " + r.getBegin_time() + " AND reservations.end_time <= " + r.getEnd_time() + 
-            ") OR (reservations.end_time > " + r.getEnd_time() + " AND reservations.begin_time < " + r.getBegin_time() + 
-            "));";
+        TempRes t = getTempResFromId(reservationId);
+        String deleteString = "DELETE FROM reservations WHERE reservation_id != ?" + 
+            " AND complete = false AND ((reservations.begin_time >= ? AND reservations.begin_time < ?)" + 
+            " OR (reservations.end_time > ? AND reservations.end_time <= ?)" + 
+            " OR (reservations.end_time > ? AND reservations.begin_time < ?));";
     
-        jt.update(deleteString);
+        jt.update(deleteString, new Object[]{t.reservation_id, t.begin_time, t.end_time, t.begin_time, t.end_time, t.end_time, t.begin_time});
     }
 
 }
