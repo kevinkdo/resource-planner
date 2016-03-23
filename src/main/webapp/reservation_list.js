@@ -14,7 +14,8 @@ const ReservationList = React.createClass({
     this.props.setPstate({error_msg: ""});
     return {
       loading_tags: true,
-      loading_table: true,
+      loading_table: false,
+      route: "approved",
       tags: [],
       start_date: start_date,
       start_time: start_time,
@@ -166,39 +167,45 @@ const ReservationList = React.createClass({
         </div>
       </div>
     var rightpane = this.state.loading_table ? <Loader /> : (
-      <table className="table table-hover">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Resource</th>
-            <th>User</th>
-            <th>Start</th>
-            <th>End</th>
-            <th></th>
-            <th></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.keys(me.state.reservations).map(id => {
-            var x = me.state.reservations[id];
-            return <tr key={"reservation " + x.reservation_id}>
-              <td>{x.reservation_id}</td>
-              <td>TODO RESERVATION TITLE</td>
-              <td>{x.resource.name}</td>
-              <td>{x.user.username}</td>
-              <td>{new Date(x.begin_time).toLocaleString()}</td>
-              <td>{new Date(x.end_time).toLocaleString()}</td>
-              <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>View/Edit</a></td>
-              <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
-              <td><a role="button" onClick={() => this.approveReservation(x.reservation_id)}>TODO Approve</a></td>
+      <div>
+        <ul className="nav nav-tabs">
+          <li className={this.state.route == 'approved' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "approved"})}>Approved</a></li>
+          <li className={this.state.route == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "pending"})}>Pending</a></li>
+        </ul>
+        <table className="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Resource</th>
+              <th>User</th>
+              <th>Start</th>
+              <th>End</th>
+              <th></th>
+              <th></th>
+              <th></th>
             </tr>
-          })}
-          {Object.keys(me.state.reservations).length > 0 ? null :
-            <tr><td className="lead text-center" colSpan="7">No reservations in this timespan</td></tr>}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {Object.keys(me.state.reservations).map(id => {
+              var x = me.state.reservations[id];
+              return <tr key={"reservation " + x.reservation_id}>
+                <td>{x.reservation_id}</td>
+                <td>TODO RESERVATION TITLE</td>
+                <td>{x.resource.name}</td>
+                <td>{x.user.username}</td>
+                <td>{new Date(x.begin_time).toLocaleString()}</td>
+                <td>{new Date(x.end_time).toLocaleString()}</td>
+                <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>View/Edit</a></td>
+                <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
+                <td><a role="button" onClick={() => this.approveReservation(x.reservation_id)}>TODO Approve</a></td>
+              </tr>
+            })}
+            {Object.keys(me.state.reservations).length > 0 ? null :
+              <tr><td className="lead text-center" colSpan="7">No reservations in this timespan</td></tr>}
+          </tbody>
+        </table>
+      </div>
     );
     return (
       <div>
