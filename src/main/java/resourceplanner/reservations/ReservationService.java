@@ -649,9 +649,8 @@ public class ReservationService {
         }
         else{
             //Delete the reservation "as an admin" to guarentee it is deleted. 
+            
         }
-
-        return new StandardResponse(true, "Not yet implemented");
     }
 
 
