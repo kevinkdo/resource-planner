@@ -34,15 +34,15 @@ const Navbar = React.createClass({
               <span className="icon-bar"></span>
               <span className="icon-bar"></span>
             </button>
-            <a className="navbar-brand" href="#"><span className="glyphicon glyphicon-pawn" aria-hidden="true"></span></a>
+            <a className="navbar-brand"><span className="glyphicon glyphicon-pawn" aria-hidden="true"></span></a>
           </div>
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul className="nav navbar-nav navbar-left">
-              <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "resource_list"})}>Resources</a></li>
-              <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "reservation_list"})}>Reservations</a></li>
-              <li className={this.props.pstate.route.indexOf("group") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "group_manager"})}>Groups</a></li>
-              <li className={this.props.pstate.route.indexOf("permissions") > -1 ? "active" : ""}><a href="#" onClick={() => this.props.setPstate({route: "permissions_manager"})}>Permissions Manager</a></li>
+              <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#resource_list">Resources</a></li>
+              <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#reservation_list">Reservations</a></li>
+              <li className={this.props.pstate.route.indexOf("group") > -1 ? "active" : ""}><a href="#group_manager">Groups</a></li>
+              <li className={this.props.pstate.route.indexOf("permissions") > -1 ? "active" : ""}><a href="#permissions_manager">Permissions Manager</a></li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
               <li><p className="navbar-text">{this.state.username}</p></li>

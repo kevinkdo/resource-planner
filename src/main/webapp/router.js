@@ -7,30 +7,54 @@ const Router = React.createClass({
     };
   },
 
+  onhashchange() {
+    this.setState({
+      route: location.hash.substring(1)
+    });
+  },
+
+  componentDidMount() {
+    window.onhashchange = this.onhashchange;
+    if (!location.hash) {
+      location.hash = '#reservation_list';
+    } else {
+      this.setState({
+        route: location.hash.substring(1)
+      });
+    }
+  },
+
+  setStateWrapper(data) {
+    if (data.route) {
+      location.hash = '#' + data.route;
+    }
+    this.setState(data);
+  },
+
   render() {
     switch (this.state.route) {
       case "login":
-        return <Login setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <Login setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "group_manager":
-        return <GroupManager setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <GroupManager setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "group_editor":
-        return <GroupEditor setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <GroupEditor setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "settings":
-        return <Settings setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <Settings setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "reservation_list":
-        return <ReservationList setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ReservationList setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "reservation_creator":
-        return <ReservationCreator setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ReservationCreator setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "reservation_editor":
-        return <ReservationEditor setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ReservationEditor setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "resource_list":
-        return <ResourceList setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ResourceList setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "resource_creator":
-        return <ResourceCreator setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ResourceCreator setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "resource_editor":
-        return <ResourceEditor setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <ResourceEditor setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "permissions_manager":
-        return <PermissionsManager setPstate={this.setState.bind(this)} pstate={this.state} />
+        return <PermissionsManager setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
     }
     return <div>ERROR</div>;
   }
