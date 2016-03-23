@@ -156,7 +156,7 @@ const ReservationList = React.createClass({
             {this.state.loading_tags ? <Loader /> : <div>
               <ul className="list-group">
                 {this.state.tags.map(x =>
-                  <a key={"reservationtag" + x.name} href="#" className="list-group-item" onClick={(evt) => {evt.preventDefault(); me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  <a key={"reservationtag" + x.name} className="list-group-item pointer" onClick={(evt) => {evt.preventDefault(); me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
                 )}
               </ul>
               {Object.keys(me.state.tags).length > 0 ? null :

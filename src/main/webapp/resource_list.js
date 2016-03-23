@@ -122,7 +122,7 @@ const ResourceList = React.createClass({
               <div>
                 <ul className="list-group">
                   {Object.keys(this.state.tags).map(tag =>
-                    <a key={"resourcetag" + tag} href="#" className="list-group-item" onClick={(evt) => {evt.preventDefault(); me.cycleState(tag)}}>{tag}<span className="badge">{this.state.tags[tag]}</span></a>
+                    <a key={"resourcetag" + tag} className="list-group-item pointer" onClick={(evt) => {evt.preventDefault(); me.cycleState(tag)}}>{tag}<span className="badge">{this.state.tags[tag]}</span></a>
                   )}
                 </ul>
                 {Object.keys(me.state.tags).length > 0 ? null :
