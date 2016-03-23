@@ -55,6 +55,8 @@ const Router = React.createClass({
         return <ResourceEditor setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
       case "permissions_manager":
         return <PermissionsManager setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+      case "admin_console":
+        return <AdminConsole setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
     }
     return <div>ERROR</div>;
   }
