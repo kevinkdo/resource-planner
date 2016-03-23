@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS groupmembers;
 DROP TABLE IF EXISTS groupResourcePermissions;
 DROP TABLE IF EXISTS userResourcePermissions;
 DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS reservationresources;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS resourcetags;
 DROP TABLE IF EXISTS resources;
@@ -42,12 +43,24 @@ CREATE TABLE resourcetags (
 
 CREATE TABLE reservations (
   reservation_id SERIAL PRIMARY KEY NOT NULL,
+  title          VARCHAR(255)       NOT NULL DEFAULT '',
+  description    VARCHAR(2000)      NOT NULL DEFAULT '',
   user_id        INT                NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
-  resource_id    INT                NOT NULL REFERENCES resources (resource_id) ON DELETE CASCADE,
   begin_time     TIMESTAMP,
   end_time       TIMESTAMP,
-  should_email   BOOLEAN            NOT NULL
+  should_email   BOOLEAN            NOT NULL,
+  complete       BOOLEAN            NOT NULL DEFAULT false
 );
+
+CREATE TABLE reservationresources (
+  reservation_id          INT                NOT NULL REFERENCES reservations (reservation_id) ON DELETE CASCADE,
+  resource_id             INT                NOT NULL REFERENCES resources (resource_id) ON DELETE CASCADE,
+  resource_approved       BOOLEAN            NOT NULL DEFAULT false
+);
+
+/*
+Should complete be true by default?
+ */
 
 CREATE TABLE groups (
   group_id      SERIAL PRIMARY KEY NOT NULL,

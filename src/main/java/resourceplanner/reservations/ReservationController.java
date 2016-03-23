@@ -9,11 +9,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import resourceplanner.main.Controller;
 import resourceplanner.main.StandardResponse;
-import resourceplanner.reservations.ReservationData.ReservationWithIDs;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import resourceplanner.reservations.ReservationData.*;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -21,37 +21,12 @@ public class ReservationController extends Controller {
 
     @Autowired
     private ReservationService reservationService;
-	
-    @RequestMapping(value = "/",
+
+    @RequestMapping(value = "/test/{resourceId}",
             method = RequestMethod.GET)
     @ResponseBody
-    public StandardResponse getMatchingReservations(@RequestParam(value = "resource_ids", required = false) Integer[] resource_ids, 
-        @RequestParam(value = "user_ids", required = false) Integer[] user_ids,
-        @RequestParam(value = "required_tags", required = false) String[] required_tags,
-        @RequestParam(value = "excluded_tags", required = false) String[] excluded_tags,
-        @RequestParam(value = "start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-        @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
-        final HttpServletRequest request) {
-
-        //Cannonical way to convert LocalDateTime to Timestamp
-        Timestamp startTimestamp = Timestamp.valueOf(start);
-        Timestamp endTimestamp = Timestamp.valueOf(end);
-        GetAllMatchingReservationRequest req = new GetAllMatchingReservationRequest(resource_ids, user_ids, 
-            required_tags, excluded_tags, startTimestamp, endTimestamp);
-        if(req.isValid()){
-            return reservationService.getMatchingReservations(req, getRequesterID(request));
-        }
-        else{
-            return new StandardResponse(true, "Invalid input parameters (Issue with start and end times)");
-        }
-    }
-
-
-	@RequestMapping(value = "/{reservationId}",
-            method = RequestMethod.GET)
-    @ResponseBody
-    public StandardResponse getReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
-        return reservationService.getReservationByIdDB(reservationId, getRequesterID(request));
+    public StandardResponse test(@PathVariable final int resourceId, final HttpServletRequest request) {
+        return reservationService.reservationTest(resourceId);
     }
 
     @RequestMapping(value = "",
@@ -59,19 +34,37 @@ public class ReservationController extends Controller {
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse createReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request){
-    	//An admin can make a reservation for anyone. A normal user can only make a reservation for himself. 
-    	// Verify that the user_id in the reservation == current user OR the current user is the admin
+        //An admin can make a reservation for anyone. A normal user can only make a reservation for himself.
+        // Verify that the user_id in the reservation == current user OR the current user is the admin
 
-        if(!req.isValidCreateRequest()){
-            return new StandardResponse(true, "Begin time after end time");
+        if(hasReservationP(request) || getRequesterID(request) == req.getUser_id()){
+            return reservationService.createReservation(req, getRequesterID(request));
         }
+        else{
+            return new StandardResponse(true, "Non-Admin user attempting to make reservation for another user");
+        }
+    }
 
-    	if(hasReservationP(request) || getRequesterID(request) == req.getUser_id()){
-    		return reservationService.createReservationDB(req);
-    	}
-    	else{
-    		return new StandardResponse(true, "Non-Admin user attempting to make reservation for another user");
-    	}
+    @RequestMapping(value = "/{reservationId}",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
+        return reservationService.getReservationById(reservationId, getRequesterID(request));
+    }
+
+    @RequestMapping(value = "/",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getReservations(@RequestParam(value = "resource_id", required = false) Integer resource_id,
+                                                    @RequestParam(value = "start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                    @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+                                                    final HttpServletRequest request) {
+
+        //Cannonical way to convert LocalDateTime to Timestamp
+        Timestamp startTimestamp = Timestamp.valueOf(start);
+        Timestamp endTimestamp = Timestamp.valueOf(end);
+        QueryReservationRequest req = new QueryReservationRequest(resource_id, startTimestamp, endTimestamp);
+        return reservationService.getReservations(req, getRequesterID(request));
     }
 
     @RequestMapping(value = "/{reservationId}",
@@ -79,34 +72,39 @@ public class ReservationController extends Controller {
             headers = {"Content-type=application/json"})
     @ResponseBody
     public StandardResponse updateReservation(@RequestBody final ReservationRequest req, final HttpServletRequest request,
-            @PathVariable final int reservationId){
-        ReservationWithIDs existingRes = reservationService.getReservationWithIdsObjectById(reservationId);
-        if(existingRes == null){
-            return new StandardResponse(true, "No reservation with given ID exists");
-        }
-        if(getRequesterID(request) != existingRes.getUser_id() && !hasReservationP(request)){
-            return new StandardResponse(true, "Non-admin trying to alter another user's reservation");
-        }
-
-        return reservationService.updateReservationDB(req, reservationId, request);
+                                              @PathVariable final int reservationId){
+        return reservationService.updateReservation(req, reservationId, hasReservationP(request), getRequesterID(request));
     }
+
 
     @RequestMapping(value = "/{reservationId}",
             method = RequestMethod.DELETE)
     @ResponseBody
     public StandardResponse deleteReservationById(@PathVariable final int reservationId, final HttpServletRequest request) {
-    	//We must do an initial get to check for the user of the reservation.    
-        ReservationWithIDs reservation = reservationService.getReservationWithIdsObjectById(reservationId);
-        if(reservation == null){
-            return new StandardResponse(true, "No reservation with given ID exists");
-        }
-        //Admin can delete ANY reservation, user can only delete his/her own
-    	if(hasReservationP(request) || getRequesterID(request) == reservation.getUser_id()){
-    		return reservationService.deleteReservationByIdDB(reservationId);
-    	}
-    	else{
-    		return new StandardResponse(true, "Non-Admin user attempting to delete reservation for another user");
-    	}
+        return reservationService.deleteReservation(reservationId, hasReservationP(request), getRequesterID(request));
     }
+
+    @RequestMapping(value = "/approvableReservations",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getApprovableReservations(final HttpServletRequest request) {
+        return reservationService.getApprovableReservations(getRequesterID(request), hasResourceP(request));
+    }
+
+    @RequestMapping(value = "/canceledWithApproval/{reservationId}",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getCanceledWithApproval(@PathVariable final int reservationId, final HttpServletRequest request) {
+        return reservationService.getCanceledWithApproval(reservationId);
+    }
+
+    @RequestMapping(value = "/approveReservation/{reservationId}",
+            method = RequestMethod.POST)
+    @ResponseBody
+    public StandardResponse approveReservation(@RequestBody final ReservationApproval req, @PathVariable final int reservationId, 
+            final HttpServletRequest request) {
+        return reservationService.approveReservation(req, reservationId, getRequesterID(request), hasResourceP(request));
+    }
+
 
 }

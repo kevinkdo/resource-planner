@@ -140,7 +140,7 @@ public class PermissionService {
         return new StandardResponse(false, "Permissions updated");
     }
 
-
+    //Returns an object containing resource NAMES since resource permissions is just IDs. 
     private List<ResourceAndID> getViewableResourcesAndIDs(ResourcePermissions resourcePermissions){
     	Map<Integer, String> allResources = (Map) jt.query(
     			"SELECT resource_id, name FROM resources;", new ResultSetExtractor() {
@@ -231,69 +231,134 @@ public class PermissionService {
     //Returns all resources that a user can view due to personal permissions
     //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM A GROUP HE IS IN)
     public List<Integer> getUserViewableResources(int userId){
-    	String userViewableQueryString = "SELECT resource_id FROM userresourcepermissions WHERE user_id = " + userId +
-    		" AND permission_level > 0;"; 
-
-    	List<Integer> userViewableResources = jt.query(
-                userViewableQueryString,
-                new RowMapper<Integer>() {
-                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Integer(rs.getInt("resource_id"));
-                    }
-                });
-
-    	return userViewableResources;
+    	return getUserResourcesWithPermission(1, userId);
     }
 
     //Returns all resources a user can view due to group memberships
     //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM PERSONAL PERMISSIONS)
     public List<Integer> getGroupViewableResources(int userId){
-    	String groupViewableQueryString = "SELECT resource_id FROM groupresourcepermissions WHERE group_id IN " +
-    			"(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
-    			"permission_level > 0;";
-    	
-    	List<Integer> groupViewableResources = jt.query(
-                groupViewableQueryString,
-                new RowMapper<Integer>() {
-                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Integer(rs.getInt("resource_id"));
-                    }
-                });
-    	return groupViewableResources;
+        return getGroupResourcesWithPermission(1, userId);
+    }
+
+    //Returns all resources a user can view, via BOTH groups and personal permissions
+    public List<Integer> getAllViewableResources(int userId){
+        Set<Integer> resources = new HashSet<Integer>();
+        resources.addAll(getUserViewableResources(userId));
+        resources.addAll(getGroupViewableResources(userId));
+
+        List<Integer> allResources = new ArrayList<Integer>();
+        allResources.addAll(resources);
+
+        return allResources;
     }
 
     //Returns all resources that a user can view due to personal permissions
     //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM A GROUP HE IS IN)
     public List<Integer> getUserReservableResources(int userId){
-        String userReservableQueryString = "SELECT resource_id FROM userresourcepermissions WHERE user_id = " + userId +
-            " AND permission_level > 1;"; 
-
-        List<Integer> userReservableResources = jt.query(
-                userReservableQueryString,
-                new RowMapper<Integer>() {
-                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new Integer(rs.getInt("resource_id"));
-                    }
-                });
-
-        return userReservableResources;
+        return getUserResourcesWithPermission(2, userId);
     }
 
     //Returns all resources a user can view due to group memberships
     //(NOT INCLUDED ARE RESOURCES THE USER CAN VIEW FROM PERSONAL PERMISSIONS)
     public List<Integer> getGroupReservableResources(int userId){
-        String groupReservableQueryString = "SELECT resource_id FROM groupresourcepermissions WHERE group_id IN " +
-                "(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
-                "permission_level > 1;";
-        
-        List<Integer> groupReservableResources = jt.query(
-                groupReservableQueryString,
+        return getGroupResourcesWithPermission(2, userId);
+    }
+
+    //Returns all resources a user can reserve, via BOTH groups and personal permissions
+    public List<Integer> getAllReservableResources(int userId){
+        Set<Integer> resources = new HashSet<Integer>();
+        resources.addAll(getUserReservableResources(userId));
+        resources.addAll(getGroupReservableResources(userId));
+
+        List<Integer> allResources = new ArrayList<Integer>();
+        allResources.addAll(resources);
+
+        return allResources;
+    }
+
+    //Returns all resources a user is resource manager of HIMSELF (not through groups)
+    public List<Integer> getUserResourceManagerResources(int userId){
+        return getUserResourcesWithPermission(3, userId);
+    }
+
+    //Returns all resources a user is resource manager of through GROUPS (not personally)
+    public List<Integer> getGroupResourceManagerResources(int userId){
+        return getGroupResourcesWithPermission(3, userId);
+    }
+
+    //Returns all resources a user is resource manager of, via BOTH groups and personal
+    //permissions
+    public List<Integer> getAllResourceManagerResources(int userId){
+        Set<Integer> resources = new HashSet<Integer>();
+        resources.addAll(getUserResourceManagerResources(userId));
+        resources.addAll(getGroupResourceManagerResources(userId));
+
+        List<Integer> allResources = new ArrayList<Integer>();
+        allResources.addAll(resources);
+
+        return allResources;
+    }
+
+    //Returns all resources a user is resource manager of that are ALSO restricted
+    public List<Integer> getAllRestrictedResourceManagerResources(int userId){
+        String userQueryString = "SELECT resources.resource_id FROM userresourcepermissions, resources WHERE user_id = " + userId +
+            " AND permission_level >= 3 AND resources.resource_id = userresourcepermissions.resource_id AND restricted = true;"; 
+
+        List<Integer> userResources = jt.query(
+                userQueryString,
                 new RowMapper<Integer>() {
                     public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
                         return new Integer(rs.getInt("resource_id"));
                     }
                 });
-        return groupReservableResources;
+
+        String groupQueryString = "SELECT resource_id FROM groupresourcepermissions, resources WHERE group_id IN " +
+                "(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
+                "permission_level >= 3 AND resources.resource_id = groupresourcepermissions.resource_id AND restricted = true;";
+        
+        List<Integer> groupResources = jt.query(
+                groupQueryString,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Integer(rs.getInt("resource_id"));
+                    }
+                });
+        Set<Integer> resources = new HashSet<Integer>();
+        resources.addAll(userResources);
+        resources.addAll(groupResources);
+        List<Integer> allResources = new ArrayList<Integer>();
+        allResources.addAll(resources);
+        return allResources;
+    }
+
+    private List<Integer> getUserResourcesWithPermission(int requiredPermissionLevel, int userId){
+        String userQueryString = "SELECT resource_id FROM userresourcepermissions WHERE user_id = " + userId +
+            " AND permission_level >= " + requiredPermissionLevel + ";"; 
+
+        List<Integer> userResources = jt.query(
+                userQueryString,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Integer(rs.getInt("resource_id"));
+                    }
+                });
+
+        return userResources;
+    }
+
+    private List<Integer> getGroupResourcesWithPermission(int requiredPermissionLevel, int userId){
+        String groupQueryString = "SELECT resource_id FROM groupresourcepermissions WHERE group_id IN " +
+                "(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
+                "permission_level >= " + requiredPermissionLevel + ";";
+        
+        List<Integer> groupResources = jt.query(
+                groupQueryString,
+                new RowMapper<Integer>() {
+                    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Integer(rs.getInt("resource_id"));
+                    }
+                });
+        return groupResources;
     }
 
 

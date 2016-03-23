@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import resourceplanner.reservations.ReservationService;
 import resourceplanner.reservations.ReservationData.Reservation;
-import resourceplanner.reservations.ReservationData.ReservationWithIDsData;
 import utilities.EmailScheduler;
 import utilities.TimeUtility;
 
@@ -29,9 +28,9 @@ public class EmailService {
 	private ReservationService reservationService;
 
 
-	public void rescheduleEmails(ReservationWithIDsData reservation){
-    	removeScheduledEmails(reservation.getReservation_id());
-    	scheduleEmailUpdate(reservation);
+	public void rescheduleEmails(int reservationId){
+    	removeScheduledEmails(reservationId);
+    	scheduleEmail(reservationId);
     }
 
 
@@ -45,18 +44,18 @@ public class EmailService {
     	}
     }
 
-    public void scheduleEmailUpdate(ReservationWithIDsData res){
-    	Reservation completeReservation = reservationService.getReservationObjectById(res.getReservation_id());
+    public void scheduleEmail(int reservationId){
+		Reservation res = reservationService.getReservationByIdAdmin(reservationId);
 
-    	if(completeReservation.getShould_email() && completeReservation.getUser().isShould_email()){
-    		EmailScheduler startReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.BEGIN_ALERT);
-			EmailScheduler endReservationEmailScheduler = new EmailScheduler(completeReservation, EmailScheduler.END_ALERT);
+    	if(res.getShould_email() && res.getUser().isShould_email()){
+    		EmailScheduler startReservationEmailScheduler = new EmailScheduler(res, EmailScheduler.BEGIN_ALERT);
+			EmailScheduler endReservationEmailScheduler = new EmailScheduler(res, EmailScheduler.END_ALERT);
 
-			System.out.println("Begin time: "+completeReservation.getBegin_time());
-			System.out.println("End   time: "+completeReservation.getEnd_time());
+			System.out.println("Begin time: "+res.getBegin_time());
+			System.out.println("End   time: "+res.getEnd_time());
 
-			Timestamp beginTimestamp = TimeUtility.stringToTimestamp(completeReservation.getBegin_time());
-			Timestamp endTimestamp = TimeUtility.stringToTimestamp(completeReservation.getEnd_time());
+			Timestamp beginTimestamp = TimeUtility.stringToTimestamp(res.getBegin_time());
+			Timestamp endTimestamp = TimeUtility.stringToTimestamp(res.getEnd_time());
 			Date dateBegin = new Date(beginTimestamp.getTime());
 			Date dateEnd = new Date(endTimestamp.getTime());
 
@@ -70,8 +69,8 @@ public class EmailService {
 			ScheduledFuture beginEmail = concurrentTaskScheduler.schedule(startReservationEmailScheduler, dateBegin);
 			ScheduledFuture endEmail = concurrentTaskScheduler.schedule(endReservationEmailScheduler, dateEnd);
     		
-    		if(scheduledEmailMap.containsKey(completeReservation.getReservation_id())){
-    			List<ScheduledFuture> existingFutures = scheduledEmailMap.get(completeReservation.getReservation_id());
+    		if(scheduledEmailMap.containsKey(res.getReservation_id())){
+    			List<ScheduledFuture> existingFutures = scheduledEmailMap.get(res.getReservation_id());
     			for (ScheduledFuture f : existingFutures){
     				f.cancel(true);
     			}
@@ -83,7 +82,7 @@ public class EmailService {
     			List<ScheduledFuture> newFutures = new ArrayList<ScheduledFuture>();
     			newFutures.add(beginEmail);
     			newFutures.add(endEmail);
-    			scheduledEmailMap.put(completeReservation.getReservation_id(), newFutures);
+    			scheduledEmailMap.put(res.getReservation_id(), newFutures);
     		}
     	}
     }
@@ -91,30 +90,5 @@ public class EmailService {
     private boolean verifyDateInFuture(Date date){
 		Date currentDate = new Date();
 		return currentDate.before(date);
-    }
-
-    public void upateEmailAfterUserChange(int userId){
-    	List<Integer> reservationIds = reservationService.getReservationsOfUser(userId);
-    	List<ReservationWithIDsData> reservations = new ArrayList<ReservationWithIDsData>();
-    	for(int i = 0; i < reservationIds.size(); i++){
-    		reservations.add(reservationService.getReservationWithIDsDataObjectById(reservationIds.get(i)));
-    	}
-    	for(ReservationWithIDsData r : reservations){
-    		rescheduleEmails(r);
-    	}
-    }
-
-    public void cancelEmailsForReservationsOfUser(int userId){
-    	List<Integer> reservationIds = reservationService.getReservationsOfUser(userId);
-    	for(int i = 0; i < reservationIds.size(); i++){
-    		removeScheduledEmails(reservationIds.get(i));
-    	}
-    }
-
-    public void cancelEmailsForReservationsWithResource(int resourceId){
-    	List<Integer> reservationIds = reservationService.getReservationsWithResource(resourceId);
-    	for(int i = 0; i < reservationIds.size(); i++){
-    		removeScheduledEmails(reservationIds.get(i));
-    	}
     }
 }

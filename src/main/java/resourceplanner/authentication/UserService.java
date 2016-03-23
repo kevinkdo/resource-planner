@@ -166,65 +166,7 @@ public class UserService {
                 });
     }
 
-    public StandardResponse updateUser(UserRequest req, int userId) {
-        if (!req.isUpdateValid()) {
-            return new StandardResponse(true, "Invalid request");
-        }
-
-        List<User> users = getUsers(userId);
-        if (users.size() == 0) {
-            return new StandardResponse(true, "User not found");
-        }
-
-        /*
-        String passwordHash = null;
-        try {
-            passwordHash = PasswordHash.createHash(req.getPassword());
-        } catch (Exception f) {
-            return new StandardResponse(true, "Failed during hashing in register");
-        }
-
-        User user = users.get(0);
-        if (!req.getEmail().equals(user.getEmail())) {
-            // check if new email already exists
-            int emailExists = jt.queryForObject(
-                    "SELECT COUNT(*) FROM users WHERE email = ?;", Integer.class, req.getEmail());
-            if (emailExists != 0) {
-                return new StandardResponse(true, "Email already exists");
-            }
-        }
-
-        if (!req.getUsername().equals(user.getUsername())) {
-            // check if new username already exists
-            int usernameExists = jt.queryForObject(
-                    "SELECT COUNT(*) FROM users WHERE username = ?;", Integer.class, req.getUsername());
-            if (usernameExists != 0) {
-                return new StandardResponse(true, "Username already exists");
-            }
-        }
-        */
-
-        // do full update
-        /*
-        jt.update("UPDATE users SET email = ?, username = ?, passhash = ?, should_email = ? WHERE user_id = ?;",
-                req.getEmail(),
-                req.getUsername(),
-                passwordHash,
-                req.isShould_email(),
-                userId);
-                */
-        jt.update("UPDATE users SET should_email = ? WHERE user_id = ?;",
-                req.getShould_email(),
-                userId);
-
-        //User committed = new User(req.getEmail(), req.getUsername(), req.isShould_email());
-        UserUpdate committed = new UserUpdate(req.getShould_email());
-        emailService.upateEmailAfterUserChange(userId);
-        return new StandardResponse(false, "Successfully updated email settings", committed);
-    }
-
     public StandardResponse deleteUser(int userId) {
-        emailService.cancelEmailsForReservationsOfUser(userId);
         jt.update("DELETE FROM reservations WHERE user_id = ?;", userId);
         jt.update("DELETE FROM users WHERE user_id = ?;", userId);
         return new StandardResponse(false, "Successfully deleted user");
