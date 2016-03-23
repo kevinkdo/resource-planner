@@ -137,6 +137,7 @@ const ResourceList = React.createClass({
         <thead>
           <tr>
             <th>ID</th>
+            <th>Restricted</th>
             <th>Name</th>
             <th>Description</th>
             <th>Tags</th>
@@ -147,8 +148,9 @@ const ResourceList = React.createClass({
         <tbody>
           {Object.keys(me.state.resources).map(id => {
             var x = me.state.resources[id];
-            return <tr key={"resource " + id} className={x.restricted ? "danger" : ""}>
+            return <tr key={"resource " + id} className={x.restricted ? "warning" : ""}>
               <td>{id}</td>
+              <td>{x.restricted ? "Yes" : "No"}</td>
               <td>{x.name}</td>
               <td>{x.description}</td>
               <td>{x.tags.join(",")}</td>
