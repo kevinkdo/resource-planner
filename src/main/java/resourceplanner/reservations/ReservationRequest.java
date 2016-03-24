@@ -58,6 +58,10 @@ public class ReservationRequest {
             && should_email != null;
     }
 
+    public boolean isValidText() {
+        return title.length() >= 1 && title.length() < 254 && description.length() >= 1 && description.length() < 254;
+    }
+
     public boolean isValidTimes() {
         return getBegin_time().before(getEnd_time());
     }

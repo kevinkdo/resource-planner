@@ -43,6 +43,10 @@ public class ReservationService {
             return new StandardResponse(true, "Request is not valid");
         }
 
+        if (!req.isValidText()) {
+            return new StandardResponse(true, "Request title or description length is not valid");
+        }
+
         if (!req.isValidTimes()) {
             return new StandardResponse(true, "Begin time is after end time");
         }
@@ -365,6 +369,10 @@ public class ReservationService {
     public StandardResponse updateReservation(ReservationRequest req, int reservationId, boolean isAdmin, int userId) {
         if (!req.isValid()) {
             return new StandardResponse(true, "Request is not valid");
+        }
+
+        if (!req.isValidText()) {
+            return new StandardResponse(true, "Request title or description length is not valid");
         }
 
         if (!req.isValidTimes()) {
