@@ -252,9 +252,9 @@ public class ReservationService {
         return new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
     }
 
-    private List<Reservation> getAllReservations(int userId) {
-        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservations;",
-                new Object[]{}, Integer.class);
+    private List<Reservation> getAllReservations(int userId, Timestamp start, Timestamp end) {
+        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservations WHERE NOT (end_time < ? OR begin_time > ?);",
+                new Object[]{start, end}, Integer.class);
 
         List<Reservation> reservations = new ArrayList<Reservation>();
 
@@ -267,9 +267,9 @@ public class ReservationService {
         return reservations;
     }
 
-    private List<Integer> getAllReservationIds() {
-        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservations;",
-                new Object[]{}, Integer.class);
+    private List<Integer> getAllReservationIds(Timestamp start, Timestamp end) {
+        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservations WHERE NOT (end_time < ? OR begin_time > ?);",
+                new Object[]{start, end}, Integer.class);
         return reservationIds;
     }
 
@@ -285,30 +285,80 @@ public class ReservationService {
         return reservations;
     }
 
-    private List<Integer> getReservationIdsByResourceId(int resourceId) {
-        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservationresources WHERE resource_id = ?;",
-                new Object[]{resourceId}, Integer.class);
+    private List<Integer> getReservationIdsByResourceId(int resourceId, Timestamp start, Timestamp end) {
+        List<Integer> reservationIds = jt.queryForList(
+                "SELECT reservationresources.reservation_id " +
+                        "FROM reservationresources, reservations " +
+                        "WHERE reservationresources.reservation_id = reservations.reservation_id " +
+                        "AND reservationresources.resource_id = ?" +
+                        "AND NOT (reservations.end_time < ? OR reservations.begin_time > ?);",
+                new Object[]{resourceId, start, end}, Integer.class);
         return reservationIds;
     }
 
+    private Set<String> getTagsByReservation(Reservation r) {
+        List<Resource> resources = r.getResources();
+
+        Set<String> tags = new HashSet<String>();
+        for (Resource resource : resources) {
+            tags.addAll(resource.getTags());
+        }
+        return tags;
+    }
+
     public StandardResponse getReservations(QueryReservationRequest req, int userId) {
+        if (!req.isValid()) {
+            return new StandardResponse(true, "Request is not valid");
+        }
+
         if (req.getResource_ids().length == 0 && req.getRequired_tags().length == 0 && req.getExcluded_tags().length == 0) {
-            return new StandardResponse(false, "Successfully retrieved reservations given no parameters", getAllReservations(userId));
+            return new StandardResponse(false, "Successfully retrieved reservations given no parameters", new ComplexReservations(getAllReservations(userId, req.getStart(), req.getEnd())));
         }
 
         // get all matching reservations first according to resource ids
         Set<Integer> reservationIds = new HashSet<Integer>();
         if (req.getResource_ids().length == 0) {
-            reservationIds.addAll(getAllReservationIds());
+            reservationIds.addAll(getAllReservationIds(req.getStart(), req.getEnd()));
         } else {
             for (int resourceId : req.getResource_ids()) {
-                reservationIds.addAll(getReservationIdsByResourceId(resourceId));
+                reservationIds.addAll(getReservationIdsByResourceId(resourceId, req.getStart(), req.getEnd()));
             }
         }
 
-        List<Reservation> tempReservations = getReservationsByIds(reservationIds, userId);
+        List<Reservation> reservations = getReservationsByIds(reservationIds, userId);
 
-        ComplexReservations reservationResponse = new ComplexReservations(tempReservations);
+        if (req.getRequired_tags().length == 0 && req.getExcluded_tags().length == 0) {
+
+            return new StandardResponse(false, "Successfully retrieved reservations", new ComplexReservations(reservations));
+        }
+
+        Set<Reservation> removeSet = new HashSet<Reservation>();
+
+        // filter out all the reservations that don't include all the required tags
+        // filter out all the reservations that include any of the excluded tags
+        for (Reservation r : reservations) {
+            Set<String> tags = getTagsByReservation(r);
+            boolean remove = false;
+            for (String requiredTag : req.getRequired_tags()) {
+                if (!tags.contains(requiredTag)) {
+                    // remove
+                    remove = true;
+                }
+            }
+            for (String excludedTag : req.getExcluded_tags()) {
+                if (tags.contains(excludedTag)) {
+                    // remove
+                    remove = true;
+                }
+            }
+            if (remove) {
+                removeSet.add(r);
+            }
+        }
+
+        reservations.removeAll(removeSet);
+
+        ComplexReservations reservationResponse = new ComplexReservations(reservations);
         return new StandardResponse(false, "Successfully retrieved reservations", reservationResponse);
     }
 
