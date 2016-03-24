@@ -5,10 +5,10 @@ import java.util.List;
 /**
  * Created by jiaweizhang on 3/15/16.
  */
-public class ResourceReservations {
+public class ComplexReservations {
     private List<Reservation> reservations;
 
-    public ResourceReservations(List<Reservation> reservations) {
+    public ComplexReservations(List<Reservation> reservations) {
         this.reservations = reservations;
     }
 

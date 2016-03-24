@@ -13,7 +13,7 @@ import resourceplanner.main.EmailService;
 import resourceplanner.main.StandardResponse;
 import resourceplanner.permissions.PermissionService;
 import resourceplanner.reservations.ReservationData.Reservation;
-import resourceplanner.reservations.ReservationData.ResourceReservations;
+import resourceplanner.reservations.ReservationData.ComplexReservations;
 import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.resources.ResourceService;
 import resourceplanner.reservations.ReservationData.*;
@@ -111,19 +111,29 @@ public class ReservationService {
 
         List<Object[]> batch = new ArrayList<Object[]>();
         for (Integer resourceId : req.getResource_ids()) {
+            boolean resource_approved = !isRestricted(resourceId);
             Object[] values = new Object[]{
                     resourceId,
-                    reservationId};
+                    reservationId,
+                    resource_approved};
             batch.add(values);
         }
         int[] updateCounts = jt.batchUpdate(
-                "INSERT INTO reservationresources (resource_id, reservation_id) VALUES (?, ?);",
+                "INSERT INTO reservationresources (resource_id, reservation_id, resource_approved) VALUES (?, ?, ?);",
                 batch);
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), complete);
 
         return new StandardResponse(false, "Reservation inserted successfully", res);
 
+    }
+
+    private boolean isRestricted(int resourceId) {
+        String statement = "SELECT COUNT(*) FROM resources WHERE resource_id = ? AND restricted = true;";
+
+        Integer cnt = jt.queryForObject(
+                statement, Integer.class, resourceId);
+        return cnt != null && cnt > 0;
     }
 
     public Reservation getReservationByIdAdmin(int reservationId) {
@@ -201,36 +211,29 @@ public class ReservationService {
         return new StandardResponse(false, "Successfully retrieved reservation", r);
     }
 
-    public StandardResponse getReservations(QueryReservationRequest req, int userId) {
-        // make sure resource_id is valid
-        // TODO
+    public Reservation getReservationByIdHelper(int reservationId, int userId) {
 
-        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservationresources WHERE resource_id = ?;",
-                new Object[]{req.getResource_id()}, Integer.class);
+        TempRes t = jt.query(
+                "SELECT * FROM reservations WHERE reservation_id = ?;",
+                new Object[]{reservationId},
+                new RowMapper<TempRes>() {
+                    public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempRes t = new TempRes();
+                        t.reservation_id = rs.getInt("reservation_id");
+                        t.title = rs.getString("title");
+                        t.description = rs.getString("description");
+                        t.user_id = rs.getInt("user_id");
+                        t.begin_time = rs.getTimestamp("begin_time");
+                        t.end_time = rs.getTimestamp("end_time");
+                        t.should_email = rs.getBoolean("should_email");
+                        t.complete = rs.getBoolean("complete");
+                        return t;
+                    }
+                }).get(0);
 
-        List<Reservation> reservations = new ArrayList<Reservation>();
+        List<Resource> rList = getResources(reservationId);
 
-        for (int reservationId : reservationIds) {
-            TempRes t = jt.query(
-                    "SELECT * FROM reservations WHERE reservation_id = ?;",
-                    new Object[]{reservationId},
-                    new RowMapper<TempRes>() {
-                        public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            TempRes t = new TempRes();
-                            t.reservation_id = rs.getInt("reservation_id");
-                            t.title = rs.getString("title");
-                            t.description = rs.getString("description");
-                            t.user_id = rs.getInt("user_id");
-                            t.begin_time = rs.getTimestamp("begin_time");
-                            t.end_time = rs.getTimestamp("end_time");
-                            t.should_email = rs.getBoolean("should_email");
-                            t.complete = rs.getBoolean("complete");
-                            return t;
-                        }
-                    }).get(0);
-
-            List<Resource> rList = getResources(reservationId);
-
+        if (userId != 1) {
             List<Integer> userViewable = permissionService.getUserViewableResources(userId);
             List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
 
@@ -239,18 +242,124 @@ public class ReservationService {
 
             for (Resource r : rList) {
                 if (!allViewableResources.contains(r.getResource_id())) {
-                    continue;
+                    return null;
                 }
             }
-
-            User u = getUser(t.user_id);
-
-            Reservation r = new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
-            reservations.add(r);
         }
 
-        ResourceReservations reservationResponse = new ResourceReservations(reservations);
-        return new StandardResponse(false, "Successfully retrieved reservations for the resource", reservationResponse);
+        User u = getUser(t.user_id);
+
+        return new Reservation(t.title, t.description, t.reservation_id, u, rList, t.begin_time, t.end_time, t.should_email, t.complete);
+    }
+
+    private List<Reservation> getAllReservations(int userId, Timestamp start, Timestamp end) {
+        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservations WHERE NOT (end_time < ? OR begin_time > ?);",
+                new Object[]{start, end}, Integer.class);
+
+        List<Reservation> reservations = new ArrayList<Reservation>();
+
+        for (int reservationId : reservationIds) {
+            Reservation r = getReservationByIdHelper(reservationId, userId);
+            if (r != null) {
+                reservations.add(r);
+            }
+        }
+        return reservations;
+    }
+
+    private List<Integer> getAllReservationIds(Timestamp start, Timestamp end) {
+        List<Integer> reservationIds = jt.queryForList("SELECT reservation_id FROM reservations WHERE NOT (end_time < ? OR begin_time > ?);",
+                new Object[]{start, end}, Integer.class);
+        return reservationIds;
+    }
+
+    private List<Reservation> getReservationsByIds(Set<Integer> reservationIds, int userId) {
+        List<Reservation> reservations = new ArrayList<Reservation>();
+
+        for (int reservationId : reservationIds) {
+            Reservation r = getReservationByIdHelper(reservationId, userId);
+            if (r != null) {
+                reservations.add(r);
+            }
+        }
+        return reservations;
+    }
+
+    private List<Integer> getReservationIdsByResourceId(int resourceId, Timestamp start, Timestamp end) {
+        List<Integer> reservationIds = jt.queryForList(
+                "SELECT reservationresources.reservation_id " +
+                        "FROM reservationresources, reservations " +
+                        "WHERE reservationresources.reservation_id = reservations.reservation_id " +
+                        "AND reservationresources.resource_id = ?" +
+                        "AND NOT (reservations.end_time < ? OR reservations.begin_time > ?);",
+                new Object[]{resourceId, start, end}, Integer.class);
+        return reservationIds;
+    }
+
+    private Set<String> getTagsByReservation(Reservation r) {
+        List<Resource> resources = r.getResources();
+
+        Set<String> tags = new HashSet<String>();
+        for (Resource resource : resources) {
+            tags.addAll(resource.getTags());
+        }
+        return tags;
+    }
+
+    public StandardResponse getReservations(QueryReservationRequest req, int userId) {
+        if (!req.isValid()) {
+            return new StandardResponse(true, "Request is not valid");
+        }
+
+        if (req.getResource_ids().length == 0 && req.getRequired_tags().length == 0 && req.getExcluded_tags().length == 0) {
+            return new StandardResponse(false, "Successfully retrieved reservations given no parameters", new ComplexReservations(getAllReservations(userId, req.getStart(), req.getEnd())));
+        }
+
+        // get all matching reservations first according to resource ids
+        Set<Integer> reservationIds = new HashSet<Integer>();
+        if (req.getResource_ids().length == 0) {
+            reservationIds.addAll(getAllReservationIds(req.getStart(), req.getEnd()));
+        } else {
+            for (int resourceId : req.getResource_ids()) {
+                reservationIds.addAll(getReservationIdsByResourceId(resourceId, req.getStart(), req.getEnd()));
+            }
+        }
+
+        List<Reservation> reservations = getReservationsByIds(reservationIds, userId);
+
+        if (req.getRequired_tags().length == 0 && req.getExcluded_tags().length == 0) {
+
+            return new StandardResponse(false, "Successfully retrieved reservations", new ComplexReservations(reservations));
+        }
+
+        Set<Reservation> removeSet = new HashSet<Reservation>();
+
+        // filter out all the reservations that don't include all the required tags
+        // filter out all the reservations that include any of the excluded tags
+        for (Reservation r : reservations) {
+            Set<String> tags = getTagsByReservation(r);
+            boolean remove = false;
+            for (String requiredTag : req.getRequired_tags()) {
+                if (!tags.contains(requiredTag)) {
+                    // remove
+                    remove = true;
+                }
+            }
+            for (String excludedTag : req.getExcluded_tags()) {
+                if (tags.contains(excludedTag)) {
+                    // remove
+                    remove = true;
+                }
+            }
+            if (remove) {
+                removeSet.add(r);
+            }
+        }
+
+        reservations.removeAll(removeSet);
+
+        ComplexReservations reservationResponse = new ComplexReservations(reservations);
+        return new StandardResponse(false, "Successfully retrieved reservations", reservationResponse);
     }
 
     public StandardResponse updateReservation(ReservationRequest req, int reservationId, boolean isAdmin, int userId) {
@@ -767,7 +876,7 @@ public class ReservationService {
     }
 
     private void partiallyApproveReservation(int reservationId, List<Integer> approvableResources){
-        Map<String,Object> params = Collections.singletonMap("ids", approvableResources);  
+        Map<String,List<Integer>> params = Collections.singletonMap("ids", approvableResources);
 
         String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
             " AND reservation_id IN (:ids);";
