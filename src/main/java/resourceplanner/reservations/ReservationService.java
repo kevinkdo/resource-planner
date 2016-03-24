@@ -111,19 +111,29 @@ public class ReservationService {
 
         List<Object[]> batch = new ArrayList<Object[]>();
         for (Integer resourceId : req.getResource_ids()) {
+            boolean resource_approved = !isRestricted(resourceId);
             Object[] values = new Object[]{
                     resourceId,
-                    reservationId};
+                    reservationId,
+                    resource_approved};
             batch.add(values);
         }
         int[] updateCounts = jt.batchUpdate(
-                "INSERT INTO reservationresources (resource_id, reservation_id) VALUES (?, ?);",
+                "INSERT INTO reservationresources (resource_id, reservation_id, resource_approved) VALUES (?, ?, ?);",
                 batch);
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), complete);
 
         return new StandardResponse(false, "Reservation inserted successfully", res);
 
+    }
+
+    private boolean isRestricted(int resourceId) {
+        String statement = "SELECT COUNT(*) FROM resources WHERE resource_id = ? AND restricted = true;";
+
+        Integer cnt = jt.queryForObject(
+                statement, Integer.class, resourceId);
+        return cnt != null && cnt > 0;
     }
 
     public Reservation getReservationByIdAdmin(int reservationId) {
@@ -767,7 +777,7 @@ public class ReservationService {
     }
 
     private void partiallyApproveReservation(int reservationId, List<Integer> approvableResources){
-        Map<String,Object> params = Collections.singletonMap("ids", approvableResources);  
+        Map<String,List<Integer>> params = Collections.singletonMap("ids", approvableResources);
 
         String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
             " AND reservation_id IN (:ids);";
