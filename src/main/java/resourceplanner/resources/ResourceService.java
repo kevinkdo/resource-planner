@@ -387,8 +387,16 @@ public class ResourceService {
             return new StandardResponse(true, "Resource does not exist");
         }
 
-        //emailService.cancelEmailsForReservationsWithResource(resourceId);
-        // TODO
+        // get list of reservations that depend on resource
+        List<Integer> reservationIds = jt.queryForList(
+                    "SELECT reservation_id FROM reservationresources WHERE resource_id = ?",
+                    new Object[]{resourceId},
+                    Integer.class
+        );
+        for (int reservationId : reservationIds) {
+            emailService.removeScheduledEmails(reservationId);
+        }
+
         jt.update("DELETE FROM reservationresources WHERE resource_id = ?;");
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resources WHERE resource_id = ?;", resourceId);
