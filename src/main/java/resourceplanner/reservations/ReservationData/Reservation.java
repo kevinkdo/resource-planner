@@ -1,7 +1,7 @@
 package resourceplanner.reservations.ReservationData;
 
-import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.authentication.UserData.User;
+import resourceplanner.resources.ResourceData.Resource;
 import utilities.TimeUtility;
 
 import java.sql.Timestamp;

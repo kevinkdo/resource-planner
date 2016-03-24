@@ -9,9 +9,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import resourceplanner.main.StandardResponse;
 import resourceplanner.groups.GroupData.Group;
 import resourceplanner.groups.GroupData.SimpleGroup;
+import resourceplanner.main.StandardResponse;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

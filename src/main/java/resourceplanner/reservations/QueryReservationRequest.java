@@ -1,6 +1,6 @@
 package resourceplanner.reservations;
+
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * Created by Davis Treybig on 1/26/2016.

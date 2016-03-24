@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import resourceplanner.main.EmailService;
 import resourceplanner.main.StandardResponse;
+import resourceplanner.permissions.PermissionService;
 import resourceplanner.resources.ResourceData.CanDelete;
 import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.resources.ResourceData.Resources;
 import utilities.TimeUtility;
-import resourceplanner.permissions.PermissionService;
 
 import java.sql.*;
 import java.util.*;

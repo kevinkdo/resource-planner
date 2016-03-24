@@ -8,18 +8,17 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import resourceplanner.authentication.UserData.User;
 import resourceplanner.main.EmailService;
 import resourceplanner.main.StandardResponse;
-import resourceplanner.authentication.UserData.User;
-import resourceplanner.authentication.UserData.UserUpdate;
 import utilities.PasswordHash;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
 
 /**
  * Created by jiaweizhang on 1/26/2016.

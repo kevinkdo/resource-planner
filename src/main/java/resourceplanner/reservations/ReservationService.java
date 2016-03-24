@@ -12,11 +12,9 @@ import resourceplanner.authentication.UserData.User;
 import resourceplanner.main.EmailService;
 import resourceplanner.main.StandardResponse;
 import resourceplanner.permissions.PermissionService;
-import resourceplanner.reservations.ReservationData.Reservation;
-import resourceplanner.reservations.ReservationData.ComplexReservations;
+import resourceplanner.reservations.ReservationData.*;
 import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.resources.ResourceService;
-import resourceplanner.reservations.ReservationData.*;
 
 import java.sql.*;
 import java.util.*;
@@ -602,21 +600,6 @@ public class ReservationService {
         return cnt != null && cnt > 0;
     }
 
-    /*
-    private List<Resource> getResources(int reservationId) {
-        List<Integer> resourceIds = jt.queryForList(
-                "SELECT resource_id FROM reservationresources WHERE reservation_id = ?;",
-                new Object[]{reservationId},
-                Integer.class);
-
-        List<Resource> rList = new ArrayList<Resource>();
-        for (int resourceId : resourceIds) {
-            rList.add(getResource(resourceId));
-        }
-        return rList;
-    }
-    */
-
     private List<Resource> getResources(int reservationId, int specifier){
         // 0 = all resources
         // 1 = only approved resources
@@ -665,8 +648,6 @@ public class ReservationService {
                         return resource;
                     }
                 });
-
-        // TODO no need to check because already confirmed existance earlier
 
         Resource resource = resources.get(0);
 

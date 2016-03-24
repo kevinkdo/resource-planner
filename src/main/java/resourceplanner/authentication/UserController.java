@@ -2,10 +2,10 @@ package resourceplanner.authentication;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import resourceplanner.permissions.PermissionRequest;
-import resourceplanner.permissions.PermissionService;
 import resourceplanner.main.Controller;
 import resourceplanner.main.StandardResponse;
+import resourceplanner.permissions.PermissionRequest;
+import resourceplanner.permissions.PermissionService;
 
 import javax.servlet.http.HttpServletRequest;
 
