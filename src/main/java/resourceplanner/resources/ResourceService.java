@@ -397,7 +397,7 @@ public class ResourceService {
             emailService.removeScheduledEmails(reservationId);
         }
 
-        jt.update("DELETE FROM reservationresources WHERE resource_id = ?;");
+        jt.update("DELETE FROM reservationresources WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
         jt.update("DELETE FROM resources WHERE resource_id = ?;", resourceId);
         return new StandardResponse(false, "successfully deleted resource and all accompanying reservations");
