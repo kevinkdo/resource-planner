@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import resourceplanner.reservations.ReservationService;
 import resourceplanner.reservations.ReservationData.Reservation;
+import resourceplanner.reservations.ReservationService;
 import utilities.EmailScheduler;
 import utilities.TimeUtility;
 

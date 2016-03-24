@@ -9,11 +9,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import resourceplanner.main.Controller;
 import resourceplanner.main.StandardResponse;
+import resourceplanner.reservations.ReservationData.ReservationApproval;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import resourceplanner.reservations.ReservationData.*;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -21,13 +21,6 @@ public class ReservationController extends Controller {
 
     @Autowired
     private ReservationService reservationService;
-
-    @RequestMapping(value = "/test/{resourceId}",
-            method = RequestMethod.GET)
-    @ResponseBody
-    public StandardResponse test(@PathVariable final int resourceId, final HttpServletRequest request) {
-        return reservationService.reservationTest(resourceId);
-    }
 
     @RequestMapping(value = "",
             method = RequestMethod.POST,

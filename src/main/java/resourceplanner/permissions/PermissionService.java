@@ -6,15 +6,15 @@ package resourceplanner.permissions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import resourceplanner.main.StandardResponse;
 import resourceplanner.permissions.PermissionData.*;
-import java.util.*;
-import org.springframework.jdbc.core.RowMapper;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.springframework.jdbc.core.ResultSetExtractor;
+import java.util.*;
 
 
 @Transactional

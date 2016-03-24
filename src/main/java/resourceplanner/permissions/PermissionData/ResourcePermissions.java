@@ -1,5 +1,6 @@
 package resourceplanner.permissions.PermissionData;
-import java.util.*;
+
+import java.util.List;
 
 /**
  * Created by Davis Treybig

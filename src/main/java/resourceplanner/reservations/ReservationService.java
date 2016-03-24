@@ -12,11 +12,9 @@ import resourceplanner.authentication.UserData.User;
 import resourceplanner.main.EmailService;
 import resourceplanner.main.StandardResponse;
 import resourceplanner.permissions.PermissionService;
-import resourceplanner.reservations.ReservationData.Reservation;
-import resourceplanner.reservations.ReservationData.ComplexReservations;
+import resourceplanner.reservations.ReservationData.*;
 import resourceplanner.resources.ResourceData.Resource;
 import resourceplanner.resources.ResourceService;
-import resourceplanner.reservations.ReservationData.*;
 
 import java.sql.*;
 import java.util.*;
@@ -665,8 +663,6 @@ public class ReservationService {
                         return resource;
                     }
                 });
-
-        // TODO no need to check because already confirmed existance earlier
 
         Resource resource = resources.get(0);
 
