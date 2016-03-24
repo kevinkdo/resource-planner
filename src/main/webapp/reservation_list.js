@@ -14,8 +14,8 @@ const ReservationList = React.createClass({
     this.props.setPstate({error_msg: ""});
     return {
       loading_tags: true,
-      loading_table: false,
-      route: "approved",
+      loading_table: true,
+      subroute: "approved",
       tags: [],
       start_date: start_date,
       start_time: start_time,
@@ -97,9 +97,9 @@ const ReservationList = React.createClass({
     send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
-          obj.data.forEach(function(x) {
-            new_reservations[x.reservation_id] = x;
-          });
+        obj.data.reservations.forEach(function(x) {
+          new_reservations[x.reservation_id] = x;
+        });
         me.setState({
           reservations: new_reservations,
           loading_table: false
@@ -169,19 +169,18 @@ const ReservationList = React.createClass({
     var rightpane = this.state.loading_table ? <Loader /> : (
       <div>
         <ul className="nav nav-tabs">
-          <li className={this.state.route == 'approved' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "approved"})}>Approved</a></li>
-          <li className={this.state.route == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "pending"})}>Pending</a></li>
+          <li className={this.state.subroute == 'approved' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "approved"})}>Approved</a></li>
+          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "pending"})}>Pending</a></li>
         </ul>
         <table className="table table-hover">
           <thead>
             <tr>
               <th>ID</th>
               <th>Title</th>
-              <th>Resource</th>
+              <th>Resources</th>
               <th>User</th>
               <th>Start</th>
               <th>End</th>
-              <th></th>
               <th></th>
               <th></th>
             </tr>
@@ -191,14 +190,13 @@ const ReservationList = React.createClass({
               var x = me.state.reservations[id];
               return <tr key={"reservation " + x.reservation_id}>
                 <td>{x.reservation_id}</td>
-                <td>TODO RESERVATION TITLE</td>
-                <td>{x.resource.name}</td>
+                <td>{x.title}</td>
+                <td>{x.resources.map(x => x.name).join(",")}</td>
                 <td>{x.user.username}</td>
                 <td>{new Date(x.begin_time).toLocaleString()}</td>
                 <td>{new Date(x.end_time).toLocaleString()}</td>
                 <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>View/Edit</a></td>
                 <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
-                <td><a role="button" onClick={() => this.approveReservation(x.reservation_id)}>TODO Approve</a></td>
               </tr>
             })}
             {Object.keys(me.state.reservations).length > 0 ? null :

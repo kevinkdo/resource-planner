@@ -7,6 +7,11 @@ const Router = React.createClass({
     };
   },
 
+  //This is kind of confusing because there are two ways
+  //that sub components can change the route. One is by
+  //changing the hash with an href attribute on a link.
+  //The second is by calling setStateWrapper (passed down as
+  //setPstate prop)
   onhashchange() {
     this.setState({
       route: location.hash.substring(1)

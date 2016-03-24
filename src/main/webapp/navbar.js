@@ -50,7 +50,6 @@ const Navbar = React.createClass({
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
                   <li><a href="#admin_console" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
-                  <li role="separator" className="divider"></li>
                   <li><a href="#settings" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
                   <li><a href="#login" onClick={this.logout}>Log Out</a></li>
