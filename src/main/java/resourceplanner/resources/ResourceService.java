@@ -396,11 +396,15 @@ public class ResourceService {
     }
 
     public StandardResponse canDeleteResource(int resourceId) {
+        int resourceNum = jt.queryForObject("SELECT COUNT(*) FROM resources WHERE resource_id = ?;", new Object[]{resourceId}, Integer.class);
+        if (resourceNum == 0) {
+            return new StandardResponse(true, "Resource does not exist");
+        }
 
         Timestamp currentTime = TimeUtility.currentUTCTimestamp();
 
-        int reservations = jt.queryForObject(
-                "SELECT COUNT(*) FROM reservations WHERE resource_id = ? AND ? < end_time;", Integer.class, resourceId, currentTime);
+        int reservations = jt.queryForObject("SELECT COUNT(*) FROM reservationresources, reservations WHERE reservationresources.resource_id = ? AND ? < reservations.end_time;",
+                new Object[]{resourceId, currentTime}, Integer.class);
 
         boolean canDelete = reservations == 0;
 
