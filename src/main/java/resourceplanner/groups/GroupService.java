@@ -18,7 +18,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by jiaweizhang on 2/12/2016.
@@ -51,20 +53,29 @@ public class GroupService {
 
         int groupId = keyHolder.getKey().intValue();
 
+        // remove all duplicate user ids
+        Set<Integer> userIdSet = new HashSet<Integer>();
+        userIdSet.addAll(req.getUser_ids());
+
+        // validate all user ids
+        for (int userId : userIdSet) {
+            int userNum = jt.queryForObject("SELECT COUNT(*) FROM users WHERE user_id = ?;", new Object[]{userId}, Integer.class);
+            if (userNum == 0) {
+                return new StandardResponse(true, "User with id " + userId + " does not exist");
+            }
+        }
+
         List<Object[]> batch = new ArrayList<Object[]>();
-        for (int userId : req.getUser_ids()) {
+        for (int userId : userIdSet) {
             Object[] values = new Object[]{
                     groupId,
                     userId};
             batch.add(values);
         }
-        try {
-            int[] updateCounts = jt.batchUpdate(
-                    "INSERT INTO groupmembers (group_id, user_id) VALUES (?, ?);",
-                    batch);
-        } catch (Exception e) {
-            return new StandardResponse(true, "Invalid users");
-        }
+        int[] updateCounts = jt.batchUpdate(
+                "INSERT INTO groupmembers (group_id, user_id) VALUES (?, ?);",
+                batch);
+
 
         addDefaultResourcePermissions(groupId);
 
@@ -156,8 +167,20 @@ public class GroupService {
 
         jt.update("DELETE FROM groupmembers WHERE group_id = ?;", groupId);
 
+        // remove all duplicate user ids
+        Set<Integer> userIdSet = new HashSet<Integer>();
+        userIdSet.addAll(req.getUser_ids());
+
+        // validate all user ids
+        for (int userId : userIdSet) {
+            int userNum = jt.queryForObject("SELECT COUNT(*) FROM users WHERE user_id = ?;", new Object[]{userId}, Integer.class);
+            if (userNum == 0) {
+                return new StandardResponse(true, "User with id " + userId + " does not exist");
+            }
+        }
+
         List<Object[]> batch = new ArrayList<Object[]>();
-        for (int userId : req.getUser_ids()) {
+        for (int userId : userIdSet) {
             Object[] values = new Object[]{
                     groupId,
                     userId};
