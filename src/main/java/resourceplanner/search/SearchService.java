@@ -6,6 +6,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import resourceplanner.main.StandardResponse;
+import resourceplanner.search.responsedata.SearchGroup;
+import resourceplanner.search.responsedata.SearchReservation;
 import resourceplanner.search.responsedata.SearchResource;
 import resourceplanner.search.responsedata.SearchUser;
 
@@ -60,13 +62,38 @@ public class SearchService {
     }
 
     public StandardResponse getReservationId(String query) {
-        // TODO
-        return null;
+        List<SearchReservation> r = jt.query(
+                "SELECT reservation_id, title, description FROM reservations WHERE title LIKE ? OR description LIKE ?;",
+                new Object[]{"%" + query + "%", "%" + query + "%"},
+                new RowMapper<SearchReservation>() {
+                    public SearchReservation mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        SearchReservation r = new SearchReservation();
+                        r.setReservation_id(rs.getInt("reservation_id"));
+                        r.setTitle(rs.getString("title"));
+                        r.setDescription(rs.getString("description"));
+                        return r;
+                    }
+                }
+        );
+
+        return new StandardResponse(false, "Successfully retrieved reservations", r);
     }
 
     public StandardResponse getGroupId(String query) {
-        // TODO
-        return null;
+        List<SearchGroup> g = jt.query(
+                "SELECT group_id, group_name FROM groups WHERE group_name LIKE ?;",
+                new Object[]{"%" + query + "%"},
+                new RowMapper<SearchGroup>() {
+                    public SearchGroup mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        SearchGroup g = new SearchGroup();
+                        g.setGroup_id(rs.getInt("group_id"));
+                        g.setGroup_name(rs.getString("group_name"));
+                        return g;
+                    }
+                }
+        );
+
+        return new StandardResponse(false, "Successfully retrieved groups", g);
     }
 
 }
