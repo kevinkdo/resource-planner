@@ -140,20 +140,30 @@ public class PermissionService {
         return new StandardResponse(false, "Permissions updated");
     }
 
+    private static class TempMapResource {
+        private Integer resource_id;
+        private String name;
+    }
+
     //Returns an object containing resource NAMES since resource permissions is just IDs. 
     private List<ResourceAndID> getViewableResourcesAndIDs(ResourcePermissions resourcePermissions){
-    	Map<Integer, String> allResources = (Map) jt.query(
-    			"SELECT resource_id, name FROM resources;", new ResultSetExtractor() {
-			        public Object extractData(ResultSet rs) throws SQLException {
-			            Map map = new HashMap();
-			            while (rs.next()) {
-			                Integer id = rs.getInt("resource_id");
-			                String name = rs.getString("name");
-			                map.put(id, name);
-			            }
-			            return map;
+    	List<TempMapResource> rList = jt.query(
+    			"SELECT resource_id, name FROM resources;",
+                new Object[]{},
+                new RowMapper<TempMapResource>() {
+			        public TempMapResource mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempMapResource t = new TempMapResource();
+                        t.resource_id = rs.getInt("resource_id");
+                        t.name = rs.getString("name");
+			            return t;
 			        };
 			    });
+
+        Map<Integer, String> allResources = new HashMap<Integer, String>();
+
+        for (TempMapResource r : rList) {
+            allResources.put(r.resource_id, r.name);
+        }
 
     	List<ResourceAndID> viewableResources = new ArrayList<ResourceAndID>();
 
