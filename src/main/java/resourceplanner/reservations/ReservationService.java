@@ -371,15 +371,15 @@ public class ReservationService {
             return new StandardResponse(true, "Start time after end time");
         }
 
+        if (!reservationExists(reservationId)) {
+            return new StandardResponse(true, "Reservation with that ID does not exist");
+        }
+
         // check that each resource exists
         for (int i : req.getResource_ids()) {
             if (!resourceExists(i)) {
                 return new StandardResponse(true, "Resource with id " + i + " does not exist");
             }
-        }
-
-        if (!reservationExists(reservationId)) {
-            return new StandardResponse(true, "Reservation with that ID does not exist");
         }
 
         TempRes t = jt.query(
