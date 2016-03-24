@@ -17,7 +17,7 @@ public class SearchController extends Controller {
     @Autowired
     private SearchService searchService;
 
-    @RequestMapping(value = "/userid",
+    @RequestMapping(value = "/user",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
@@ -28,7 +28,7 @@ public class SearchController extends Controller {
         return searchService.getUserId(req.getQuery());
     }
 
-    @RequestMapping(value = "/resourceid",
+    @RequestMapping(value = "/resource",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
@@ -39,7 +39,7 @@ public class SearchController extends Controller {
         return searchService.getResourceId(req.getQuery());
     }
 
-    @RequestMapping(value = "/reservationid",
+    @RequestMapping(value = "/reservation",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody
@@ -50,7 +50,7 @@ public class SearchController extends Controller {
         return searchService.getReservationId(req.getQuery());
     }
 
-    @RequestMapping(value = "/groupid",
+    @RequestMapping(value = "/group",
             method = RequestMethod.POST,
             headers = {"Content-type=application/json"})
     @ResponseBody

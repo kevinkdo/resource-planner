@@ -600,21 +600,6 @@ public class ReservationService {
         return cnt != null && cnt > 0;
     }
 
-    /*
-    private List<Resource> getResources(int reservationId) {
-        List<Integer> resourceIds = jt.queryForList(
-                "SELECT resource_id FROM reservationresources WHERE reservation_id = ?;",
-                new Object[]{reservationId},
-                Integer.class);
-
-        List<Resource> rList = new ArrayList<Resource>();
-        for (int resourceId : resourceIds) {
-            rList.add(getResource(resourceId));
-        }
-        return rList;
-    }
-    */
-
     private List<Resource> getResources(int reservationId, int specifier){
         // 0 = all resources
         // 1 = only approved resources
