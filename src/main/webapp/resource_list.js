@@ -137,9 +137,8 @@ const ResourceList = React.createClass({
         <thead>
           <tr>
             <th>ID</th>
-            <th>Restricted</th>
             <th>Name</th>
-            <th>Description</th>
+            <th>Restricted</th>
             <th>Tags</th>
             <th></th>
             <th></th>
@@ -150,9 +149,8 @@ const ResourceList = React.createClass({
             var x = me.state.resources[id];
             return <tr key={"resource " + id} className={x.restricted ? "warning" : ""}>
               <td>{id}</td>
-              <td>{x.restricted ? "Yes" : "No"}</td>
               <td>{x.name}</td>
-              <td>{x.description}</td>
+              <td>{x.restricted ? "Yes" : "No"}</td>
               <td>{x.tags.join(",")}</td>
               <td><a role="button" onClick={() => this.editResource(id)}>View/Edit</a></td>
               <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>

@@ -15,13 +15,14 @@ const ReservationList = React.createClass({
     return {
       loading_tags: true,
       loading_table: true,
-      subroute: "approved",
+      subroute: "all",
       tags: [],
       start_date: start_date,
       start_time: start_time,
       end_date: end_date,
       end_time: end_time,
-      reservations: {},
+      all_reservations: {},
+      pending_reservations: {},
       error_msg: error_msg,
       is_error: is_error
     };
@@ -87,7 +88,32 @@ const ReservationList = React.createClass({
   },
 
   approveReservation(id) {
-    alert('TODO APPROVE RESERVATION');
+    send_xhr("GET", "/api/reservations/canceledWithApproval/" + id, localStorage.getItem("session"), null,
+      function(obj) {
+        debugger;
+        var confirmed_approve = obj.data.length == 0;
+        if (!confirmed_approve) {
+          confirmed_approve = confirm("By approving this reservation, you will necessarily be cancelling " + obj.data.length.toString() + " other reservations. Proceed?");
+        }
+
+        if (confirmed_approve) {
+          send_xhr("POST", "/api/reservations/approveReservation/" + id, localStorage.getItem("session"), JSON.stringify({approved: true}),
+            function(obj) {
+              me.refresh();
+              me.setState({error_msg: "", is_error: false});
+            },
+            function(obj) {
+              me.refresh();
+              me.setState({error_msg: obj.error_msg, is_error: true});
+            }
+          );
+        }
+      },
+      function(obj) {
+        me.refresh();
+        me.setState({error_msg: obj.error_msg, is_error: true});
+      }
+    );
   },
 
   refresh() {
@@ -101,8 +127,29 @@ const ReservationList = React.createClass({
           new_reservations[x.reservation_id] = x;
         });
         me.setState({
-          reservations: new_reservations,
-          loading_table: false
+          all_reservations: new_reservations,
+          loading_table: false,
+          subroute: "all"
+        });
+      },
+      function(obj) {
+        me.setState({
+          loading_table: false,
+          error_msg: obj.error_msg,
+          is_error: true
+        });
+      }
+    );
+    send_xhr("GET", "/api/reservations/approvableReservations", localStorage.getItem("session"), null,
+      function(obj) {
+        var new_reservations = {};
+        obj.data.reservations.forEach(function(x) {
+          new_reservations[x.reservation_id] = x;
+        });
+        me.setState({
+          pending_reservations: new_reservations,
+          loading_table: false,
+          subroute: "all"
         });
       },
       function(obj) {
@@ -166,11 +213,52 @@ const ReservationList = React.createClass({
           </div>
         </div>
       </div>
-    var rightpane = this.state.loading_table ? <Loader /> : (
+    var rightpane_all = this.state.loading_table ? <Loader /> : (
       <div>
         <ul className="nav nav-tabs">
-          <li className={this.state.subroute == 'approved' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "approved"})}>Approved</a></li>
-          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({route: "pending"})}>Pending</a></li>
+          <li className={this.state.subroute == 'all' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "all"})}>All</a></li>
+          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "pending"})}>Pending your approval</a></li>
+        </ul>
+        <table className="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Complete</th>
+              <th>Resources</th>
+              <th>User</th>
+              <th>Start</th>
+              <th>End</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.keys(me.state.all_reservations).map(id => {
+              var x = me.state.all_reservations[id];
+              return <tr key={"reservation " + x.reservation_id} className={x.complete ? "success" : "danger"}>
+                <td>{x.reservation_id}</td>
+                <td>{x.title}</td>
+                <td>{x.complete ? "Yes" : "No"}</td>
+                <td>{x.resources.map(x => x.name).join(",")}</td>
+                <td>{x.user.username}</td>
+                <td>{new Date(x.begin_time).toLocaleString()}</td>
+                <td>{new Date(x.end_time).toLocaleString()}</td>
+                <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>View/Edit</a></td>
+                <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
+              </tr>
+            })}
+            {Object.keys(me.state.all_reservations).length > 0 ? null :
+              <tr><td className="lead text-center" colSpan="7">No reservations in this timespan</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    );
+    var rightpane_pending = this.state.loading_table ? <Loader /> : (
+      <div>
+        <ul className="nav nav-tabs">
+          <li className={this.state.subroute == 'all' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "all"})}>All</a></li>
+          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "pending"})}>Pending your approval</a></li>
         </ul>
         <table className="table table-hover">
           <thead>
@@ -182,12 +270,11 @@ const ReservationList = React.createClass({
               <th>Start</th>
               <th>End</th>
               <th></th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
-            {Object.keys(me.state.reservations).map(id => {
-              var x = me.state.reservations[id];
+            {Object.keys(me.state.pending_reservations).map(id => {
+              var x = me.state.pending_reservations[id];
               return <tr key={"reservation " + x.reservation_id}>
                 <td>{x.reservation_id}</td>
                 <td>{x.title}</td>
@@ -195,12 +282,11 @@ const ReservationList = React.createClass({
                 <td>{x.user.username}</td>
                 <td>{new Date(x.begin_time).toLocaleString()}</td>
                 <td>{new Date(x.end_time).toLocaleString()}</td>
-                <td><a role="button" onClick={() => this.editReservation(x.reservation_id)}>View/Edit</a></td>
-                <td><a role="button" onClick={() => this.deleteReservation(x.reservation_id)}>Delete</a></td>
+                <td><a role="button" onClick={() => this.approveReservation(x.reservation_id)}>Approve</a></td>
               </tr>
             })}
-            {Object.keys(me.state.reservations).length > 0 ? null :
-              <tr><td className="lead text-center" colSpan="7">No reservations in this timespan</td></tr>}
+            {Object.keys(me.state.pending_reservations).length > 0 ? null :
+              <tr><td className="lead text-center" colSpan="7">No reservations to approve</td></tr>}
           </tbody>
         </table>
       </div>
@@ -221,7 +307,7 @@ const ReservationList = React.createClass({
                   <strong>{this.state.error_msg}</strong>
                 </div>
               }
-              {rightpane}
+              {me.state.subroute == 'all' ? rightpane_all : rightpane_pending}
             </div>
           </div>
         </div>
