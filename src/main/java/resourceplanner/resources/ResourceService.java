@@ -346,6 +346,31 @@ public class ResourceService {
         return noTagsrts;
     }
 
+    private RT getSpecificResource(int resourceId){
+        List<RT> resource = jt.query("SELECT * from resources WHERE resource_id = " + resourceId + ";",
+            new RowMapper<RT>() {
+                    public RT mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        RT rt = new RT();
+                        rt.name = rs.getString("name");
+                        rt.description = rs.getString("description");
+                        rt.restricted = rs.getBoolean("restricted");
+                        rt.resourceId = rs.getInt("resource_id");
+                        rt.tag = null;
+                        return rt;
+                    }
+                }
+            );
+        return resource.get(0);
+    }
+
+    private void updateNewUnrestrictedResource(int resourceId){
+        jt.update("UPDATE reservationresources SET resource_approved = true WHERE resource_id = ?;",
+                  resourceId);
+
+        //find all reservations where not exists a resource that is not approved, set them approved
+        jt.update("UPDATE reservations SET complete = true WHERE NOT EXISTS (SELECT * from reservationresources WHERE reservationresources.reservation_id = reservations.reservation_id AND resource_approved = false);");
+    }
+
     public StandardResponse updateResource(ResourceRequest req, int resourceId) {
         if (!req.isValid()) {
             return new StandardResponse(true, "Invalid request");
@@ -355,6 +380,11 @@ public class ResourceService {
                 "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, resourceId);
         if (resourceExists != 1) {
             return new StandardResponse(true, "Resource does not exist");
+        }
+
+        RT oldResource = getSpecificResource(resourceId);
+        if(oldResource.restricted == true && !req.isRestricted()){
+            updateNewUnrestrictedResource(resourceId);
         }
 
         jt.update("UPDATE resources SET name = ?, description = ?, restricted = ? WHERE resource_id = ?;",
