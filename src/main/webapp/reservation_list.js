@@ -88,9 +88,9 @@ const ReservationList = React.createClass({
   },
 
   approveReservation(id) {
+    var me = this;
     send_xhr("GET", "/api/reservations/canceledWithApproval/" + id, localStorage.getItem("session"), null,
       function(obj) {
-        debugger;
         var confirmed_approve = obj.data.length == 0;
         if (!confirmed_approve) {
           confirmed_approve = confirm("By approving this reservation, you will necessarily be cancelling " + obj.data.length.toString() + " other reservations. Proceed?");
@@ -100,7 +100,7 @@ const ReservationList = React.createClass({
           send_xhr("POST", "/api/reservations/approveReservation/" + id, localStorage.getItem("session"), JSON.stringify({approved: true}),
             function(obj) {
               me.refresh();
-              me.setState({error_msg: "", is_error: false});
+              me.setState({error_msg: obj.error_msg, is_error: false});
             },
             function(obj) {
               me.refresh();
