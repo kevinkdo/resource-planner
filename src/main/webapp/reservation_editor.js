@@ -133,6 +133,7 @@ const ReservationEditor = React.createClass({
                   {!this.state.error_msg ? <div></div> :
                     <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>
                       <strong>{this.state.error_msg}</strong>
+                      <p>If you want to make a new reservation with the same resources, click <a href="#reservation_creator/0" onClick={() => me.props.setPstate({resource_ids: me.state.resource_ids})}>here</a>.</p>
                     </div>
                   }
                   <div className="form-group">

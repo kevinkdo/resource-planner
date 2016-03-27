@@ -65,7 +65,7 @@ const ReservationCreator = React.createClass({
     return {
       sending: false,
       all_resources: [],
-      resource_ids: [],
+      resource_ids: this.props.pstate.resource_ids.length > 0 ? this.props.pstate.resource_ids : [],
       user_id: userId(),
       title: "",
       description: "",
@@ -89,7 +89,7 @@ const ReservationCreator = React.createClass({
         } else {
           me.setState({
             all_resources: obj.data.resources,
-            resource_ids: [obj.data.resources[0].resource_id],
+            resource_ids: me.state.resource_ids.length > 0 ? me.state.resource_ids : [obj.data.resources[0].resource_id],
             initial_load_resources: false
           });
         }

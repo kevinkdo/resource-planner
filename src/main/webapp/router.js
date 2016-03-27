@@ -3,7 +3,10 @@ const Router = React.createClass({
     var session = localStorage.getItem("session");
     return {
       route: session ? "reservation_list" : "login",
-      view_id: 0
+      view_id: 0,
+      resource_ids: [],
+      error_msg: "",
+      is_error: false
     };
   },
 
