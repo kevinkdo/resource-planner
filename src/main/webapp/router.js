@@ -7,31 +7,36 @@ const Router = React.createClass({
     };
   },
 
+  setStateFromLocationHash() {
+    var hash = location.hash.substring(1);
+    var slash_index = hash.search('/');
+    var view_id = Number(hash.substring(slash_index + 1));
+    this.setState({
+      route: hash.substring(0, slash_index),
+      view_id: view_id
+    });
+  },
+
   //This is kind of confusing because there are two ways
   //that sub components can change the route. One is by
   //changing the hash with an href attribute on a link.
   //The second is by calling setStateWrapper (passed down as
   //setPstate prop)
-  onhashchange() {
-    this.setState({
-      route: location.hash.substring(1)
-    });
-  },
-
   componentDidMount() {
-    window.onhashchange = this.onhashchange;
+    window.onhashchange = this.setStateFromLocationHash;
     if (!location.hash) {
-      location.hash = '#' + this.state.route;
+      location.hash = '#' + this.state.route + '/' + this.state.view_id.toString();
     } else {
-      this.setState({
-        route: location.hash.substring(1)
-      });
+      this.setStateFromLocationHash();
     }
   },
 
   setStateWrapper(data) {
+    if (!data.view_id) {
+      data.view_id = 0;
+    }
     if (data.route) {
-      location.hash = '#' + data.route;
+      location.hash = '#' + data.route + '/' + data.view_id.toString();
     }
     this.setState(data);
   },

@@ -216,8 +216,8 @@ const ReservationList = React.createClass({
     var rightpane_all = this.state.loading_table ? <Loader /> : (
       <div>
         <ul className="nav nav-tabs">
-          <li className={this.state.subroute == 'all' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "all"})}>All</a></li>
-          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "pending"})}>Pending your approval</a></li>
+          <li className={this.state.subroute == 'all' ? "active" : ""}><a href="#reservation_list/0" onClick={(evt) => this.setState({subroute: "all"})}>All</a></li>
+          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list/0" onClick={(evt) => this.setState({subroute: "pending"})}>Pending your approval</a></li>
         </ul>
         <table className="table table-hover">
           <thead>
@@ -257,8 +257,8 @@ const ReservationList = React.createClass({
     var rightpane_pending = this.state.loading_table ? <Loader /> : (
       <div>
         <ul className="nav nav-tabs">
-          <li className={this.state.subroute == 'all' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "all"})}>All</a></li>
-          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list" onClick={(evt) => this.setState({subroute: "pending"})}>Pending your approval</a></li>
+          <li className={this.state.subroute == 'all' ? "active" : ""}><a href="#reservation_list/0" onClick={(evt) => this.setState({subroute: "all"})}>All</a></li>
+          <li className={this.state.subroute == 'pending' ? "active" : ""}><a href="#reservation_list/0" onClick={(evt) => this.setState({subroute: "pending"})}>Pending your approval</a></li>
         </ul>
         <table className="table table-hover">
           <thead>

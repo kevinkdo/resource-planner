@@ -39,20 +39,20 @@ const Navbar = React.createClass({
 
           <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul className="nav navbar-nav navbar-left">
-              <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#resource_list">Resources</a></li>
-              <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#reservation_list">Reservations</a></li>
-              <li className={this.props.pstate.route.indexOf("group") > -1 ? "active" : ""}><a href="#group_manager">Groups</a></li>
-              <li className={this.props.pstate.route.indexOf("permissions") > -1 ? "active" : ""}><a href="#permissions_manager">Permissions Manager</a></li>
+              <li className={this.props.pstate.route.indexOf("resource") > -1 ? "active" : ""}><a href="#resource_list/0">Resources</a></li>
+              <li className={this.props.pstate.route.indexOf("reservation") > -1 ? "active" : ""}><a href="#reservation_list/0">Reservations</a></li>
+              <li className={this.props.pstate.route.indexOf("group") > -1 ? "active" : ""}><a href="#group_manager/0">Groups</a></li>
+              <li className={this.props.pstate.route.indexOf("permissions") > -1 ? "active" : ""}><a href="#permissions_manager/0">Permissions Manager</a></li>
             </ul>
             <ul className="nav navbar-nav navbar-right">
               <li><p className="navbar-text">{this.state.username}</p></li>
               <li className="dropdown">
                 <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span className="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
                 <ul className="dropdown-menu">
-                  <li><a href="#admin_console" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
-                  <li><a href="#settings" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
+                  <li><a href="#admin_console/0" onClick={() => this.props.setPstate({route: "admin_console"})}>Admin Console</a></li>
+                  <li><a href="#settings/0" onClick={() => this.props.setPstate({route: "settings"})}>Settings</a></li>
                   <li role="separator" className="divider"></li>
-                  <li><a href="#login" onClick={this.logout}>Log Out</a></li>
+                  <li><a href="#login/0" onClick={this.logout}>Log Out</a></li>
                 </ul>
               </li>
             </ul>
