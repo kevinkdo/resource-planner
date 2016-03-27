@@ -105,11 +105,11 @@ const GroupEditor = React.createClass({
                   
                   <div className="row">
                     <div className="col-xs-4 col-md-4">
-                      <label>Members</label>
+                      <label>Member IDs</label>
                       {this.state.user_ids.slice(0, -1).map((x,i) =>
-                        <ListMinusInput key={i} minusFunc={this.removeMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional member ID" hasAddon={false}/>
+                        <ListMinusInput key={i} minusFunc={this.removeMember} value={x} index={i} editFunc={this.setMember} placeholder="Optional ID" hasAddon={false}/>
                       )}
-                      <ListPlusInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional member ID" editFunc={this.setMember} hasAddon={true}/>
+                      <ListPlusInput addFunc={this.addMember} value={last_member} index={this.state.user_ids.length-1} placeholder="Optional ID" editFunc={this.setMember} hasAddon={true}/>
                     </div>
                     <div className="col-xs-4 col-xs-offset-4 col-md-4 col-md-offset-4">
                       <label>All users</label>
