@@ -53,21 +53,13 @@ For retrospectives on our former backend choices and more detail about our backe
 \label{sec:Backend}
 The backend consists of the parts of the software system that run on a VPS (Virtual Private Server) using Ubuntu Linux 14.04. Our software uses PostgreSQL 9.5 for persistent data storage and the Java Spring Framework as the container for a Tomcat web server. If the backend were viewed as an MVC (Model-View-Controller), PostgreSQL would be the model and Java Spring would be the view (REST API) and the controller (request processing, database communication, and response creation). 
 
-This architecture has not changed since evolution 1, and it has suited us well. 
+This architecture has not changed since evolution 2, and it has suited us well. 
 
 \subsection{Java}
-\subsubsection{Retrospective}
-At this point, we are quite content with our choice of Java as the backend language. Familiarity with Java has made development easy, and static typing has helped prevent bugs and improve code readability. Thus far, we have not encountered any problems that would have been much easier solved in another language. 
-
-\subsubsection{Current Design}
-Nothing has changed from a design perspective in terms of our choice of Java as a language. 
+Java has continued to suit us well in evolution 3, and from a design perspective it did not significantly affect any of the evolution 3 requirements. Familiarity with Java has made development easy, and static typing has helped prevent bugs and improve code readability.
 
 \subsection{Java Spring}
-\subsubsection{Retrospective}
-Spring has worked very well for us thus far. It is well documented, it has libraries for every use-case we have needed, and its MVC structure has made it easy to write our code in a maintainable way (for instance, adding a new set of endpoints for Groups was trivial - see the \hyperref[sec:GROUPS]{groups section}). {\huge<- TODO replace reference to groups to something from ev3} We have had no significant issues with Spring so far. 
-
-\subsubsection{Current Design}
-Spring continues to be our backend framework, and thus nothing has changed from a design perspective in this regard.
+Spring has also continued to suit us well in evolution 3. Adding a new set of endpoints to handle incomplete reservations was extremely easy. Furthermore, as our codebase has gotten more and more complex, we have appreciated the structure that Spring enforces. This structure (an MVC structure based around services, controllers, filters, and utilities) has in effect ensured that our overall package and class layout is understandable, maintainable, and very extensible. We have no regrets in choosing Spring. 
 
 \subsection{PostgreSQL}
 \subsubsection{Retrospective}
@@ -79,10 +71,9 @@ In regards to choosing PostgreSQL over some other SQL DB, we have not needed to 
 The following changes were made to our DB schema for evolution 2:
 {\huge TODO UPDATE THE ENUMERATE BELOW}
 \begin{enumerate}
-    \item A Group table was added which tracks group settings and names. 
-    \item A group members table was added. This tracks all the members of each group. 
-    \item A user resource permissions table and a group resource permissions were added. These track resource permissions for each user and each group, respectively. 
-    \item The user table was updated to include user permissions
+    \item A title and description field were added to the Reservations table
+    \item The "resource" column was removed from the reservations table, and instead we created a reservation-resources table. This was done because now each reservation can have multiple resources. This table also stores a "resource_approved" field to indicate which resources are approved for each reservation. 
+    \item A "complete" boolean was added to the reservations table, to indicate which reservations are incomplete and which are not
 \end{enumerate}
 
 You can see a full diagram of this updated schema in  \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}}. 
@@ -441,7 +432,7 @@ Michael Han wrote and maintained the automated backend tests and implemented the
 \label{appendix:DBDesign}
 \begin{figure}[h]
 \begin{center}
-%\includegraphics[height=4in]{Evolution2DB.pdf}
+\includegraphics[height=4in]{Evolution3DB.pdf}
 \end{center}
 \caption{DB Schema}
 \end{figure}
