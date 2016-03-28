@@ -59,7 +59,7 @@ This architecture has not changed since evolution 2, and it has suited us well.
 Java has continued to suit us well in evolution 3, and from a design perspective it did not significantly affect any of the evolution 3 requirements. Familiarity with Java has made development easy, and static typing has helped prevent bugs and improve code readability.
 
 \subsection{Java Spring}
-Spring has also continued to suit us well in evolution 3. Adding a new set of endpoints to handle incomplete reservations was extremely easy. Furthermore, as our codebase has gotten more and more complex, we have appreciated the structure that Spring enforces. This structure (an MVC structure based around services, controllers, filters, and utilities) has in effect ensured that our overall package and class layout is understandable, maintainable, and very extensible. We have no regrets in choosing Spring. 
+Spring has also continued to suit us well in evolution 3. Adding a new set of endpoints to handle incomplete reservations was extremely easy. Furthermore, as our codebase has gotten more and more complex, we have appreciated the structure that Spring enforces. This structure (an MVC structure based around services, controllers, filters, and utilities) has in effect ensured that our overall package and class layout is understandable, maintainable, and very extensible. 
 
 \subsection{PostgreSQL}
 \subsubsection{Retrospective}
@@ -123,13 +123,28 @@ For evolution 2, we decided to stay with a type of MVC. All backend code is eith
 
 This design allowed us to make changes to a module much more quickly, as we didn't have to look through other modules to find the specific module we wanted to modify. This further compartmentalization of our code allows us to retain a MVC design, albeit a module-based MVC rather than a backend-based MVC. This change made the already easy-to-use design even more intuitive and efficient. The new design is as extensible, if not more so than before. 
 
-\subsection{Groups}
-\label{sec:GROUPS}
-\subsubsection{Current Design}
-{\huge TODO DELETE?}
-Groups are a new evolution 2 feature. Our implementation allows for two groups to have the same name (though they are unique as they have different IDs). A group is affiliated with zero or more members and the three types of system-wide permissions - resource permission, reservation permission, and user permission. The users with user permission have the ability to create groups, edit groups, edit group membership, and delete groups. 
+\subsection{Email}
+\label{sec:EMAIL}
+\subsubsection{Retrospective}
+Our original design to handle emails sent at the start and end of reservations was as follows:
+\begin{enumerate}
+    \item An EmailService class was used to handle scheduling emails. This class kept track of queued emails to be sent in the future, and provided a simple API that could be called on reservation creation/modification/deletion to update queued email times, or add new emails to the queue, or delete queued emails.
+    \item An EmailScheduler class, which handled the logic of actually composing the email, based on certain input parameters. This class would define the subject of each email, as well as its content. 
+    \item An EmailUtility class, which handled the actually email API we use to send emails. 
+\end{enumerate}
 
-There were not any particularly complex or challenging design decisions to make when implementing groups. From a database perspective, using one table for group settings and one table for group members is the most logical implementation. From a functionality perspective, the evolution 2 specification was very clear in what a group is. Finally, from a code perspective, we simply added another Controller and Service pair for groups, and its implementation very closely mimicked the UserController and UserService classes. This further demonstrates how well Spring and an MVC backend have worked for us. 
+The basic workflow of the above was, individual service classes would call EmailService, EmailService would call EmailScheduler, and EmailScheduler would call EmailUtility. We felt this overall design was simple, easy to use, and quite extensible to future email requirements. 
+
+\subsubsection{Retrospective and Current Design}
+Evolution 3 introduced a number of new email requirements. Luckily, our original email scheduling design made adhering to these new requirements easy. Specifically, we only add to do the following things:
+\begin{enumerate}
+    \item We added a few new methods to EmailService to handle instantly-sent emails (such as an email for when an  incomplete reservation gets denied or canceled). These are all just 3-4 lines, and call EmailScheduler the same way former EmailService methods did. 
+    \item We modified the API of EmailService slightly so that it would automatically detect what type of reservation was being scheduled for an email. Based on this info (complete reservation vs incomplete reservation), we alter the content of potential future emails, but all scheduling is done the exact same way as before. 
+    \item We added a number of new potential input parameters to EmailScheduler, to handle the various new kinds of emails we need to send (reservation denied, reservation canceled, reservation about to be canceled, etc). 
+    \item EmailUtility did not change at all. 
+\end{enumerate}
+
+Essentially, none of our old code had to change, none of our scheduling algorithms had to change, and we just had to add a few new types of emails and appropriately check for which type should be sent. As such, we are very happy with how we originally designed emails, and believe our current email code will continue to serve us well in the face of future changes. 
 
 
 \subsection{Permissions}
@@ -149,21 +164,14 @@ In addition, this strategy is still extensible in the sense that we can always e
 
 The downside, however, is that we are less capable of adapting to radically different permission guidelines. However, we feel this is a risk worth taking for now. 
 
-\subsection{Email}
-\subsubsection{Retrospective}
-{\huge TODO}
-
-\subsubsection{Current Design}
-{\huge TODO}
 
 \subsubsection{Assumptions}
-{\huge TODO UPDATE}
-Given the ambiguity of some of the permission guidelines, we want to outline our assumptions for permission behavior:
+Given the ambiguity of some evolution requirements, here are some of the assumptions we made this evolution:
 \begin{enumerate}
-    \item The admin always has full permissions on everything. This can never be changed. 
-    \item A new user or new group will, by default, have no system permissions. A user with user system permissions will need to go in and give them permissions. 
-    \item A newly created resource defaults to VIEW permission for the user that created it, and no permission for all other users and groups. 
-    \item A user with reservation management permissions can modify ANY reservation, including reservations for resources that the user does not himself have view or reserve access for. That being said, a user with reservation management permissions can not break any permission constraints when modifying a reservation (as an example, a user with reservation management permissions could not edit a reservation such that the edited reservation pairs a user with a resource that user does not have reserve access for). 
+    \item We assume that any person or any group that is a resource manager of a given resource also has both view and reserve permission for that resource. We confirmed this was a reasonable assumption via both Peter and Professor Hilton. 
+    \item The evolution requirements state that an email must be sent warning a user that their upcoming incomplete reservation might get canceled if it is not approved in time. The time before the reservation that this email must be sent is unclear, however. We choose to send this email 10 minutes before the scheduled start time. 
+    \item It is somewhat unclear in the guidelines which types of emails should be toggle-able based on email settings. We chose to assume that ALL EMAILS will adhere to a user's email settings. This means that, unless you have both global email active as well as email active for your specific reservation, you will not receive any emails of any kind regarding that reservation. 
+    \item {\huge TODO: Anything else?} 
 \end{enumerate}
 
 
