@@ -3,6 +3,8 @@ package resourceplanner.reservations;
 import utilities.TimeUtility;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -32,7 +34,7 @@ public class ReservationRequest {
     }
 
     public List<Integer> getResource_ids(){
-        return resource_ids;
+        return new ArrayList<Integer>(new LinkedHashSet<Integer>(resource_ids));
     }
 
     public Timestamp getBegin_time() {
