@@ -441,12 +441,28 @@ public class ReservationService {
             }
         }
 
+        List<TempReservationResource> approvedStatusList = getApprovedStatus(reservationId);
+
+        Map<Integer, Boolean> map = new HashMap<Integer, Boolean>();
+        for (TempReservationResource trr : approvedStatusList) {
+            map.put(trr.resourceId, trr.approved);
+        }
+
+        boolean notComplete = false;
+        for (Resource r : rList) {
+            if (r.isRestricted() && !map.get(r.getResource_id())) {
+                // if restricted and not approved
+                notComplete = true;
+            }
+        }
+
+        t.complete = !notComplete;
+
         String q = "UPDATE reservations SET title = ?, description = ?, user_id = ?, begin_time = ?, end_time = ?, should_email = ?, complete = ? WHERE reservation_id = ?;";
 
         jt.update(q, new Object[]{req.getTitle(), req.getDescription(), req.getUser_id(), req.getBegin_time(), req.getEnd_time(), req.getShould_email(), t.complete, reservationId});
 
         jt.update("DELETE FROM reservationresources WHERE reservation_id = ?;", reservationId);
-
 
         List<Object[]> batch = new ArrayList<Object[]>();
         for (Integer resourceId : req.getResource_ids()) {
@@ -464,6 +480,25 @@ public class ReservationService {
             emailService.rescheduleEmails(reservationId);
         }
         return new StandardResponse(false, "Reservation successfully updated", res);
+    }
+
+    private List<TempReservationResource> getApprovedStatus(int reservationId) {
+        return jt.query(
+                "SELECT resource_id, resource_approved FROM reservationresources WHERE reservation_id = ?;",
+                new Object[]{reservationId},
+                new RowMapper<TempReservationResource>() {
+                    public TempReservationResource mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempReservationResource t = new TempReservationResource();
+                        t.resourceId = rs.getInt("resource_id");
+                        t.approved = rs.getBoolean("resource_approved");
+                        return t;
+                    }
+                });
+    }
+
+    private class TempReservationResource {
+        private int resourceId;
+        private boolean approved;
     }
 
     private List<Integer> rListToInts(List<Resource> rList) {
@@ -506,10 +541,6 @@ public class ReservationService {
 
         emailService.removeScheduledEmails(reservationId);
         return new StandardResponse(false, "Successfully deleted reservation");
-    }
-
-    public StandardResponse reservationTest(int resourceId) {
-        return new StandardResponse(true, "test", resourceExists(resourceId));
     }
 
     private static class TimeRestrict {
