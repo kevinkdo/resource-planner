@@ -59,7 +59,7 @@ public class ReservationRequest {
     }
 
     public boolean isValidText() {
-        return title.length() >= 1 && title.length() < 254 && description.length() >= 1 && description.length() < 254;
+        return title.length() >= 1 && title.length() < 254 && description.length() < 254;
     }
 
     public boolean isValidTimes() {
