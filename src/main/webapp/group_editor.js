@@ -6,6 +6,16 @@ const GroupEditor = React.createClass({
 
   editGroup(evt) {
     var me = this;
+    var valid = true;
+    this.state.user_ids.forEach(function(int) {
+      if (int.length > 0 && !parseInt(int)) {
+        me.setState({is_error: true, error_msg: "Invalid user IDs"});
+        valid = false;
+      }
+    });
+    if (!valid) {
+      return;
+    }
     this.setState({sending: true});
     send_xhr("PUT", "/api/groups/" + this.props.pstate.view_id, localStorage.getItem("session"),
       JSON.stringify({group_name: this.state.group_name, user_ids: this.state.user_ids.filter(x => x.length > 0)}),
