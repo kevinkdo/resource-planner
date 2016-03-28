@@ -28,12 +28,72 @@ public class EmailService {
 	private ReservationService reservationService;
 
 
-	public void rescheduleEmails(int reservationId){
-    	removeScheduledEmails(reservationId);
-    	scheduleEmail(reservationId);
+    private void scheduleIncompleteEmail(Reservation res){
+        if(res.getShould_email() && res.getUser().isShould_email()){
+            EmailScheduler pendingEmail = new EmailScheduler(res, EmailScheduler.INCOMPLETE_PENDING_ALERT);
+            EmailScheduler neverApprovedEmail = new EmailScheduler(res, EmailScheduler.INCOMPLETE_NEVER_APPROVED_ALERT);
+
+            Timestamp beginTimestamp = TimeUtility.stringToTimestamp(res.getBegin_time());
+            Date dateBegin = new Date(beginTimestamp.getTime());
+            Timestamp pendingTimestamp = new Timestamp(beginTimestamp.getTime() - 10*60*1000);
+            Date datePending = new Date(pendingTimestamp.getTime());
+
+            if(!verifyDateInFuture(dateBegin)){
+                return;
+            }
+
+            ScheduledFuture scheduledPendingEmail = concurrentTaskScheduler.schedule(pendingEmail, datePending);
+            ScheduledFuture scheduledNeverApprovedEmail = concurrentTaskScheduler.schedule(neverApprovedEmail, dateBegin);
+
+            if(scheduledEmailMap.containsKey(res.getReservation_id())){
+                List<ScheduledFuture> existingFutures = scheduledEmailMap.get(res.getReservation_id());
+                for (ScheduledFuture f : existingFutures){
+                    f.cancel(true);
+                }
+                existingFutures = new ArrayList<ScheduledFuture>();
+                existingFutures.add(scheduledPendingEmail);
+                existingFutures.add(scheduledNeverApprovedEmail);
+            }
+            else{
+                List<ScheduledFuture> newFutures = new ArrayList<ScheduledFuture>();
+                newFutures.add(scheduledPendingEmail);
+                newFutures.add(scheduledNeverApprovedEmail);
+                scheduledEmailMap.put(res.getReservation_id(), newFutures);
+            }
+
+        }
     }
 
 
+    public void sendDeniedEmail(int reservationId){
+        Reservation res = reservationService.getReservationByIdAdmin(reservationId);
+        if(res.getShould_email() && res.getUser().isShould_email()){
+            EmailScheduler denyEmailScheduler = new EmailScheduler(res, EmailScheduler.DENY_ALERT);
+            denyEmailScheduler.run();
+        }  
+    }
+
+    public void sendCanceledEmail(int reservationId){
+        Reservation res = reservationService.getReservationByIdAdmin(reservationId);
+        if(res.getShould_email() && res.getUser().isShould_email()){
+            EmailScheduler cancelEmailScheduler = new EmailScheduler(res, EmailScheduler.CANCEL_ALERT);
+            cancelEmailScheduler.run();
+        }
+    }
+
+
+	public void scheduleEmails(int reservationId){
+        Reservation res = reservationService.getReservationByIdAdmin(reservationId);
+        if(res.getComplete()){
+            scheduleEmail(res);
+        }
+    	else{
+            scheduleIncompleteEmail(res);
+        }
+    }
+
+
+    
     public void removeScheduledEmails(int reservationId){
     	if(scheduledEmailMap.containsKey(reservationId)){
     		List<ScheduledFuture> futures = scheduledEmailMap.get(reservationId);
@@ -44,9 +104,7 @@ public class EmailService {
     	}
     }
 
-    public void scheduleEmail(int reservationId){
-		Reservation res = reservationService.getReservationByIdAdmin(reservationId);
-
+    private void scheduleEmail(Reservation res){
     	if(res.getShould_email() && res.getUser().isShould_email()){
     		EmailScheduler startReservationEmailScheduler = new EmailScheduler(res, EmailScheduler.BEGIN_ALERT);
 			EmailScheduler endReservationEmailScheduler = new EmailScheduler(res, EmailScheduler.END_ALERT);

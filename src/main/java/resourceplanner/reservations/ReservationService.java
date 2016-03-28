@@ -125,9 +125,8 @@ public class ReservationService {
                 batch);
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), complete);
-
+        emailService.scheduleEmails(reservationId);
         return new StandardResponse(false, "Reservation inserted successfully", res);
-
     }
 
     private boolean isRestricted(int resourceId) {
@@ -476,9 +475,7 @@ public class ReservationService {
                 batch);
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), t.complete);
-        if (t.complete) {
-            emailService.rescheduleEmails(reservationId);
-        }
+        emailService.scheduleEmails(reservationId);
         return new StandardResponse(false, "Reservation successfully updated", res);
     }
 
@@ -834,6 +831,7 @@ public class ReservationService {
         else{
             //Delete the reservation "as an admin" to guarentee it is deleted. 
             deleteReservation(reservationId, true, 1);
+            emailService.sendDeniedEmail(reservationId);
             return new StandardResponse(false, "Reservation denied and deleted");
         }
     }
@@ -859,6 +857,8 @@ public class ReservationService {
     }
 
     private List<TempRes> getOverlappingIncompleteReservations(TempRes t){
+        List<Resource> originalResources = getResources(t.reservation_id);
+
         List<TempRes> reservations = jt.query(
             "SELECT * FROM reservations WHERE reservation_id != ?" + 
             " AND complete = false AND ((reservations.begin_time >= ? AND reservations.begin_time < ?)" + 
@@ -879,7 +879,21 @@ public class ReservationService {
                         return t;
                     }
                 });
-        return reservations;
+        Set<TempRes> finalOutput = new HashSet<TempRes>();
+
+        for(TempRes temp : reservations){
+            List<Resource> resources = getResources(temp.reservation_id);
+            for(Resource originalResource : originalResources){
+                if(resources.contains(originalResource)){
+                    finalOutput.add(temp);
+                }
+            }
+        }
+
+        List<TempRes> returnObject = new ArrayList<TempRes>();
+        returnObject.addAll(finalOutput);
+
+        return returnObject;
     }
 
     private void fullyApproveReservation(int reservationId){
@@ -890,8 +904,7 @@ public class ReservationService {
         String reservationUpdateString = "UPDATE reservations SET complete = true WHERE reservation_id = " + reservationId + ";";
         jt.update(reservationUpdateString);
 
-        emailService.scheduleEmail(reservationId);
-
+        emailService.scheduleEmails(reservationId);
         deleteOverlappingIncompleteReservations(reservationId);
     }
 
@@ -919,19 +932,18 @@ public class ReservationService {
         else{ //all resources approved, can modify reservation status
             String reservationUpdateString = "UPDATE reservations SET complete = true WHERE reservation_id = " + reservationId + ";";
             jt.update(reservationUpdateString);
-            emailService.scheduleEmail(reservationId);
+            emailService.scheduleEmails(reservationId);
             deleteOverlappingIncompleteReservations(reservationId);
         }
     }
 
     private void deleteOverlappingIncompleteReservations(int reservationId){
         TempRes t = getTempResFromId(reservationId);
-        String deleteString = "DELETE FROM reservations WHERE reservation_id != ?" + 
-            " AND complete = false AND ((reservations.begin_time >= ? AND reservations.begin_time < ?)" + 
-            " OR (reservations.end_time > ? AND reservations.end_time <= ?)" + 
-            " OR (reservations.end_time > ? AND reservations.begin_time < ?));";
-    
-        jt.update(deleteString, new Object[]{t.reservation_id, t.begin_time, t.end_time, t.begin_time, t.end_time, t.end_time, t.begin_time});
+        List<TempRes> overlappingIncomplete = getOverlappingIncompleteReservations(t);
+        for(TempRes toCancel : overlappingIncomplete){
+            emailService.sendCanceledEmail(toCancel.reservation_id);
+            deleteReservation(reservationId, true, 1);
+        }
     }
 
 }
