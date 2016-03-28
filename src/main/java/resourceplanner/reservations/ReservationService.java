@@ -421,6 +421,12 @@ public class ReservationService {
         List<Integer> rListInts = rListToInts(rList);
         User u = getUser(req.getUser_id());
 
+        for (int resourceId : req.getResource_ids()) {
+            if (!rListInts.contains(resourceId)) {
+                return new StandardResponse(true, "Cannot add new resources to reservation");
+            }
+        }
+
         if (userId != 1) {
             List<Integer> userReservable = permissionService.getUserReservableResources(userId);
             List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
