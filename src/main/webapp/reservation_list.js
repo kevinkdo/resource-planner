@@ -87,7 +87,7 @@ const ReservationList = React.createClass({
     );
   },
 
-  approveReservation(id) {
+  approveReservation(id, approve_boolean) {
     var me = this;
     send_xhr("GET", "/api/reservations/canceledWithApproval/" + id, localStorage.getItem("session"), null,
       function(obj) {
@@ -97,7 +97,7 @@ const ReservationList = React.createClass({
         }
 
         if (confirmed_approve) {
-          send_xhr("POST", "/api/reservations/approveReservation/" + id, localStorage.getItem("session"), JSON.stringify({approved: true}),
+          send_xhr("POST", "/api/reservations/approveReservation/" + id, localStorage.getItem("session"), JSON.stringify({approved: approve_boolean}),
             function(obj) {
               me.refresh();
               me.setState({error_msg: obj.error_msg, is_error: false});
@@ -270,6 +270,7 @@ const ReservationList = React.createClass({
               <th>Start</th>
               <th>End</th>
               <th></th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -282,7 +283,8 @@ const ReservationList = React.createClass({
                 <td>{x.user.username}</td>
                 <td>{new Date(x.begin_time).toLocaleString()}</td>
                 <td>{new Date(x.end_time).toLocaleString()}</td>
-                <td><a role="button" onClick={() => this.approveReservation(x.reservation_id)}>Approve</a></td>
+                <td><a role="button" onClick={() => this.approveReservation(x.reservation_id, true)}>Approve</a></td>
+                <td><a role="button" onClick={() => this.approveReservation(x.reservation_id, false)}>Deny</a></td>
               </tr>
             })}
             {Object.keys(me.state.pending_reservations).length > 0 ? null :
