@@ -55,6 +55,17 @@ public class UserController extends Controller {
     }
 
     @RequestMapping(value = "/{userId}",
+            method = RequestMethod.PUT,
+            headers = {"Content-type=application/json"})
+    @ResponseBody
+    public StandardResponse updateUser(@PathVariable final int userId, @RequestBody final UserRequest req, final HttpServletRequest request) {
+        if (userId != getRequesterID(request) && !hasUserP(request)) {
+            return new StandardResponse(true, "You are not authorized");
+        }
+        return userService.updateUser(req, userId);
+    }
+
+    @RequestMapping(value = "/{userId}",
             method = RequestMethod.DELETE)
     @ResponseBody
     public StandardResponse deleteUser(@PathVariable final int userId, final HttpServletRequest request) {

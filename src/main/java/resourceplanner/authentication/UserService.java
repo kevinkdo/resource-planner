@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import resourceplanner.authentication.UserData.User;
+import resourceplanner.authentication.UserData.UserUpdate;
 import resourceplanner.main.EmailService;
 import resourceplanner.main.StandardResponse;
 import utilities.PasswordHash;
@@ -163,6 +164,24 @@ public class UserService {
                         return user;
                     }
                 });
+    }
+
+    public StandardResponse updateUser(UserRequest req, int userId) {
+        if (!req.isUpdateValid()) {
+            return new StandardResponse(true, "Invalid request");
+        }
+
+        List<User> users = getUsers(userId);
+        if (users.size() == 0) {
+            return new StandardResponse(true, "User not found");
+        }
+
+        jt.update("UPDATE users SET should_email = ? WHERE user_id = ?;",
+                req.getShould_email(),
+                userId);
+
+        UserUpdate committed = new UserUpdate(req.getShould_email());
+        return new StandardResponse(false, "Successfully updated email settings", committed);
     }
 
     public StandardResponse deleteUser(int userId) {
