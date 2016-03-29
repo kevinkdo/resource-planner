@@ -115,13 +115,13 @@ We chose to not implement every test case in \hyperref[appendix:backendtest]{App
 
 \subsection{Code Structure}
 \subsubsection{Retrospective}
-{\huge TODO UPDATE}
-Our code structure went through a large, though simple refactoring. For evolution 1, we had all our backend code divided into filters, controllers, services, and utilities. This led to some issues where when a change was made in a controller, you would have to locate the corresponding service and make changes there. 
-\subsubsection{Current Design}
-{\huge TODO UPDATE}
-For evolution 2, we decided to stay with a type of MVC. All backend code is either part of a utility, a 'module' or 'main'. The utility code remained essentially unchanged from evolution 1. A module is a package consisting of a controller, one or more services that serve that controller, and models that serve I/O or storage functions. For example, a group module has a group-controller which specifies the endpoints, a service module which performs the actions required for the requests send to the service from the endpoints, and a number of request and response object formats (models). Main essentially consists of non-utility code that is used across modules, such as filters and email services. 
+Our code structure has essentially stayed the same for evolution 3. In evolution 2, we changed our overall code hierarchy to be divided into modules for each set of endpoints, and within each module we placed the different MVC pieces that related to that module. For instance, within the Reservation module, we placed our reservation controller, our reservation service, all reservation data structures, etc. We did this in order to ensure that our code was appropriately compartmentalized, such that someone who, for instance, needs to modify resource code, knows exactly where the relavent classes are. We are still very happy with this decision - it has made updating and modifying code in the backend much cleaner (for instance, instead of sifting through 20+ different custom data structures when making changes, you can go through the exact 3-4 relavent ones). 
 
-This design allowed us to make changes to a module much more quickly, as we didn't have to look through other modules to find the specific module we wanted to modify. This further compartmentalization of our code allows us to retain a MVC design, albeit a module-based MVC rather than a backend-based MVC. This change made the already easy-to-use design even more intuitive and efficient. The new design is as extensible, if not more so than before. 
+Since many of the new requirements in evolution 3 were extensions of previous work (modifications to reservations, modifications to permissions, modifications to email), we did not have to add any significant new modules or classes. Rather, most of our work for evolution 3 involved slightly modifying or extending previously created controllers and services. 
+
+\subsection{Current Design}
+We have no plans to modify the aforementioned code structure, as it has suited us well and helped us maintain clean code at a high level in the backend. 
+
 
 \subsection{Email}
 \label{sec:EMAIL}
@@ -148,21 +148,21 @@ Essentially, none of our old code had to change, none of our scheduling algorith
 
 
 \subsection{Permissions}
-\subsubsection{Current Design}
-{\huge TODO UPDATE}
-We debated heavily how to handle permissions for evolution 2. The largest question was whether to add a full set of permission endpoints to allow the frontend to query and modify specific permissions, or to consolidate permission editing and querying into a single call and thus a single view on the frontend. To clarify, the former case would involve numerous endpoints like GET /userResourcePermissions/\{user\_id\}, GET /groupSystemPermissions/\{group\_id\}, etc. whereas the latter would involve a single endpoint that would return a table of all permissions. 
-
-The benefits of the former case include:
+\subsubsection{Retrospective And Current Design}
+The permissions design we implemented for evolution 2 had two key factors:
 \begin{enumerate}
-    \item More 'extensibility' in the sense that future requirements may further change how permissions work. In such a case, it may be better to have a number of discretized permission endpoints, rather than all permissions lumped into a single endpoint. 
-    \item A less monolithic permission frontend. Multiple endpoints allow, for instance, one view for group system permissions, one view to edit the permissions for a resource, etc. 
+    \item Storing resource-specific permissions as a single integer value (no access as 0, view access as 1, reserve access as 2), rather than as separate boolean values or values stored in separate DB tables. 
+    \item Having all permission modification and viewing being done through a single permission matrix. 
 \end{enumerate}
 
-That being said, we ended up choosing to do the latter case, and the primary reason was simplicity. We have a single location where a user can edit all permissions on the front-end, we have a single API endpoint to query for all permissions that a user can change, and we have a single API endpoint to alter all permissions that a user can change. Doing things this way prevented us from having to alter every piece of the UI on the frontend, and also allowed us to consolidate permission code nicely in the backend. In addition, we feel it actually makes for a very nice user experience - the user always knows precisely where to go to change permissions. 
+These design choices have proven to be very helpful. First of all, as we argued in our evolution 2 document, the choice to have all permissions be in a single place (the permission matrix) has made using and testing our system exceptionally easy. As we add new features and need to manually test them, we can trivially edit the permissions in the system to create the test scenario that we want to create. Had we separated out user permissions and group permissions or resource permissions and system permissions, it would have substantially slowed our manual testing and general usage of our application. 
 
-In addition, this strategy is still extensible in the sense that we can always easily add new permissions to this single permission manager table very easily. As such, we argue that this strategy is actually more extensible than the multiple endpoint strategy for future permission changes that are not radically different from current permission behavior. The multiple endpoint strategy would have to modify a lot of front-end code to adapt, whereas we could change almost nothing on the frontend. 
+Secondly, and more importantly, these design choices made it very easy to handle the new permission requirements for evolution 3. Evolution 3's major permission change is that there are now "resource managers". Our design enabled us to just define the standard that resource manager is represented by a value of 3 in our resource-specific permission tables. In other words, nothing in the backend had to change to handle resource managers being shown in the permission matrix or to handle resource managers being set via the permission matrix. 
 
-The downside, however, is that we are less capable of adapting to radically different permission guidelines. However, we feel this is a risk worth taking for now. 
+In addition, new backend methods to retrieve resource managers (for the new incomplete reservation endpoints) were able to re-use much of our previous permission code, since detecting of resource managers involves all the same DB calls, but is simply checking for a different integer. 
+
+As such, we feel that our argument in the evolution 2 doc that our permission design allowed the easy addition of new permissions has been shown as very true. Furthermore, we believe that if evolution 4 brings on even more permission variations, we should be able to easily accomodate those as well. 
+
 
 
 \subsubsection{Assumptions}
