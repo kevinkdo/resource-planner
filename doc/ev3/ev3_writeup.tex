@@ -41,9 +41,9 @@
 \label{fig:design}
 \end{figure}
 
-Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 2. The primary changes are {\huge TODO}.
+Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 2. {\huge TODO - are there any 'huge changes???'}.
 
-The rest of the changes required for evolution 3 fit nicely into our existing frameworks. In the backend, permissions were handled with a few new API calls on top of our evolution 1 API calls, and a few new DB tables were added to support these calls. {\huge TODO EXPAND IF NECESSARY}
+The rest of the changes required for evolution 3 fit nicely into our existing frameworks. In the backend, permissions were handled with a few new API calls on top of our evolution 1 API calls, and a few new DB tables were added to support these calls. Additionally, the email service was expanded to handle requests involving timing.{\huge TODO EXPAND IF NECESSARY} The primary changes on the front-end are {\huge TODO}
 
 For retrospectives on our former backend choices and more detail about our backend additions, see the \hyperref[sec:Backend]{backend section}. For retrospectives on our former frontend choices and more detail about our frontend additions, see the \hyperref[sec:Frontend]{frontend section}. Finally, see \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for our updated backend test strategy,  \hyperref[appendix:frontendtest]{Appendix \ref{appendix:frontendtest}} for our updated frontend test strategy, \hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}} for our updated API specification, and \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}} for our updated database design. 
 
@@ -60,7 +60,7 @@ Java has continued to suit us well in evolution 3, and from a design perspective
 \subsection{Java Spring}
 Spring has also continued to suit us well in evolution 3. Adding a new set of endpoints to handle incomplete reservations was extremely easy. Furthermore, as our codebase has gotten more and more complex, we have appreciated the structure that Spring enforces. This structure (an MVC structure based around services, controllers, filters, and utilities) has in effect ensured that our overall package and class layout is understandable, maintainable, and very extensible. 
 
-We did run into an issue involving the Jackson JSON parser which is included with Java Spring. Jackson throws difficult-to-handle exceptions when the type of the JSON request values do not match with the expected types. Therefore, we had to circumvent the issue by performing type-checking on the front-end within ReactJS.
+We did run into an issue involving the Jackson JSON parser which is included with Java Spring. Jackson throws difficult-to-handle exceptions when the type of the JSON request values do not match with the expected types. Therefore, we had to circumvent the issue by performing type-checking on the front-end using ReactJS.
 
 We also decided to stop pursuing the '@Transactional' features provided by Java Spring, which allow for SQL transactions because we felt that having concurrent users performing the same action at once is not within the scope of the project. 
 
@@ -217,11 +217,13 @@ We were very pleased with our decision not to implement automated UI testing. Wh
 As a result of our success with the manual UI testing from evolution 1, the only changes to our methodology here are to increase the number of test cases to account for the new functionality introduced by the Evolution 3 requirements.
 
 \section{Member contributions}
+{\huge TODO UPDATE}
+
 Kevin Do maintained the frontend and advocated for the frontend's needs in discussions with the backend team.
 
 Davis Treybig implemented much of the permission-related code, including new permission endpoints and permission-based checks for other API endpoints. 
 
-Jiawei Zhang integrated Duke OAuth2 and implemented the group endpoints and system-wide permissions for users and groups.
+Jiawei Zhang refactored the reservation service and updated it to new spec. Also simplified email service.
 
 Michael Han wrote and maintained the automated backend tests and implemented the API Debugger and the group manager.
 
