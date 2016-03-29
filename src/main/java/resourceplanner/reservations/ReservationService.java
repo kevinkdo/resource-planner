@@ -917,9 +917,20 @@ public class ReservationService {
     private void partiallyApproveReservation(int reservationId, List<Integer> approvableResources){
         Map<String,List<Integer>> params = Collections.singletonMap("ids", approvableResources);
 
+       // String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
+        //    " AND reservation_id IN (:ids);";
         String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
-            " AND reservation_id IN (:ids);";
-        jt.update(resourceUpdateString, params);
+            " AND resource_id IN (";
+
+        for(int i = 0; i < approvableResources.size(); i++){
+            resourceUpdateString = resourceUpdateString + approvableResources.get(i);
+            if(i < approvableResources.size() - 1 ){
+                resourceUpdateString = resourceUpdateString + ", ";
+            }
+        }
+        resourceUpdateString = resourceUpdateString + ");";
+
+        jt.update(resourceUpdateString);
 
 
         String shouldUpdateReservation = "SELECT resource_id FROM reservationresources where reservation_id = " + reservationId +
