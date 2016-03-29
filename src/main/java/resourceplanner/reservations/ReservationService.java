@@ -812,6 +812,7 @@ public class ReservationService {
         if(currentRes.complete){
             return new StandardResponse(true, "Reservation is already approved");
         }
+        System.out.println("Checking to be canceled");
         List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes);
         List<Reservation> overlappingReservations = convertTempListToReservationList(overlapping);
         return new StandardResponse(false, "To-be-canceled reservations returned", overlappingReservations);
@@ -869,7 +870,7 @@ public class ReservationService {
             "SELECT * FROM reservations WHERE reservation_id != ?" + 
             " AND complete = false AND ((reservations.begin_time >= ? AND reservations.begin_time < ?)" + 
             " OR (reservations.end_time > ? AND reservations.end_time <= ?)" + 
-            " OR (reservations.end_time > ? AND reservations.begin_time < ?));",
+            " OR (reservations.end_time >= ? AND reservations.begin_time <= ?));",
             new Object[]{t.reservation_id, t.begin_time, t.end_time, t.begin_time, t.end_time, t.end_time, t.begin_time},
             new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -890,8 +891,10 @@ public class ReservationService {
         for(TempRes temp : reservations){
             List<Resource> resources = getResources(temp.reservation_id);
             for(Resource originalResource : originalResources){
-                if(resources.contains(originalResource)){
-                    finalOutput.add(temp);
+                for(Resource tempResource : resources){
+                    if(originalResource.getResource_id() == tempResource.getResource_id()){
+                        finalOutput.add(temp);
+                    }
                 }
             }
         }
@@ -959,7 +962,7 @@ public class ReservationService {
         List<TempRes> overlappingIncomplete = getOverlappingIncompleteReservations(t);
         for(TempRes toCancel : overlappingIncomplete){
             emailService.sendCanceledEmail(toCancel.reservation_id);
-            deleteReservation(reservationId, true, 1);
+            deleteReservation(toCancel.reservation_id, true, 1);
         }
     }
 
