@@ -29,38 +29,35 @@ public class EmailService {
 
 
     private void scheduleIncompleteEmail(Reservation res){
-        if(res.getShould_email() && res.getUser().isShould_email()){
-            EmailScheduler pendingEmail = new EmailScheduler(res, EmailScheduler.INCOMPLETE_PENDING_ALERT);
-            EmailScheduler neverApprovedEmail = new EmailScheduler(res, EmailScheduler.INCOMPLETE_NEVER_APPROVED_ALERT);
+        EmailScheduler pendingEmail = new EmailScheduler(res, EmailScheduler.INCOMPLETE_PENDING_ALERT);
+        EmailScheduler neverApprovedEmail = new EmailScheduler(res, EmailScheduler.INCOMPLETE_NEVER_APPROVED_ALERT);
 
-            Timestamp beginTimestamp = TimeUtility.stringToTimestamp(res.getBegin_time());
-            Date dateBegin = new Date(beginTimestamp.getTime());
-            Timestamp pendingTimestamp = new Timestamp(beginTimestamp.getTime() - 10*60*1000);
-            Date datePending = new Date(pendingTimestamp.getTime());
+        Timestamp beginTimestamp = TimeUtility.stringToTimestamp(res.getBegin_time());
+        Date dateBegin = new Date(beginTimestamp.getTime());
+        Timestamp pendingTimestamp = new Timestamp(beginTimestamp.getTime() - 10*60*1000);
+        Date datePending = new Date(pendingTimestamp.getTime());
 
-            if(!verifyDateInFuture(dateBegin)){
-                return;
+        if(!verifyDateInFuture(dateBegin)){
+            return;
+        }
+
+        ScheduledFuture scheduledPendingEmail = concurrentTaskScheduler.schedule(pendingEmail, datePending);
+        ScheduledFuture scheduledNeverApprovedEmail = concurrentTaskScheduler.schedule(neverApprovedEmail, dateBegin);
+
+        if(scheduledEmailMap.containsKey(res.getReservation_id())){
+            List<ScheduledFuture> existingFutures = scheduledEmailMap.get(res.getReservation_id());
+            for (ScheduledFuture f : existingFutures){
+                f.cancel(true);
             }
-
-            ScheduledFuture scheduledPendingEmail = concurrentTaskScheduler.schedule(pendingEmail, datePending);
-            ScheduledFuture scheduledNeverApprovedEmail = concurrentTaskScheduler.schedule(neverApprovedEmail, dateBegin);
-
-            if(scheduledEmailMap.containsKey(res.getReservation_id())){
-                List<ScheduledFuture> existingFutures = scheduledEmailMap.get(res.getReservation_id());
-                for (ScheduledFuture f : existingFutures){
-                    f.cancel(true);
-                }
-                existingFutures = new ArrayList<ScheduledFuture>();
-                existingFutures.add(scheduledPendingEmail);
-                existingFutures.add(scheduledNeverApprovedEmail);
-            }
-            else{
-                List<ScheduledFuture> newFutures = new ArrayList<ScheduledFuture>();
-                newFutures.add(scheduledPendingEmail);
-                newFutures.add(scheduledNeverApprovedEmail);
-                scheduledEmailMap.put(res.getReservation_id(), newFutures);
-            }
-
+            existingFutures = new ArrayList<ScheduledFuture>();
+            existingFutures.add(scheduledPendingEmail);
+            existingFutures.add(scheduledNeverApprovedEmail);
+        }
+        else{
+            List<ScheduledFuture> newFutures = new ArrayList<ScheduledFuture>();
+            newFutures.add(scheduledPendingEmail);
+            newFutures.add(scheduledNeverApprovedEmail);
+            scheduledEmailMap.put(res.getReservation_id(), newFutures);
         }
     }
 

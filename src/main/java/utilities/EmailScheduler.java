@@ -96,11 +96,18 @@ public class EmailScheduler implements Runnable{
 			subject = "Incomplete reservation never approved";
 			message = "Hi, \n\nThe following reservation was never fully approved, and as such was canceled at its start time: \n\nTitle: " + reservation.getTitle() + "\nDescription: " + reservation.getDescription() + "\nResources: " + rString + "\nStart Time: "+ beginTime + "\n\n Thanks, \nResource Manager";
 			deletePendingReservation();
+
+			if(!reservation.getShould_email() || !reservation.getUser().isShould_email()){
+				return;
+			}
 			System.out.println("incomplete never approved email being sent");
 		}
 		else if((alertType != null) && (alertType.equals(INCOMPLETE_PENDING_ALERT))){
 			subject = "Incomplete reservation not yet approved";
 			message = "Hi, \n\nThe following reservation is scheduled to begin soon, but still has not been approved. It will be canceled if it is not approved in time: \n\nTitle: " + reservation.getTitle() + "\nDescription: " + reservation.getDescription() + "\nResources: " + rString + "\nStart Time: "+ beginTime + "\n\n Thanks, \nResource Manager";
+			if(!reservation.getShould_email() || !reservation.getUser().isShould_email()){
+				return;
+			}
 			System.out.println("incomplete pending email being sent");
 		}
 		else {
