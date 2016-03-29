@@ -812,6 +812,7 @@ public class ReservationService {
         if(currentRes.complete){
             return new StandardResponse(true, "Reservation is already approved");
         }
+        System.out.println("Checking to be canceled");
         List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes);
         List<Reservation> overlappingReservations = convertTempListToReservationList(overlapping);
         return new StandardResponse(false, "To-be-canceled reservations returned", overlappingReservations);
@@ -836,8 +837,8 @@ public class ReservationService {
         }
         else{
             //Delete the reservation "as an admin" to guarentee it is deleted. 
-            deleteReservation(reservationId, true, 1);
             emailService.sendDeniedEmail(reservationId);
+            deleteReservation(reservationId, true, 1);
             return new StandardResponse(false, "Reservation denied and deleted");
         }
     }
@@ -869,7 +870,7 @@ public class ReservationService {
             "SELECT * FROM reservations WHERE reservation_id != ?" + 
             " AND complete = false AND ((reservations.begin_time >= ? AND reservations.begin_time < ?)" + 
             " OR (reservations.end_time > ? AND reservations.end_time <= ?)" + 
-            " OR (reservations.end_time > ? AND reservations.begin_time < ?));",
+            " OR (reservations.end_time >= ? AND reservations.begin_time <= ?));",
             new Object[]{t.reservation_id, t.begin_time, t.end_time, t.begin_time, t.end_time, t.end_time, t.begin_time},
             new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -890,8 +891,10 @@ public class ReservationService {
         for(TempRes temp : reservations){
             List<Resource> resources = getResources(temp.reservation_id);
             for(Resource originalResource : originalResources){
-                if(resources.contains(originalResource)){
-                    finalOutput.add(temp);
+                for(Resource tempResource : resources){
+                    if(originalResource.getResource_id() == tempResource.getResource_id()){
+                        finalOutput.add(temp);
+                    }
                 }
             }
         }
@@ -917,9 +920,20 @@ public class ReservationService {
     private void partiallyApproveReservation(int reservationId, List<Integer> approvableResources){
         Map<String,List<Integer>> params = Collections.singletonMap("ids", approvableResources);
 
+       // String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
+        //    " AND reservation_id IN (:ids);";
         String resourceUpdateString = "UPDATE reservationresources SET resource_approved = true WHERE reservation_id = " + reservationId +
-            " AND reservation_id IN (:ids);";
-        jt.update(resourceUpdateString, params);
+            " AND resource_id IN (";
+
+        for(int i = 0; i < approvableResources.size(); i++){
+            resourceUpdateString = resourceUpdateString + approvableResources.get(i);
+            if(i < approvableResources.size() - 1 ){
+                resourceUpdateString = resourceUpdateString + ", ";
+            }
+        }
+        resourceUpdateString = resourceUpdateString + ");";
+
+        jt.update(resourceUpdateString);
 
 
         String shouldUpdateReservation = "SELECT resource_id FROM reservationresources where reservation_id = " + reservationId +
@@ -948,7 +962,7 @@ public class ReservationService {
         List<TempRes> overlappingIncomplete = getOverlappingIncompleteReservations(t);
         for(TempRes toCancel : overlappingIncomplete){
             emailService.sendCanceledEmail(toCancel.reservation_id);
-            deleteReservation(reservationId, true, 1);
+            deleteReservation(toCancel.reservation_id, true, 1);
         }
     }
 

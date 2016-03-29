@@ -322,7 +322,7 @@ public class PermissionService {
                     }
                 });
 
-        String groupQueryString = "SELECT resource_id FROM groupresourcepermissions, resources WHERE group_id IN " +
+        String groupQueryString = "SELECT resources.resource_id FROM groupresourcepermissions, resources WHERE group_id IN " +
                 "(SELECT group_id FROM groupmembers WHERE groupmembers.user_id = " + userId + ") AND " + 
                 "permission_level >= 3 AND resources.resource_id = groupresourcepermissions.resource_id AND restricted = true;";
         
