@@ -187,23 +187,23 @@ const ReservationList = React.createClass({
     var leftpane =
       <div>
         <h3></h3>
-        <div className="panel panel-primary">
+        <div className={"panel panel-primary" + (me.state.subroute=='pending' ? " grayout" : "")}>
           <div className="panel-heading">
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load reservations</button>
+            <button type="button" className={"btn btn-primary" + (me.state.subroute=='pending' ? " disabled" : "")} onClick={this.refresh}>Load reservations</button>
             <h4>Start</h4>
-              <input type="date" className="form-control" id="reservation_list_start_date" value={this.state.start_date} onChange={(evt) => this.set('start_date', evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_start_time" value={this.state.start_time} onChange={(evt) => this.set('start_time', evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_start_date" value={this.state.start_date} onChange={(evt) => this.set('start_date', evt.target.value)} disabled={me.state.subroute=='pending'}/>
+              <input type="time" className="form-control" id="reservation_list_start_time" value={this.state.start_time} onChange={(evt) => this.set('start_time', evt.target.value)} disabled={me.state.subroute=='pending'}/>
             <h4>End</h4>
-              <input type="date" className="form-control" id="reservation_list_end_date" value={this.state.end_date} onChange={(evt) => this.set('end_date', evt.target.value)}/>
-              <input type="time" className="form-control" id="reservation_list_end_time" value={this.state.end_time} onChange={(evt) => this.set('end_time', evt.target.value)}/>
+              <input type="date" className="form-control" id="reservation_list_end_date" value={this.state.end_date} onChange={(evt) => this.set('end_date', evt.target.value)} disabled={me.state.subroute=='pending'}/>
+              <input type="time" className="form-control" id="reservation_list_end_time" value={this.state.end_time} onChange={(evt) => this.set('end_time', evt.target.value)} disabled={me.state.subroute=='pending'}/>
             <h4>Tags</h4>
             {this.state.loading_tags ? <Loader /> : <div>
               <ul className="list-group">
                 {this.state.tags.map(x =>
-                  <a key={"reservationtag" + x.name} className="list-group-item pointer" onClick={(evt) => {evt.preventDefault(); me.cycleState(x.name)}}>{x.name}<span className="badge">{x.state}</span></a>
+                  <a key={"reservationtag" + x.name} className={"list-group-item pointer" + (me.state.subroute=='pending' ? " disabled" : "")} onClick={(evt) => {evt.preventDefault(); me.cycleState(x.name)} }>{x.name}<span className="badge">{x.state}</span></a>
                 )}
               </ul>
               {Object.keys(me.state.tags).length > 0 ? null :
