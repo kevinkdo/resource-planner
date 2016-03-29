@@ -836,8 +836,8 @@ public class ReservationService {
         }
         else{
             //Delete the reservation "as an admin" to guarentee it is deleted. 
-            deleteReservation(reservationId, true, 1);
             emailService.sendDeniedEmail(reservationId);
+            deleteReservation(reservationId, true, 1);
             return new StandardResponse(false, "Reservation denied and deleted");
         }
     }
