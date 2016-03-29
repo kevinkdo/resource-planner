@@ -29,7 +29,7 @@ const AdminConsole = React.createClass({
   	  email: "",
   	  username: "",
   	  password: "",
-  	  should_email: "false",
+  	  should_email: false,
   	  loading: false,
   	  error_msg: ""
   	};
