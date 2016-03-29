@@ -199,6 +199,8 @@ const PermissionsManager = React.createClass({
               </tr>
             );
           })}
+          {(Object.keys(me.state.data.users).length > 0 || Object.keys(me.state.data.groups).length > 0) ? null :
+              <tr><td className="lead text-center" colSpan="7">No users or groups to show</td></tr>}
         </tbody>
       </table>
     );
