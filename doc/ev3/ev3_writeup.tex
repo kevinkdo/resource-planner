@@ -93,20 +93,12 @@ The only security addition introduced for evolution 3 is the validation of data 
 
 \subsection{Testing}
 \subsubsection{Retrospective}
-{\huge TODO UPDATE}
-For evolution 1 backend testing, we used a suite of API tests ran from a series of Python scripts. This strategy worked extremely well for us - by having a set of tests which covered the vast majority of API cases, we could quickly make changes and verify that nothing was broken. We stand by our decision to focus on testing only the API contract, and not the backend internals, because ultimately the API is what must be working for the web application to work correctly. Realistically, any major bug in the internals of the backend should affect the API tests as well.
+Our python testing suite has continued to suit us well for testing our REST API. That being said, as this project has become more and more complex, the number of tests required has grown somewhat exponentially. This has made it hard to keep up our testing suit with our actual code changes. However, this problem is more related to the project's complexity itself, rather than our testing design. The simple fact of the matter is that, no matter how we implemented testing, it would become harder and harder to maintain a full suite of tests on the REST API. 
 
-
-Now, there as some exceptions to this. For instance, email is be very hard to test via Python scripts, and so our testing suite does not fully cover email. Similarly, since it is nearly impossible for an API testing suite to be 100 percent comprehensive, there are potentially situations where a backend bug would not break any tests, but would affect the web application. Nevertheless, we feel the chances of such issues occurring is so low that they are not worth worrying about. Given the fact that our presentation for evolution 1 had no issues and that our evolution 1 passed all grader test cases, we still feel quite confident in this strategy. 
-
-We also stand by our decision to use Python, as Python scripts are simple to write and can be run quickly. In addition, our Python testing framework  \texttt{unittest} has proven very easy to use, and Python has numerous libraries that allow you to easily send HTTP requests. 
+Another small issue with our current testing plan relates to the fact that many of the requirements on each new evolution force us to make changes to the way previous API endpoints were built, such as changing what data structures are returned, etc. The problem with this is that our current testing assertions are completely literal, and test for a precisely identical JSON response. This means that if a given test ran correctly, but then we add a single extra field to the JSON response of the API endpoint being tested, the test will now be broken. Perhaps some other testing frameworks would allow our tests to be a little more flexible with what they received. This would prevent so many of our tests from immediately breaking after a few basic changes are made for a new evolution. 
 
 \subsubsection{Current Design}
-{\huge TODO UPDATE}
-For Evolution 2, we updated the test cases to reflect the new permissions, groups, and login protocol with NetID requirements. We added separate tests for groups and permissions but also integrated the new requirements into the existing tests, updating them as needed. In addition, we created the API Debugger which allows for easy testing of the endpoints. For simplicity, while we allow testing of the login endpoint, we run the other endpoint tests as admin. We chose to use the token from the admin because a basic debugger should show that the endpoints accomplish the tasks that they are designed for and not focus so much on who is trying to accomplish the tasks. The API debugger was also written in Python due to ease of sending requests and testing via \texttt{unittest}. 
-
-We chose to not implement every test case in \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for backend testing because we felt that the current tests gave a fairly comprehensive view of functionality. That said, we did manually test all of the cases listed there.
-
+Despite the above challenges, on the whole, we are still happy with our current backend testing strategy. Python tests are easy to run, easy to modify, and easy to create. And, we still stand by our decision to focus our testing on the REST API, rather than on unit tests, since the REST API is the ultimate thing that the front-end cares about. Moving forward, we will need to make sure that we add enough tests to accomodate all of the evolution 4 features, even if that means adding an immense number of tests. 
 
 \subsection{Code Structure}
 \subsubsection{Retrospective}
@@ -130,7 +122,7 @@ Our original design to handle emails sent at the start and end of reservations w
 
 The basic workflow of the above was, individual service classes would call EmailService, EmailService would call EmailScheduler, and EmailScheduler would call EmailUtility. We felt this overall design was simple, easy to use, and quite extensible to future email requirements. 
 
-\subsubsection{Retrospective and Current Design}
+\subsubsection{Current Design}
 Evolution 3 introduced a number of new email requirements. Luckily, our original email scheduling design made adhering to these new requirements easy. Specifically, we only add to do the following things:
 \begin{enumerate}
     \item We added a few new methods to EmailService to handle instantly-sent emails (such as an email for when an  incomplete reservation gets denied or canceled). These are all just 3-4 lines, and call EmailScheduler the same way former EmailService methods did. 
