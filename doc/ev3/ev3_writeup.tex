@@ -41,7 +41,7 @@
 \label{fig:design}
 \end{figure}
 
-Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 2. {\huge TODO - are there any 'huge changes???'}.
+Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 2. 
 
 The changes required for evolution 3 fit nicely into our existing frameworks. In the backend, resource manager permissions were handled with a few new API calls built on top of our evolution 2 permission API calls. Additionally, the email service was expanded to accomodate the new set of email requirements. Finally, the necesarry changes were made across existing reservation endpoints to support multiple resources within each reservation, and corresponding DB updates were made as well. The primary changes on the front-end are {\huge TODO}
 
@@ -106,9 +106,17 @@ Our code structure has essentially stayed the same for evolution 3. In evolution
 
 Since many of the new requirements in evolution 3 were extensions of previous work (modifications to reservations, modifications to permissions, modifications to email), we did not have to add any significant new modules or classes. Rather, most of our work for evolution 3 involved slightly modifying or extending previously created controllers and services. 
 
-\subsection{Current Design}
+\subsubsection{Current Design}
 We have no plans to modify the aforementioned code structure, as it has suited us well and helped us maintain clean code at a high level in the backend. 
 
+\subsection{Reservations}
+\subsubsection{Retrospective}
+Our existing reservations code went through a few changes to accommodate reservation titles, descriptions, and multiple resources. All the reservations code was also refactored to better accommodate future changes to reservations. 
+
+\subsubsection{Current Design}
+Adding titles and descriptions to reservations was trivial, as there was a one-to-one mapping from reservation\_id to title and description. Adding multiple resources to reservations was more difficult and involved checking permissions for each resource before associating the resource to a reservation. Finally, once the resource permissions are handled, if the resources are restricted, they are sent off to be approved by those with approval permission. There are edge cases such as reservations with no resources or reservations with all unrestricted resources (which would require no approval) which involve automatically setting the status of a reservation to complete. 
+
+Overall, the additions to reservations were very simply implemented. Reservations code was then completely refactored to stop using a deprecated JDBC class and start using the new JdbcTemplate class, which provides additional security features and is much simpler to use. 
 
 \subsection{Email}
 \label{sec:EMAIL}
@@ -210,7 +218,6 @@ We were very pleased with our decision not to implement automated UI testing. Wh
 As a result of our success with the manual UI testing from evolution 1, the only changes to our methodology here are to increase the number of test cases to account for the new functionality introduced by the Evolution 3 requirements.
 
 \section{Member contributions}
-{\huge TODO UPDATE}
 
 Kevin Do maintained the frontend and advocated for the frontend's needs in discussions with the backend team.
 
