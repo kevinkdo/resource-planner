@@ -43,7 +43,7 @@
 
 Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 2. 
 
-The changes required for evolution 3 fit nicely into our existing frameworks. In the backend, resource manager permissions were handled with a few new API calls built on top of our evolution 2 permission API calls. Additionally, the email service was expanded to accomodate the new set of email requirements. Finally, the necesarry changes were made across existing reservation endpoints to support multiple resources within each reservation, and corresponding DB updates were made as well. The primary changes on the front-end are {\huge TODO}
+The changes required for evolution 3 fit nicely into our existing frameworks. In the backend, resource manager permissions were handled with a few new API calls built on top of our evolution 2 permission API calls. Additionally, the email service was expanded to accomodate the new set of email requirements. Finally, the necesarry changes were made across existing reservation endpoints to support multiple resources within each reservation, and corresponding DB updates were made as well. The primary changes on the front-end are to add text boxes for the new reservation fields, a checkbox for restricted resources, and a new tab for approvable reservations.
 
 For retrospectives on our former backend choices and more detail about our backend additions, see the \hyperref[sec:Backend]{backend section}. For retrospectives on our former frontend choices and more detail about our frontend additions, see the \hyperref[sec:Frontend]{frontend section}. Finally, see \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for our updated backend test strategy,  \hyperref[appendix:frontendtest]{Appendix \ref{appendix:frontendtest}} for our updated frontend test strategy, \hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}} for our updated API specification, and \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}} for our updated database design. 
 
@@ -450,7 +450,17 @@ Michael Han maintained the automated backend tests, helped with manual frontend 
 \clearpage
 \section{API Specification}
 \label{appendix:apispec}
-{\huge TODO REPLACE WITH SCREENSHOT OF GDOC}
+\includegraphics[width=6in]{apispec_01.pdf}
+
+\includegraphics[width=6in]{apispec_02.pdf}
+
+\includegraphics[width=6in]{apispec_03.pdf}
+
+\includegraphics[width=6in]{apispec_04.pdf}
+
+\includegraphics[width=6in]{apispec_05.pdf}
+
+\includegraphics[width=6in]{apispec_06.pdf}
 
 \clearpage
 \section{DB Design}
