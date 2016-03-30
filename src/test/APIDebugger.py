@@ -16,6 +16,9 @@ userUrl = '"/api/users"'
 canDeleteUrl = '+ "/candelete"'
 groupUrl = '"/api/groups/"'
 permissionUrl = ' + "/editablePermissions"'
+incompleteReservationUrl = ' + "/approvableReservations"'
+cancelIncompleteReservationUrl = ' + "/canceledWithApproval"'
+approveIncompletReservationUrl = ' + "/approveReservation"'
 getRequest = 'r = requests.get(baseUrl + '
 postRequest = 'r = requests.post(baseUrl + '
 putRequest = 'r = requests.put(baseUrl + '
@@ -54,8 +57,12 @@ optionsPrint = {
   16: (Verbs.Put, 'Update Group by ID'),
   17: (Verbs.Delete, 'Delete Group by ID'),
   18: (Verbs.Put, 'Update permissions by user ID'),
-  19: (Verbs.Get, 'Get permissions by user ID')
+  19: (Verbs.Get, 'Get permissions by user ID'),
+  20: (Verbs.Get, 'Get all incomplete reservations that you can approve'),
+  21: (Verbs.Get, 'Get all incomplete reservations that would be canceled with approval of reservation ID (type in)'),  
+  22: (Verbs.Post, 'Approve or deny a reservation')
 }
+
 
 def debugger():
   print "Assumes you are logged in as admin"
@@ -84,7 +91,14 @@ def processSelection(input):
   if input in optionsPrint:
     if optionsPrint[input][0] is Verbs.Put or optionsPrint[input][0] is Verbs.Get or optionsPrint[input][0] is Verbs.Delete:
       temp = raw_input('input the desired ID or hit enter if non-applicable: ')
-      if temp == '' and (input is not 1 and input is not 15):
+      if temp == '' and (input is not 1 and input is not 15 and input is not 20):
+        while temp == '':
+          temp = raw_input('ID required. Input the desired ID: ')
+      else:
+        requestID = requestIDPre + temp + requestIDPost
+    if optionsPrint[input][0] is Verbs.Post and input is 22:
+      temp = raw_input('input the desired ID or hit enter if non-applicable: ')
+      if temp == '' and (input is not 1 and input is not 15 and input is not 20):
         while temp == '':
           temp = raw_input('ID required. Input the desired ID: ')
       else:
@@ -117,8 +131,12 @@ def processSelection(input):
       16: putRequest + groupUrl + requestID + requestPayload + requestEnding,
       17: deleteRequest + groupUrl + requestID + requestEnding,
       18: putRequest + userUrl + requestID + permissionUrl + requestPayload + requestEnding,
-      19: getRequest + userUrl + requestID + permissionUrl + requestEnding
+      19: getRequest + userUrl + requestID + permissionUrl + requestEnding,
+      20: getRequest + reserveUrl + incompleteReservationUrl + requestEnding,
+      21: getRequest + reserveUrl + cancelIncompleteReservationUrl + requestID + requestEnding,
+      22: postRequest + reserveUrl + approveIncompletReservationUrl + requestID + requestPayload + requestEnding
     }
+    print updatedDict[input]
     exec(updatedDict[input])
     
     print 'URL: '+ r.url
