@@ -125,7 +125,7 @@ Our original design to handle emails sent at the start and end of reservations w
 \begin{enumerate}
     \item An EmailService class was used to handle scheduling emails. This class kept track of queued emails to be sent in the future, and provided a simple API that could be called on reservation creation/modification/deletion to update queued email times, or add new emails to the queue, or delete queued emails.
     \item An EmailScheduler class, which handled the logic of actually composing the email, based on certain input parameters. This class would define the subject of each email, as well as its content. 
-    \item An EmailUtility class, which handled the actually email API we use to send emails. 
+    \item An EmailUtility class, which handled the actual email API we use to send emails. 
 \end{enumerate}
 
 The basic workflow of the above was, individual service classes would call EmailService, EmailService would call EmailScheduler, and EmailScheduler would call EmailUtility. We felt this overall design was simple, easy to use, and quite extensible to future email requirements. 
@@ -177,7 +177,7 @@ Given the ambiguity of some evolution requirements, here are some of the assumpt
 Communication between the frontend and the backend is done through a REST API with JSON (\hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}}).
 
 \subsection{Retrospective}
-The JSON-based REST API served us well for Evolution 3. We identified several strengths that helped us implement the new set of requirements: the well-understood nature of JSON and the fairly rich state transfer afforded to us. Furthermore, the weaknesses we identified (that the client must initiate all data transfer and JSON's rigid tree-of-values structure) did not affect us much when implemented Evolution 3.
+The JSON-based REST API served us well for Evolution 3. We identified several strengths that helped us implement the new set of requirements: the well-understood nature of JSON and the fairly rich state transfer afforded to us. Furthermore, the weaknesses we identified (that the client must initiate all data transfer and JSON's rigid tree-of-values structure) did not affect us much when we implemented Evolution 3.
 
 \subsection{Current Design}
 We expanded the set of endpoints that were required to implement the requirements in Evolution 3. Adding the title and description fields to reservations was a trivial change to the API. From an API perspective, compound reservations involved changing the type of the field from an integer to a list of integers. (This is not to say that the backend changes to implement this feature were as simple). Restricted resources are handled with one extra Boolean field on resources. Resource managers were added as a higher level to the permissions endpoints.
@@ -226,7 +226,7 @@ Davis Treybig implemented much of the permission-related code, including new per
 
 Jiawei Zhang refactored the reservation service and updated it to new spec. Also simplified email service.
 
-Michael Han wrote and maintained the automated backend tests and implemented the API Debugger and the group manager.
+Michael Han maintained the automated backend tests, helped with manual frontend testing, and helped with minor frontend features.
 
 \clearpage
 \appendix
@@ -276,7 +276,6 @@ Michael Han wrote and maintained the automated backend tests and implemented the
             \item Delete resource with valid ID without resource management permissions without view access
             \item Delete resource with invalid ID with resource management permissions with view access
         \end{enumerate}
-        
         \item canDelete
             \begin{enumerate}
             \item Get resources canDelete with valid ID with resource management permissions with view access
@@ -285,6 +284,10 @@ Michael Han wrote and maintained the automated backend tests and implemented the
             \item Get resources canDelete with valid ID without resource management permissions without view access
             \item Get resources canDelete with invalid ID with resource management permissions with view access
             \end{enumerate}
+        \item Restricted resources
+        \begin{enumerate}
+            \item Create valid restricted resource
+        \end{enumerate}
     \end{enumerate}
     \item Reservation Tests
     \begin{enumerate}
@@ -294,6 +297,8 @@ Michael Han wrote and maintained the automated backend tests and implemented the
             \item Create valid reservation with valid user ID with reservation management permissions without reserve access
             \item Create valid reservation with valid user ID without reservation management permissions with reserve access
             \item Create valid reservation with valid user ID without reservation management permissions without reserve access
+            \item Create valid reservation wih valid user ID with reservation management permissions with reserve access for multiple resources
+            \item Create invalid reservation with empty title field
             \item Create valid reservation with invalid user ID with reservation management permissions with reserve access
             \item Create reservation with touching time intervals with reservation management permissions with reserve access
             \item Create invalid reservation with invalid resource ID with reservation management permissions with reserve access
@@ -328,6 +333,13 @@ Michael Han wrote and maintained the automated backend tests and implemented the
             \item Delete reservation with valid ID without reservation management permissions with reserve access
             \item Delete reservation with valid ID without reservation management permissions without reserve access
             \item Delete reservation with invalid ID with reservation management permissions with reserve access    
+        \end{enumerate}
+        \item Incomplete Reservations
+        \begin{enumerate}
+            \item Create multiple valid incomplete reservations for the same restricted resource at the same time
+            \item Approve valid incomplete reservation and cancel all other overlapping incomplete reservations
+            \item Deny valid incomplete reservation
+            \item Allow incomplete reservation to expire
         \end{enumerate}
     \end{enumerate}
     \item Tags Tests
@@ -364,12 +376,20 @@ Michael Han wrote and maintained the automated backend tests and implemented the
     \end{enumerate}
     \item Permissions Tests
     \begin{enumerate}
-        \item Get user permissions with valid ID with user management permissions
-        \item Get user permissions with valid ID without user management permissions
-        \item Get user permissions with invalid ID with user management permissions
-        \item Set user permissions with valid ID with user management permissions
-        \item Set user permissions with valid ID without user management permissions
-        \item Set user permissions with invalid ID with user management permissions 
+        \item General
+        \begin{enumerate}
+            \item Get user permissions with valid ID with user management permissions
+            \item Get user permissions with valid ID without user management permissions
+            \item Get user permissions with invalid ID with user management permissions
+            \item Set user permissions with valid ID with user management permissions
+            \item Set user permissions with valid ID without user management permissions
+            \item Set user permissions with invalid ID with user management permissions 
+        \end{enumerate}
+        \item Resource Manager
+        \begin{enumerate}
+            \item Set user as a resource manager with user management permissions
+            \item Set user as a resource manager without user management permissions
+        \end{enumerate}
     \end{enumerate}
 \end{enumerate}
 
