@@ -7,6 +7,7 @@ const ResourceList = React.createClass({
       loading_tags: true,
       loading_table: true,
       tags: {},
+      subroute: "list",
       resources: {},
       error_msg: error_msg,
       is_error: is_error,
@@ -74,7 +75,8 @@ const ResourceList = React.createClass({
         });
         me.setState({
           resources: new_resources,
-          loading_table: false
+          loading_table: false,
+          subroute: "list"
         });
       },
       function(obj) {
@@ -89,7 +91,8 @@ const ResourceList = React.createClass({
         });
         me.setState({
           tags: new_tags,
-          loading_tags: false
+          loading_tags: false,
+          subroute: "list"
         });
       },
       function(obj) {
@@ -132,38 +135,50 @@ const ResourceList = React.createClass({
           </div>
         </div>
       </div>
-    var rightpane = this.state.loading_table ? <Loader /> : (
-      <table className="table table-hover">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Restricted</th>
-            <th>Parent ID</th>
-            <th>Shared Count</th>
-            <th>Tags</th>
-            <th></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.keys(me.state.resources).map(id => {
-            var x = me.state.resources[id];
-            return <tr key={"resource " + id} className={x.restricted ? "warning" : ""}>
-              <td>{id}</td>
-              <td>{x.name}</td>
-              <td>{x.restricted ? "Yes" : "No"}</td>
-              <td>{1}</td> {/* replace with parent id */}
-              <td>{2}</td> {/* replace with shared count */}
-              <td>{x.tags.join(",")}</td>
-              <td><a role="button" onClick={() => this.editResource(id)}>View/Edit</a></td>
-              <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
+    var rightpane_list = this.state.loading_table ? <Loader /> : (
+      <div>
+        <ul className="nav nav-tabs">
+          <li className={this.state.subroute == 'list' ? "active" : ""}><a href="#resource_list/0" onClick={(evt) => this.setState({subroute: "list"})}>Resource List</a></li>
+          <li className={this.state.subroute == 'hierarchy' ? "active" : ""}><a href="#resource_list/0" onClick={(evt) => this.setState({subroute: "hierarchy"})}>Resource Hierarchy</a></li>
+        </ul>
+        <table className="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Restricted</th>
+              <th>Tags</th>
+              <th>Parent ID</th>
+              <th>Shared Count</th>
+              <th></th>
+              <th></th>
             </tr>
-          })}
-          {Object.keys(me.state.resources).length > 0 ? null :
-            <tr><td className="lead text-center" colSpan="7">No resources to display</td></tr>}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {Object.keys(me.state.resources).map(id => {
+              var x = me.state.resources[id];
+              return <tr key={"resource " + id} className={x.restricted ? "warning" : ""}>
+                <td>{id}</td>
+                <td>{x.name}</td>
+                <td>{x.restricted ? "Yes" : "No"}</td>
+                <td>{x.tags.join(",")}</td>
+                <td><a role="button" onClick={() => this.editResource(id)}>View/Edit</a></td>
+                <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
+              </tr>
+            })}
+            {Object.keys(me.state.resources).length > 0 ? null :
+              <tr><td className="lead text-center" colSpan="7">No resources to display</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    );
+    var rightpane_hierarchy = this.state.loading_table ? <Loader /> : (
+      <div>
+        <ul className="nav nav-tabs">
+          <li className={this.state.subroute == 'list' ? "active" : ""}><a href="#resource_list/0" onClick={(evt) => this.setState({subroute: "list"})}>Resource List</a></li>
+          <li className={this.state.subroute == 'hierarchy' ? "active" : ""}><a href="#resource_list/0" onClick={(evt) => this.setState({subroute: "hierarchy"})}>Resource Hierarchy</a></li>
+        </ul>
+      </div>
     );
     return (
       <div>
@@ -181,7 +196,7 @@ const ResourceList = React.createClass({
                   <strong>{this.state.error_msg}</strong>
                 </div>
               }
-              {rightpane}
+              {me.state.subroute == 'list' ? rightpane_list : rightpane_hierarchy}
             </div>
           </div>
         </div>
