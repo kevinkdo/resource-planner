@@ -45,8 +45,10 @@ const ResourceEditor = React.createClass({
       name: "",
       description: "",
       tags: [""],
-      error_msg: "",
       restricted: false,
+      parent_id: 0,
+      shared_count: 1,
+      error_msg: "",      
       is_error: false
     };
   },
@@ -91,8 +93,8 @@ const ResourceEditor = React.createClass({
                     <input type="text" className="form-control" id="resource_editor_description" placeholder="Description" value={this.state.description} onChange={(evt)=>this.set("description", evt.target.value)}/>
                   </div>
                   <div className="checkbox">
-                  <label><input type="checkbox" checked={this.state.restricted} onChange={(evt)=>this.set("restricted", evt.target.checked)}/> Restricted resource</label>
-                </div>
+                    <label><input type="checkbox" checked={this.state.restricted} onChange={(evt)=>this.set("restricted", evt.target.checked)}/> Restricted resource</label>
+                  </div>
                   <div className="form-group">
                     <label htmlFor="resource_editor_tags">Tags</label>
                     <div className="row">
@@ -103,6 +105,14 @@ const ResourceEditor = React.createClass({
                         <ListPlusInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} editFunc={this.setTag} hasAddon={true} placeholder="Optional tag"/>
                       </div>
                     </div>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="resource_editor_parent_id">Parent ID</label>
+                    <input type="number" className="form-control" id="resource_editor_parent_id" placeholder="Parent ID" value={this.state.parent_id} onChange={(evt)=>this.set("parent_id", evt.target.value)}/>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="resource_editor_shared_count">Shared Count</label>
+                    <input type="number" className="form-control" id="resource_editor_shared_count" placeholder="Shared Count" value={this.state.shared_count} onChange={(evt)=>this.set("shared_count", evt.target.value)}/>
                   </div>
                   <div className="btn-toolbar">
                     <button type="submit" className="btn btn-primary" onClick={this.editResource} disabled={this.state.sending}>Save changes</button>

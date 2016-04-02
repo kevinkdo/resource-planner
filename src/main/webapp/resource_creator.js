@@ -44,6 +44,8 @@ const ResourceCreator = React.createClass({
       description: "",
       tags: [""],
       restricted: false,
+      parent_id: 0,
+      shared_count: 1,
       error_msg: "",
       is_error: false
     };
@@ -86,6 +88,14 @@ const ResourceCreator = React.createClass({
                       <ListPlusInput addFunc={this.addTag} value={last_tag} index={this.state.tags.length-1} editFunc={this.setTag} hasAddon={true} placeholder="Optional tag"/>
                     </div>
                   </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_parent_id">Parent ID</label>
+                  <input type="number" className="form-control" id="resource_creator_parent_id" placeholder="Parent ID" value={this.state.parent_id} onChange={(evt)=>this.set("parent_id", evt.target.value)}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resource_creator_shared_count">Shared Count</label>
+                  <input type="number" className="form-control" id="resource_creator_shared_count" placeholder="Shared Count" value={this.state.shared_count} onChange={(evt)=>this.set("shared_count", evt.target.value)}/>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createResource} disabled={this.state.sending}>Create resource</button>
