@@ -162,6 +162,8 @@ const ResourceList = React.createClass({
                 <td>{x.name}</td>
                 <td>{x.restricted ? "Yes" : "No"}</td>
                 <td>{x.tags.join(",")}</td>
+                <td>TODO</td>
+                <td>TODO</td>
                 <td><a role="button" onClick={() => this.editResource(id)}>View/Edit</a></td>
                 <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
               </tr>
