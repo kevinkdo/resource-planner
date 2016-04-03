@@ -174,12 +174,156 @@ const ResourceList = React.createClass({
         </table>
       </div>
     );
+
+    // ----- TreeNode -----
+    var TreeNode = React.createClass({
+      isValid() {
+        return !(this.props.numChildren == 0 && this.props.name.length == 0);
+      },    
+
+      render() {
+        var marker = <circle r="8" fill={this.isValid() ? "#5bc0de" : "#d9534f"} cx={this.props.x+8} cy={this.props.y+8} onClick={(!this.props.dragging && this.props.numChildren == 0) || this.props.selecting ? this.handleClick : null} />;
+        var text = <text className="nodelabel" x={this.props.x + 20} y={this.props.y + 13}>{this.props.name}</text>;
+        return <g>{marker}{text}</g>;
+      }
+    });
+
+    // ----- TreeLink -----
+    var TreeLink = React.createClass({
+      render() {
+        return <line className="link" x1={this.props.source.x+8} y1={this.props.source.y+16} x2={this.props.target.x+8} y2={this.props.target.y}></line>;
+      }
+    });
+
+    // ----- ResourceTree -----
+    var ResourceTree = React.createClass({ 
+      getInitialState() {
+        return {
+          nodeId: 1,
+          targetId: 0,
+          sourceId: 0,
+          xOffset: 0,
+          yOffset: 0,
+          selecting: false,
+          tree: {
+            name: "Duke",
+            id: 1,
+            children: [
+              {
+                name: "Hudson",
+                id: 2,
+                children: [
+                  {
+                    name: "Chair",
+                    id: 3,
+                    children: []
+                  }
+                ]
+              },
+              {
+                name: "CIEMAS",
+                id: 4,
+                children: [
+                  {
+                    name: "Room 1",
+                    id: 5,
+                    children: [
+                      {
+                        name: "Projector",
+                        id: 6,
+                        children: [
+                          {
+                            name: "Lightbulb",
+                            id: 7,
+                            children: []
+                          }
+                        ]
+                      },
+                      {
+                        name: "Desk",
+                        id: 8,
+                        children: [
+                          {
+                            name: "Chair",
+                            id: 9,
+                            children: []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        };
+      },
+
+      setTargetId(targetId) {
+        this.setState({
+          targetId: targetId
+        });
+      },
+
+      startDrag(dragState) {
+        this.setState({
+          sourceId: dragState.sourceId,
+          xOffset: dragState.xOffset,
+          yOffset: dragState.yOffset
+        });
+      },
+
+      setText(targetId, string) {
+        this.setState(function(state, props) {
+          var traverse = function(node) {
+            if (node.id == targetId) {
+              if (node.children && node.children.length > 0) {
+                node.subscript = string;
+              }
+              else {
+                node.name = string;
+              }
+            }
+            else if (node.children) {
+              node.children.forEach(traverse);
+            }
+          };
+          traverse(state.tree);
+          return state;
+        });
+      },
+
+      render() {
+        var me = this;
+        var width = document.getElementById('rightpane_hierarchy').clientWidth;
+        var height = document.getElementById('rightpane_hierarchy').clientHeight + 500;
+        var tree = d3.layout.tree().size([width*5/6, height*5/6]).separation(function(a, b) {return (a.parent == b.parent ? 2 : 1);});
+        var nodes = tree.nodes(this.state.tree);
+        var links = tree.links(nodes);
+        
+        var renderedNodes = nodes.map(function(node) {
+          return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} numChildren={node.children ? node.children.length : 0} setTargetId={me.setTargetId} setText={me.setText} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript}/>;
+        });
+
+        var renderedLinks = links.map(function(link) {
+          return <TreeLink key={nodeId++} source={link.source} target={link.target} />;
+        });
+
+        var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;
+
+        return <div>{svg}</div>;        
+      }
+    });
+
     var rightpane_hierarchy = this.state.loading_table ? <Loader /> : (
       <div>
-        <ul className="nav nav-tabs">
+        <ul className="nav nav-tabs" id="rightpane_hierarchy">
           <li className={this.state.subroute == 'list' ? "active" : ""}><a href="#resource_list/0" onClick={(evt) => this.setState({subroute: "list"})}>Resource List</a></li>
           <li className={this.state.subroute == 'hierarchy' ? "active" : ""}><a href="#resource_list/0" onClick={(evt) => this.setState({subroute: "hierarchy"})}>Resource Hierarchy</a></li>
         </ul>
+        <br/>
+        <br/>
+        <ResourceTree/>
       </div>
     );
     return (

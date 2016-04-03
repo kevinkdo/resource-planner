@@ -44,6 +44,14 @@ const Router = React.createClass({
     this.setState(data);
   },
 
+  numChildren(str) {
+    if (str == "\u03c3" || str == "\u03C0" || str == "\u03c1") {
+        return 1;
+      } else {
+        return 2;
+      }
+  },
+
   render() {
     switch (this.state.route) {
       case "login":
