@@ -57,6 +57,14 @@ public class ResourceController extends Controller {
         return resourceService.getResource(new String[0], new String[0], userId);
     }
 
+    @RequestMapping(value = "/forest",
+            method = RequestMethod.GET)
+    @ResponseBody
+    public StandardResponse getResourceForest(final HttpServletRequest request) {
+        int userId = getRequesterID(request);
+        return resourceService.getResourceForest(userId);
+    }
+
 
         @RequestMapping(value = "/{resourceId}",
             method = RequestMethod.PUT,

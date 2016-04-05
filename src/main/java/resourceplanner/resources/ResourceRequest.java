@@ -12,9 +12,11 @@ public class ResourceRequest {
     private String description;
     private List<String> tags;
     private Boolean restricted;
+    private Integer shared_count;
+    private Integer parent_id;
 
     public boolean isValid() {
-        return name != null && description != null && tags != null && restricted != null;
+        return name != null && description != null && tags != null && restricted != null && shared_count != null && parent_id != null;
     }
 
     public String getName() {
@@ -38,5 +40,13 @@ public class ResourceRequest {
 
     public Boolean isRestricted() {
         return restricted;
+    }
+
+    public Integer getShared_count() {
+        return shared_count;
+    }
+
+    public Integer getParent_id() {
+        return parent_id;
     }
 }

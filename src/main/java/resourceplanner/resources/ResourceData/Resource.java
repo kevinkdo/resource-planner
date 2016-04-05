@@ -11,6 +11,8 @@ public class Resource {
     private String description;
     private List<String> tags;
     private boolean restricted;
+    private int shared_count;
+    private List<Resource> children;
 
     public Resource(int resource_id, String name, String description, List<String> tags, boolean restricted) {
         this.resource_id = resource_id;
@@ -62,5 +64,21 @@ public class Resource {
 
     public void setRestricted(boolean restricted) {
         this.restricted = restricted;
+    }
+
+    public void setShared_count(int shared_count) {
+        this.shared_count = shared_count;
+    }
+
+    public int getShared_count() {
+        return shared_count;
+    }
+
+    public void setChildren(List<Resource> children) {
+        this.children = children;
+    }
+
+    public List<Resource> getChildren() {
+        return children;
     }
 }

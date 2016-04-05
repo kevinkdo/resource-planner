@@ -33,7 +33,9 @@ CREATE TABLE resources (
   resource_id     SERIAL PRIMARY KEY NOT NULL,
   name            VARCHAR(255)       NOT NULL,
   description     VARCHAR(2000),
-  restricted      BOOLEAN            NOT NULL DEFAULT FALSE
+  restricted      BOOLEAN            NOT NULL DEFAULT FALSE,
+  shared_count    INT                NOT NULL DEFAULT 1,
+  parent_id       INT                NOT NULL
 );
 
 CREATE TABLE resourcetags (

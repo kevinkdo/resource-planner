@@ -53,16 +53,26 @@ public class ResourceService {
             }
         }
 
+        if (req.getParent_id() != 0) {
+            int resourceExists = jt.queryForObject(
+                    "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, req.getParent_id());
+            if (resourceExists != 1) {
+                return new StandardResponse(true, "Parent resource does not exist");
+            }
+        }
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
                 new PreparedStatementCreator() {
                     public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                         PreparedStatement ps = connection.prepareStatement(
-                                "INSERT INTO resources (name, description, restricted) VALUES (?, ?, ?);",
+                                "INSERT INTO resources (name, description, restricted, shared_count, parent_id) VALUES (?, ?, ?, ?, ?);",
                                 new String[]{"resource_id"});
                         ps.setString(1, req.getName());
                         ps.setString(2, req.getDescription());
                         ps.setBoolean(3, req.isRestricted());
+                        ps.setInt(4, req.getShared_count());
+                        ps.setInt(5, req.getParent_id());
                         return ps;
                     }
                 },
@@ -83,8 +93,7 @@ public class ResourceService {
 
         addDefaultResourcePermissions(resourceId, userId);
 
-        return new StandardResponse(false, "Successfully inserted resource", new Resource(resourceId, req.getName(),
-                req.getDescription(), req.getTags(), req.isRestricted()));
+        return new StandardResponse(false, "Successfully inserted resource");
     }
 
     private void addDefaultResourcePermissions(int resourceId, int userId){
@@ -129,9 +138,14 @@ public class ResourceService {
             );
     }
 
-    public StandardResponse getResourceById(final int resourceId, int userId) {
+    private int getSharedCount(int resourceId) {
+        // TODO
+        return 1;
+    }
+
+    public Resource getResourceByIdHelper(final int resourceId, int userId) {
         List<Resource> resources = jt.query(
-                "SELECT name, description, restricted FROM resources WHERE resource_id = ?;",
+                "SELECT name, description, restricted, shared_count FROM resources WHERE resource_id = ?;",
                 new Object[]{resourceId},
                 new RowMapper<Resource>() {
                     public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -139,13 +153,10 @@ public class ResourceService {
                         resource.setName(rs.getString("name"));
                         resource.setDescription(rs.getString("description"));
                         resource.setRestricted(rs.getBoolean("restricted"));
+                        resource.setShared_count(rs.getInt("shared_count"));
                         return resource;
                     }
                 });
-
-        if (resources.size() != 1) {
-            return new StandardResponse(true, "Resource does not exist");
-        }
 
         Resource resource = resources.get(0);
 
@@ -156,44 +167,58 @@ public class ResourceService {
         resource.setTags(tags);
         resource.setResource_id(resourceId);
 
+        // get all childrens' resourceIds
+        List<Integer> childrenIds = jt.queryForList(
+                "SELECT resource_id FROM resources WHERE parent_id = ?;",
+                new Object[]{resourceId},
+                Integer.class);
+
+        List<Resource> children = new ArrayList<Resource>();
+        for (int childId : childrenIds) {
+            Resource child = getResourceByIdHelper(childId, userId);
+            if (child == null) {
+                return null;
+            }
+            children.add(child);
+        }
+        resource.setChildren(children);
 
         Set<Integer> allViewableResources = getViewableResources(userId);
         if(allViewableResources.contains(resourceId) || userId == 1){
-            return new StandardResponse(false, "Successfully retrieved resource", resource);
+            return resource;
         }
         else{
-            return new StandardResponse(true, "You do not have permission to view this resource");
+            return null;
         }
     }
 
-    public StandardResponse getResourceByIdIgnoringPermissions(final int resourceId) {
-        List<Resource> resources = jt.query(
-                "SELECT name, description, restricted FROM resources WHERE resource_id = ?;",
-                new Object[]{resourceId},
-                new RowMapper<Resource>() {
-                    public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        Resource resource = new Resource();
-                        resource.setName(rs.getString("name"));
-                        resource.setDescription(rs.getString("description"));
-                        resource.setRestricted(rs.getBoolean("restricted"));
-                        return resource;
-                    }
-                });
+    public StandardResponse getResourceById(final int resourceId, int userId) {
 
-        if (resources.size() != 1) {
+        int resourceExists = jt.queryForObject(
+                "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, resourceId);
+        if (resourceExists != 1) {
             return new StandardResponse(true, "Resource does not exist");
         }
 
-        Resource resource = resources.get(0);
+        Resource r = getResourceByIdHelper(resourceId, userId);
+        if (r == null) {
+            return new StandardResponse(true, "You don't have view permissions for all children of the resource");
+        }
+        return new StandardResponse(false, "Successfully fetched resource", r);
+    }
 
-        List<String> tags = jt.queryForList(
-                "SELECT tag FROM resourcetags WHERE resource_id = ?;",
-                new Object[]{resourceId},
-                String.class);
-        resource.setTags(tags);
-        resource.setResource_id(resourceId);
+    public StandardResponse getResourceByIdIgnoringPermissions(final int resourceId) {
+        int resourceExists = jt.queryForObject(
+                "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, resourceId);
+        if (resourceExists != 1) {
+            return new StandardResponse(true, "Resource does not exist");
+        }
 
-        return new StandardResponse(false, "Successfully retrieved resource", resource);
+        Resource r = getResourceByIdHelper(resourceId, 1);
+        if (r == null) {
+            return new StandardResponse(true, "You don't have view permissions for all children of the resource");
+        }
+        return new StandardResponse(false, "Successfully fetched resource", r);
     }
 
 
@@ -300,6 +325,28 @@ public class ResourceService {
         private boolean restricted;
     }
 
+    public StandardResponse getResourceForest(int userId) {
+        // get all parents
+        List<Integer> childrenIds = jt.queryForList(
+                "SELECT resource_id FROM resources WHERE parent_id = 0;",
+                new Object[]{},
+                Integer.class);
+
+        // remove duplicates
+        List<Integer> noDupesChildren = new ArrayList<Integer>(new LinkedHashSet<Integer>(childrenIds));
+
+        List<Resource> resources = new ArrayList<Resource>();
+        for (int resourceId : noDupesChildren) {
+            Resource r = getResourceByIdHelper(resourceId, userId);
+            if (r != null) {
+                // only add if you have viewing permissions
+                resources.add(r);
+            }
+        }
+
+        return new StandardResponse(false, "Successfully retrieved resource forest", new Resources(resources));
+    }
+
     private List<RT> getResourcesWithTags() {
         final String statement =
                 "SELECT resources.name, resources.description, resources.restricted, resources.resource_id, resourcetags.tag " +
@@ -382,15 +429,25 @@ public class ResourceService {
             return new StandardResponse(true, "Resource does not exist");
         }
 
+        if (req.getParent_id() != 0) {
+            int parentResourceExists = jt.queryForObject(
+                    "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, req.getParent_id());
+            if (parentResourceExists != 1) {
+                return new StandardResponse(true, "Parent resource does not exist");
+            }
+        }
+
         RT oldResource = getSpecificResource(resourceId);
         if(oldResource.restricted == true && !req.isRestricted()){
             updateNewUnrestrictedResource(resourceId);
         }
 
-        jt.update("UPDATE resources SET name = ?, description = ?, restricted = ? WHERE resource_id = ?;",
+        jt.update("UPDATE resources SET name = ?, description = ?, restricted = ?, shared_count = ?, parent_id = ? WHERE resource_id = ?;",
                 req.getName(),
                 req.getDescription(),
                 req.isRestricted(),
+                req.getShared_count(),
+                req.getParent_id(),
                 resourceId);
 
         jt.update("DELETE FROM resourcetags WHERE resource_id = ?;", resourceId);
@@ -406,8 +463,7 @@ public class ResourceService {
                 "INSERT INTO resourcetags (resource_id, tag) VALUES (?, ?);",
                 batch);
 
-        return new StandardResponse(false, "Successfully updated resource", new Resource(resourceId, req.getName(),
-                req.getDescription(), req.getTags(), req.isRestricted()));
+        return new StandardResponse(false, "Successfully updated resource");
     }
 
     public StandardResponse deleteResource(int resourceId) {
