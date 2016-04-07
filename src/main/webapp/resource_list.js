@@ -178,11 +178,11 @@ const ResourceList = React.createClass({
     // ----- TreeNode -----
     var TreeNode = React.createClass({
       isValid() {
-        return !(this.props.numChildren == 0 && this.props.name.length == 0);
+        return true;//!(this.props.numChildren == 0 && this.props.name.length == 0);
       },    
 
       render() {
-        var marker = <circle r="8" fill={this.isValid() ? "#5bc0de" : "#d9534f"} cx={this.props.x+8} cy={this.props.y+8} onClick={(!this.props.dragging && this.props.numChildren == 0) || this.props.selecting ? this.handleClick : null} />;
+        var marker = <circle r="8" fill={"#5bc0de"} cx={this.props.x+8} cy={this.props.y+8} onClick={(!this.props.dragging && this.props.numChildren == 0) || this.props.selecting ? this.handleClick : null} />;
         var text = <text className="nodelabel" x={this.props.x + 20} y={this.props.y + 13}>{this.props.name}</text>;
         return <g>{marker}{text}</g>;
       }
@@ -206,56 +206,60 @@ const ResourceList = React.createClass({
           yOffset: 0,
           selecting: false,
           tree: {
-            name: "Duke",
-            id: 1,
-            children: [
-              {
-                name: "Hudson",
-                id: 2,
-                children: [
-                  {
-                    name: "Chair",
-                    id: 3,
-                    children: []
-                  }
-                ]
-              },
-              {
-                name: "CIEMAS",
-                id: 4,
-                children: [
-                  {
-                    name: "Room 1",
-                    id: 5,
-                    children: [
-                      {
-                        name: "Projector",
-                        id: 6,
-                        children: [
-                          {
-                            name: "Lightbulb",
-                            id: 7,
-                            children: []
-                          }
-                        ]
-                      },
-                      {
-                        name: "Desk",
-                        id: 8,
-                        children: [
-                          {
-                            name: "Chair",
-                            id: 9,
-                            children: []
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+            name: "Dummy",
+            children: []
           }
+          // tree: {
+          //   name: "Duke",
+          //   id: 1,
+          //   children: [
+          //     {
+          //       name: "Hudson",
+          //       id: 2,
+          //       children: [
+          //         {
+          //           name: "Chair",
+          //           id: 3,
+          //           children: []
+          //         }
+          //       ]
+          //     },
+          //     {
+          //       name: "CIEMAS",
+          //       id: 4,
+          //       children: [
+          //         {
+          //           name: "Room 1",
+          //           id: 5,
+          //           children: [
+          //             {
+          //               name: "Projector",
+          //               id: 6,
+          //               children: [
+          //                 {
+          //                   name: "Lightbulb",
+          //                   id: 7,
+          //                   children: []
+          //                 }
+          //               ]
+          //             },
+          //             {
+          //               name: "Desk",
+          //               id: 8,
+          //               children: [
+          //                 {
+          //                   name: "Chair",
+          //                   id: 9,
+          //                   children: []
+          //                 }
+          //               ]
+          //             }
+          //           ]
+          //         }
+          //       ]
+          //     }
+          //   ]
+          // }
         };
       },
 
@@ -291,6 +295,28 @@ const ResourceList = React.createClass({
           traverse(state.tree);
           return state;
         });
+      },
+
+      refresh() {
+        var me = this;
+        send_xhr("GET", "/api/resources/forest", localStorage.getItem("session"), null,
+          function(obj) {
+            var forest = {};
+            me.state.tree.children = obj.data.resources
+            me.setState({
+              tree: me.state.tree
+            });
+            console.log(me.state.tree);
+          },
+          function(obj) {
+            me.setState({error_msg: obj.error_msg, is_error: true});
+          }
+        );
+      },
+
+      componentDidMount() {
+        this.refresh();
+
       },
 
       render() {
