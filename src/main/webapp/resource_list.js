@@ -177,12 +177,12 @@ const ResourceList = React.createClass({
 
     // ----- TreeNode -----
     var TreeNode = React.createClass({
-      isValid() {
-        return true;//!(this.props.numChildren == 0 && this.props.name.length == 0);
+      isRestricted() {
+        return this.props.restricted;
       },    
 
       render() {
-        var marker = <circle r="8" fill={"#5bc0de"} cx={this.props.x+8} cy={this.props.y+8} onClick={(!this.props.dragging && this.props.numChildren == 0) || this.props.selecting ? this.handleClick : null} />;
+        var marker = <circle r="8" fill={this.isRestricted() ? "#d9534f": "#5bc0de"} cx={this.props.x+8} cy={this.props.y+8} onClick={(!this.props.dragging && this.props.numChildren == 0) || this.props.selecting ? this.handleClick : null} />;
         var text = <text className="nodelabel" x={this.props.x + 20} y={this.props.y + 13}>{this.props.name}</text>;
         return <g>{marker}{text}</g>;
       }
@@ -328,7 +328,7 @@ const ResourceList = React.createClass({
         var links = tree.links(nodes);
         
         var renderedNodes = nodes.map(function(node) {
-          return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} numChildren={node.children ? node.children.length : 0} setTargetId={me.setTargetId} setText={me.setText} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript}/>;
+          return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} numChildren={node.children ? node.children.length : 0} setTargetId={me.setTargetId} setText={me.setText} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript} restricted={node.restricted}/>;
         });
 
         var renderedLinks = links.map(function(link) {
