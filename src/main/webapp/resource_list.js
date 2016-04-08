@@ -177,21 +177,61 @@ const ResourceList = React.createClass({
 
     // ----- TreeNode -----
     var TreeNode = React.createClass({
+      getInitialState() {
+        return {
+          clicked: false
+        };
+      },
+
       isRestricted() {
         return this.props.restricted;
       },    
 
+      handleClick(evt) {
+        this.setState({clicked: !this.state.clicked});
+        if (!this.state.clicked) {
+          evt.target.setAttribute('fill', '#5cb85c');  
+        } else {
+          evt.target.setAttribute('fill', this.isRestricted() ? "#d9534f": "#5bc0de");  
+        }        
+      },
+
       render() {
-        var marker = <circle r="8" fill={this.isRestricted() ? "#d9534f": "#5bc0de"} cx={this.props.x+8} cy={this.props.y+8} onClick={(!this.props.dragging && this.props.numChildren == 0) || this.props.selecting ? this.handleClick : null} />;
+        var marker = <circle r="8" fill={this.isRestricted() ? "#d9534f": "#5bc0de"} cx={this.props.x+8} cy={this.props.y+8} onClick={this.handleClick}/>;
         var text = <text className="nodelabel" x={this.props.x + 20} y={this.props.y + 13}>{this.props.name}</text>;
-        return <g>{marker}{text}</g>;
+        var x = <text className="x" x={this.props.x - 10} y={this.props.y - 5}>{this.state.clicked ? "X" : ""}</text>
+        return <g>{marker}{x}{text}</g>;
       }
     });
 
     // ----- TreeLink -----
     var TreeLink = React.createClass({
+      getInitialState() {
+        return {
+          clicked: false
+        };
+      },
+
+      handleClick(evt) {
+        console.log("line clicked")
+        this.setState({clicked: !this.state.clicked});
+        if (!this.state.clicked) {
+          evt.target.setAttribute('stroke', '#5cb85c');  
+        } else {
+          evt.target.setAttribute('stroke', '#999');  
+        }        
+      },   
+
+      handleXClick(evt) {
+        console.log("hello");
+        this.props.makeSubtreeRoot(this.props.target);
+        console.log("done with x click");
+      },
+
       render() {
-        return <line className="link" x1={this.props.source.x+8} y1={this.props.source.y+16} x2={this.props.target.x+8} y2={this.props.target.y}></line>;
+        var line = <line className="link" stroke='#999' x1={this.props.source.x+8} y1={this.props.source.y+16} x2={this.props.target.x+8} y2={this.props.target.y} onClick={this.handleClick}></line>;
+        var x = <text className="x" x={(this.props.source.x + this.props.target.x)/2 - 5} y={(this.props.source.y + this.props.target.y)/2 - 5} onClick={this.handleXClick}>{this.state.clicked ? "X" : ""}</text>
+        return <g>{line}{x}</g>;
       }
     });
 
@@ -209,57 +249,6 @@ const ResourceList = React.createClass({
             name: "Dummy",
             children: []
           }
-          // tree: {
-          //   name: "Duke",
-          //   id: 1,
-          //   children: [
-          //     {
-          //       name: "Hudson",
-          //       id: 2,
-          //       children: [
-          //         {
-          //           name: "Chair",
-          //           id: 3,
-          //           children: []
-          //         }
-          //       ]
-          //     },
-          //     {
-          //       name: "CIEMAS",
-          //       id: 4,
-          //       children: [
-          //         {
-          //           name: "Room 1",
-          //           id: 5,
-          //           children: [
-          //             {
-          //               name: "Projector",
-          //               id: 6,
-          //               children: [
-          //                 {
-          //                   name: "Lightbulb",
-          //                   id: 7,
-          //                   children: []
-          //                 }
-          //               ]
-          //             },
-          //             {
-          //               name: "Desk",
-          //               id: 8,
-          //               children: [
-          //                 {
-          //                   name: "Chair",
-          //                   id: 9,
-          //                   children: []
-          //                 }
-          //               ]
-          //             }
-          //           ]
-          //         }
-          //       ]
-          //     }
-          //   ]
-          // }
         };
       },
 
@@ -297,6 +286,36 @@ const ResourceList = React.createClass({
         });
       },
 
+      makeSubtreeRoot(node) {
+        console.log("in subtree root")
+        console.log(node.resource_id);
+        console.log(node);
+        var me = this;
+        send_xhr("PUT", "/api/resources/" + node.resource_id.toString(), localStorage.getItem("session"),
+          JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: 0, shared_count: node.shared_count}),
+          function(obj) {
+            console.log("updated resource");
+          },
+          function(obj) {
+            me.setState({error_msg: obj.error_msg, is_error: true});
+          }
+        );
+
+        // var temp = null; 
+        // for (var i = 0; i < this.state.tree.children.ength; i++) {
+        //   if (this.state.tree.children[i].name == node.name) {
+        //     temp = this.state.tree.children[i];
+        //     this.state.tree.children.splice(i, 1);
+        //     break;
+        //   }
+        // }
+        // this.state.tree.children.push(temp);
+        // this.setState({tree: this.state.tree});
+
+        this.refresh();
+        this.render();
+      },
+
       refresh() {
         var me = this;
         send_xhr("GET", "/api/resources/forest", localStorage.getItem("session"), null,
@@ -306,7 +325,6 @@ const ResourceList = React.createClass({
             me.setState({
               tree: me.state.tree
             });
-            console.log(me.state.tree);
           },
           function(obj) {
             me.setState({error_msg: obj.error_msg, is_error: true});
@@ -332,7 +350,7 @@ const ResourceList = React.createClass({
         });
 
         var renderedLinks = links.map(function(link) {
-          return <TreeLink key={nodeId++} source={link.source} target={link.target} />;
+          return <TreeLink key={nodeId++} source={link.source} target={link.target} makeSubtreeRoot={me.makeSubtreeRoot} />;
         });
 
         var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;
