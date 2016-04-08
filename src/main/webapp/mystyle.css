@@ -90,8 +90,11 @@ input[type="date"]::-webkit-clear-button {
 
 .link {
   fill: none;
-  stroke: #999;
-  stroke-width: 2px;
+  stroke-width: 3px;
 }
 
+.x {
+  fill: red;
+  stroke-width: 10px;
+}
 
