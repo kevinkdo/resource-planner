@@ -213,7 +213,6 @@ const ResourceList = React.createClass({
       },
 
       handleClick(evt) {
-        console.log("line clicked")
         this.setState({clicked: !this.state.clicked});
         if (!this.state.clicked) {
           evt.target.setAttribute('stroke', '#5cb85c');  
@@ -223,9 +222,8 @@ const ResourceList = React.createClass({
       },   
 
       handleXClick(evt) {
-        console.log("hello");
         this.props.makeSubtreeRoot(this.props.target);
-        console.log("done with x click");
+        this.props.refresh();
       },
 
       render() {
@@ -287,15 +285,9 @@ const ResourceList = React.createClass({
       },
 
       makeSubtreeRoot(node) {
-        console.log("in subtree root")
-        console.log(node.resource_id);
-        console.log(node);
         var me = this;
         send_xhr("PUT", "/api/resources/" + node.resource_id.toString(), localStorage.getItem("session"),
-          JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: 0, shared_count: node.shared_count}),
-          function(obj) {
-            console.log("updated resource");
-          },
+          JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: 0, shared_count: node.shared_count}), null,
           function(obj) {
             me.setState({error_msg: obj.error_msg, is_error: true});
           }
@@ -350,7 +342,7 @@ const ResourceList = React.createClass({
         });
 
         var renderedLinks = links.map(function(link) {
-          return <TreeLink key={nodeId++} source={link.source} target={link.target} makeSubtreeRoot={me.makeSubtreeRoot} />;
+          return <TreeLink key={nodeId++} source={link.source} target={link.target} makeSubtreeRoot={me.makeSubtreeRoot} refresh={me.refresh}/>;
         });
 
         var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;
