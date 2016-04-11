@@ -65,6 +65,7 @@ public class ReservationService {
         Set<Integer> allReservableResources = new HashSet<Integer>(userReservable);
         allReservableResources.addAll(groupReservable);
 
+
         // for each resource, find out what kind of overlap exists
         for (int i : req.getResource_ids()) {
             if (userId != 1) {
@@ -81,8 +82,10 @@ public class ReservationService {
             }
 
             if (timeOpen(req.getBegin_time(), req.getEnd_time(), i) == 2) {
-                // time not open
-                return new StandardResponse(true, "Reservation for resource with id " + i + " already exists at that time");
+                if(!canReserveWithSharedInTimespan(i, req.getBegin_time(), req.getEnd_time())){
+                    //Time not available for this resource
+                    return new StandardResponse(true, "Reservation for resource with id " + i + " already exists at that time");
+                }
             }
         }
 
@@ -743,6 +746,47 @@ public class ReservationService {
                     }
                 });
         return reservations.get(0);
+    }
+
+
+    private boolean canReserveWithSharedInTimespan(int resourceId, Timestamp beginTime, Timestamp endTime){
+        int shared_count = resourceService.getSharedCount(resourceId);
+        if(shared_count == 0){
+            return true;
+        }
+        else{
+            //Get list of all overlapping, complete reservations which use this resource.
+            List<TempRes> overlappingCompleteWithSameResource = jt.query(
+                "SELECT * from reservations, reservationresources WHERE reservations.reservation_id = reservationresources.reservation_id " + 
+                "AND reservations.complete = true AND reservationresources.resource_id = ?" +
+                " AND ((reservations.begin_time >= ? AND reservations.begin_time < ?)" + 
+                " OR (reservations.end_time > ? AND reservations.end_time <= ?)" + 
+                " OR (reservations.end_time >= ? AND reservations.begin_time <= ?));",
+                new Object[]{resourceId, beginTime, endTime, beginTime, endTime, endTime, beginTime},
+                new RowMapper<TempRes>() {
+                    public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        TempRes t = new TempRes();
+                        t.reservation_id = rs.getInt("reservations.reservation_id");
+                        t.title = rs.getString("title");
+                        t.description = rs.getString("description");
+                        t.user_id = rs.getInt("user_id");
+                        t.begin_time = rs.getTimestamp("begin_time");
+                        t.end_time = rs.getTimestamp("end_time");
+                        t.should_email = rs.getBoolean("should_email");
+                        t.complete = rs.getBoolean("complete");
+                        return t;
+                    }
+                }
+                );
+            //If the current size is >= shared count, don't allow. Else, allow. 
+            return !overlappingCompleteWithSameResource.size() >= shared_count
+        }
+    }
+
+
+    //Returns the current number of reservations using this resource at this moment
+    private int getCurrentReservationsWithResource(int resourceId){
+        //get all complete reservations, overlapping the current time, which 
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////

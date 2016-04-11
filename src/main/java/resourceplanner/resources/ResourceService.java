@@ -138,7 +138,7 @@ public class ResourceService {
             );
     }
 
-    private int getSharedCount(int resourceId) {
+    public int getSharedCount(int resourceId) {
         List<Integer> sharedCount = jt.query("SELECT shared_count FROM resources WHERE resource_id = " + resourceId + ";",
             new RowMapper<Integer>(){
                 public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
