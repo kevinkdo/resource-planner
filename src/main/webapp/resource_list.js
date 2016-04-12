@@ -246,7 +246,8 @@ const ResourceList = React.createClass({
           selecting: false,
           tree: {
             name: "Dummy",
-            children: []
+            children: [],
+            ignore: true
           }
         };
       },
@@ -262,26 +263,6 @@ const ResourceList = React.createClass({
           sourceId: dragState.sourceId,
           xOffset: dragState.xOffset,
           yOffset: dragState.yOffset
-        });
-      },
-
-      setText(targetId, string) {
-        this.setState(function(state, props) {
-          var traverse = function(node) {
-            if (node.id == targetId) {
-              if (node.children && node.children.length > 0) {
-                node.subscript = string;
-              }
-              else {
-                node.name = string;
-              }
-            }
-            else if (node.children) {
-              node.children.forEach(traverse);
-            }
-          };
-          traverse(state.tree);
-          return state;
         });
       },
 
@@ -364,18 +345,24 @@ const ResourceList = React.createClass({
 
       render() {
         var me = this;
-        var width = document.getElementById('rightpane_hierarchy').clientWidth;
-        var height = document.getElementById('rightpane_hierarchy').clientHeight + 500;
-        var tree = d3.layout.tree().size([width*5/6, height*5/6]).separation(function(a, b) {return (a.parent == b.parent ? 2 : 1);});
+        var width = window.innerWidth / 2;
+        var height = window.innerHeight / 2;
+        var tree = d3.layout.tree().size([width*5/6, height*5/6]);
         var nodes = tree.nodes(this.state.tree);
         var links = tree.links(nodes);
         
-        var renderedNodes = nodes.map(function(node) {
-          return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} setText={me.setText} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode}/>;
+        var renderedNodes = nodes.map(function(node) {      
+          if (node.ignore) {
+            return null;
+          }
+          return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode}/>;
         });
 
         var renderedLinks = links.map(function(link) {
-          return <TreeLink key={nodeId++} source={link.source} target={link.target} deleteLink={me.deleteLink} refresh={me.refresh}/>;
+          if (link.source.ignore) {
+            return null;
+          }
+          return <TreeLink key={nodeId++} source={link.source} target={link.target} makeSubtreeRoot={me.makeSubtreeRoot} refresh={me.refresh}/>;
         });
 
         var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;

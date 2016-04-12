@@ -75,9 +75,6 @@ const ResourceCreator = React.createClass({
                   <label htmlFor="resource_creator_description">Description</label>
                   <input type="text" className="form-control" id="resource_creator_description" placeholder="Description" value={this.state.description} onChange={(evt)=>this.set("description", evt.target.value)}/>
                 </div>
-                <div className="checkbox">
-                  <label><input type="checkbox" checked={this.state.restricted} onChange={(evt)=>this.set("restricted", evt.target.checked)}/> Restricted resource</label>
-                </div>
                 <div className="form-group">
                   <label htmlFor="resource_creator_tags">Tags</label>
                   <div className="row">
@@ -94,8 +91,11 @@ const ResourceCreator = React.createClass({
                   <input type="number" className="form-control" id="resource_creator_parent_id" placeholder="Parent ID" value={this.state.parent_id} onChange={(evt)=>this.set("parent_id", evt.target.value)}/>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="resource_creator_shared_count">Shared Count</label>
-                  <input type="number" className="form-control" id="resource_creator_shared_count" placeholder="Shared Count" value={this.state.shared_count} onChange={(evt)=>this.set("shared_count", evt.target.value)}/>
+                  <label htmlFor="resource_creator_shared_count">Maximum simultaneous reservations (0 for unlimited)</label>
+                  <input type="number" className="form-control" id="resource_creator_shared_count" placeholder="Level of Sharing" value={this.state.shared_count} onChange={(evt)=>this.set("shared_count", evt.target.value)}/>
+                </div>
+                <div className="checkbox">
+                  <label><input type="checkbox" checked={this.state.restricted} onChange={(evt)=>this.set("restricted", evt.target.checked)}/> Restricted resource</label>
                 </div>
                 <div className="btn-toolbar">
                   <button type="submit" className="btn btn-primary" onClick={this.createResource} disabled={this.state.sending}>Create resource</button>
