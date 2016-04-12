@@ -183,10 +183,6 @@ const ResourceList = React.createClass({
         };
       },
 
-      isRestricted() {
-        return this.props.restricted;
-      },    
-
       handleClick(evt) {
         this.setState({clicked: !this.state.clicked});
         if (!this.state.clicked) {
@@ -196,10 +192,15 @@ const ResourceList = React.createClass({
         }        
       },
 
+      handleXClick(evt) {
+        this.props.deleteNode(this.props.resource_id);
+        this.props.refresh();
+      },
+
       render() {
-        var marker = <circle r="8" fill={this.isRestricted() ? "#d9534f": "#5bc0de"} cx={this.props.x+8} cy={this.props.y+8} onClick={this.handleClick}/>;
+        var marker = <circle r="8" fill={this.props.restricted ? "#d9534f": "#5bc0de"} cx={this.props.x+8} cy={this.props.y+8} onClick={this.handleClick}/>;
         var text = <text className="nodelabel" x={this.props.x + 20} y={this.props.y + 13}>{this.props.name}</text>;
-        var x = <text className="x" x={this.props.x - 10} y={this.props.y - 5}>{this.state.clicked ? "X" : ""}</text>
+        var x = <text className="deleteButton" x={this.props.x - 15} y={this.props.y + 13} onClick={this.handleXClick}>{this.state.clicked ? "X" : ""}</text>
         return <g>{marker}{x}{text}</g>;
       }
     });
@@ -222,13 +223,13 @@ const ResourceList = React.createClass({
       },   
 
       handleXClick(evt) {
-        this.props.makeSubtreeRoot(this.props.target);
+        this.props.deleteLink(this.props.target);
         this.props.refresh();
       },
 
       render() {
         var line = <line className="link" stroke='#999' x1={this.props.source.x+8} y1={this.props.source.y+16} x2={this.props.target.x+8} y2={this.props.target.y} onClick={this.handleClick}></line>;
-        var x = <text className="x" x={(this.props.source.x + this.props.target.x)/2 - 5} y={(this.props.source.y + this.props.target.y)/2 - 5} onClick={this.handleXClick}>{this.state.clicked ? "X" : ""}</text>
+        var x = <text className="deleteButton" x={(this.props.source.x + this.props.target.x)/2 - 5} y={(this.props.source.y + this.props.target.y)/2 - 5} onClick={this.handleXClick}>{this.state.clicked ? "X" : ""}</text>
         return <g>{line}{x}</g>;
       }
     });
@@ -284,28 +285,60 @@ const ResourceList = React.createClass({
         });
       },
 
-      makeSubtreeRoot(node) {
+      deleteLink(node) {
         var me = this;
         send_xhr("PUT", "/api/resources/" + node.resource_id.toString(), localStorage.getItem("session"),
-          JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: 0, shared_count: node.shared_count}), null,
+          JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: 0, shared_count: node.shared_count}), 
+          function(obj) {
+            me.refresh(); 
+          },
           function(obj) {
             me.setState({error_msg: obj.error_msg, is_error: true});
           }
         );
+      },
 
-        // var temp = null; 
-        // for (var i = 0; i < this.state.tree.children.ength; i++) {
-        //   if (this.state.tree.children[i].name == node.name) {
-        //     temp = this.state.tree.children[i];
-        //     this.state.tree.children.splice(i, 1);
-        //     break;
-        //   }
-        // }
-        // this.state.tree.children.push(temp);
-        // this.setState({tree: this.state.tree});
+      deleteNode(deleted_node_id) {
+        //get deletedNodes's parent ID
+        //find all children of deletedNode
+        //replace all of the children's parent ID's with the deleted Node's parent ID
+        //send the update in 
+        //delete the node and send in that resource call 
+        //refresh and re render 
+        var deleted_node_parent_id = 0;
+        var deleted_node_children = {};
+        for (var i = 0; i < this.state.tree.children.length; i++) {
+          if (this.state.tree.children[i].resource_id == deleted_node_id) { 
+            deleted_node_children = this.state.tree.children[i].children;
+            deleted_node_parent_id = this.state.tree.children[i].parent_id;
+          } 
+        }
 
-        this.refresh();
-        this.render();
+        for (var i = 0; i < deleted_node_children.length; i++) {
+          console.log(deleted_node_children[i].resource_id.toString());
+          console.log(deleted_node_children[i].parent_id);
+          console.log(deleted_node_parent_id);
+          // send_xhr("PUT", "/api/resources/" + deleted_node_children[i].resource_id.toString(), localStorage.getItem("session"),
+          //   JSON.stringify({restricted: deleted_node_children[i].restricted, name: deleted_node_children[i].name, description: deleted_node_children[i].description || "", tags: deleted_node_children[i].tags, parent_id: deleted_node_parent_id, shared_count: deleted_node_children[i].shared_count}), 
+          //   function(obj) {
+          //     console.log("much success");
+          //   },
+          //   function(obj) {
+          //     me.setState({error_msg: obj.error_msg, is_error: true});
+          //   }
+          // );
+        }
+        
+        send_xhr("DELETE", "/api/resources/" + deleted_node_id, localStorage.getItem("session"), null,
+          function(obj) {
+            me.refresh();
+            me.render();
+          },
+          function(obj) {
+            me.refresh();
+            me.setState({error_msg: obj.error_msg, is_error: true});
+          }
+        );
       },
 
       refresh() {
@@ -338,11 +371,11 @@ const ResourceList = React.createClass({
         var links = tree.links(nodes);
         
         var renderedNodes = nodes.map(function(node) {
-          return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} numChildren={node.children ? node.children.length : 0} setTargetId={me.setTargetId} setText={me.setText} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript} restricted={node.restricted}/>;
+          return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} setText={me.setText} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode}/>;
         });
 
         var renderedLinks = links.map(function(link) {
-          return <TreeLink key={nodeId++} source={link.source} target={link.target} makeSubtreeRoot={me.makeSubtreeRoot} refresh={me.refresh}/>;
+          return <TreeLink key={nodeId++} source={link.source} target={link.target} deleteLink={me.deleteLink} refresh={me.refresh}/>;
         });
 
         var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;
