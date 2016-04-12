@@ -111,7 +111,7 @@ const ResourceEditor = React.createClass({
                     <input type="number" className="form-control" id="resource_editor_parent_id" placeholder="Parent ID" value={this.state.parent_id} onChange={(evt)=>this.set("parent_id", evt.target.value)}/>
                   </div>
                   <div className="form-group">
-                    <label htmlFor="resource_editor_shared_count">Shared Count</label>
+                    <label htmlFor="resource_editor_shared_count">Maximum simultaneous reservations (0 for unlimited)</label>
                     <input type="number" className="form-control" id="resource_editor_shared_count" placeholder="Shared Count" value={this.state.shared_count} onChange={(evt)=>this.set("shared_count", evt.target.value)}/>
                   </div>
                   <div className="btn-toolbar">
