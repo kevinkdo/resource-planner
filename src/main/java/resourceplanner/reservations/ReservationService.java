@@ -778,16 +778,30 @@ public class ReservationService {
                     }
                 }
                 );
-            //If the current size is >= shared count, don't allow. Else, allow. 
-            return !overlappingCompleteWithSameResource.size() >= shared_count
+            //Need to find the max overlap in this list of reservations. Max overlap must occur
+            //during the start time of at least one reservation. 
+            int maxOverlap = 0;
+            for(TempRes r : overlappingCompleteWithSameResource){
+                int overlapping = jt.queryForObject(
+                    "SELECT COUNT(*) FROM reservations, reservationresources WHERE reservations.reservation_id = reservationresources.reservation_id " + 
+                    "AND reservations.complete = true AND reservationresources.resource_id = ?" +
+                    " AND (? >= reservations.begin_time AND ? < reservations.end_time);",
+                    new Object[]{resourceId, r.begin_time, r.begin_time},
+                    Integer.class
+                    );
+                if(overlapping > maxOverlap){
+                    maxOverlap = overlapping;
+                }
+            }
+
+            //We want to consider the maxOverlap+1 since this calculation doesn't count the 
+            //reservation for which the query was made.
+
+            //If the maxOverlap+1 is >= shared count, don't allow. Else, allow. 
+            return !(maxOverlap + 1 >= shared_count);
         }
     }
 
-
-    //Returns the current number of reservations using this resource at this moment
-    private int getCurrentReservationsWithResource(int resourceId){
-        //get all complete reservations, overlapping the current time, which 
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////Incomplete Reservation Endpoints//////////////////////////////////////////
