@@ -93,7 +93,7 @@ input[type="date"]::-webkit-clear-button {
   stroke-width: 3px;
 }
 
-.x {
+.deleteButton {
   fill: red;
   stroke-width: 10px;
 }
