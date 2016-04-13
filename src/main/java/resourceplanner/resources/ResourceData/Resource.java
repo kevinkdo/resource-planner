@@ -14,12 +14,13 @@ public class Resource {
     private int shared_count;
     private List<Resource> children;
 
-    public Resource(int resource_id, String name, String description, List<String> tags, boolean restricted) {
+    public Resource(int resource_id, String name, String description, List<String> tags, boolean restricted, int shared_count) {
         this.resource_id = resource_id;
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.restricted = restricted;
+        this.shared_count = shared_count;
     }
 
     public Resource() {

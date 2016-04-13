@@ -140,7 +140,7 @@ public class ResourceService {
 
     private int getSharedCount(int resourceId) {
         // TODO
-        return 1;
+        return 0;
     }
 
     public Resource getResourceByIdHelper(final int resourceId, int userId) {
@@ -153,7 +153,7 @@ public class ResourceService {
                         resource.setName(rs.getString("name"));
                         resource.setDescription(rs.getString("description"));
                         resource.setRestricted(rs.getBoolean("restricted"));
-                        resource.setShared_count(rs.getInt("shared_count"));
+                        resource.setShared_count(getSharedCount(resourceId));
                         return resource;
                     }
                 });
@@ -249,6 +249,7 @@ public class ResourceService {
         Set<String> required = new HashSet<String>(Arrays.asList(requiredTags));
 
         for (RT current : rts) {
+            int sharedCount = getSharedCount(current.resourceId);
             if (processList.keySet().contains(current.resourceId)) {
                 processList.get(current.resourceId).getTags().add(current.tag);
             } else {
@@ -256,7 +257,7 @@ public class ResourceService {
                 if (current.tag != null) {
                     tagList.add(current.tag);
                 }
-                Resource r = new Resource(current.resourceId, current.name, current.description, tagList, current.restricted);
+                Resource r = new Resource(current.resourceId, current.name, current.description, tagList, current.restricted, sharedCount);
                 processList.put(current.resourceId, r);
             }
         }
