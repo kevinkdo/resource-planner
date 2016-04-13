@@ -13,14 +13,16 @@ public class Resource {
     private boolean restricted;
     private int shared_count;
     private List<Resource> children;
+    private int parent_id;
 
-    public Resource(int resource_id, String name, String description, List<String> tags, boolean restricted, int shared_count) {
+    public Resource(int resource_id, String name, String description, List<String> tags, boolean restricted, int shared_count, int parent_id) {
         this.resource_id = resource_id;
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.restricted = restricted;
         this.shared_count = shared_count;
+        this.parent_id = parent_id;
     }
 
     public Resource() {
@@ -81,5 +83,13 @@ public class Resource {
 
     public List<Resource> getChildren() {
         return children;
+    }
+
+    public void setParent_id(int parent_id) {
+        this.parent_id = parent_id;
+    }
+
+    public int getParent_id() {
+        return parent_id;
     }
 }

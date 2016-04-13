@@ -151,7 +151,7 @@ public class ResourceService {
 
     public Resource getResourceByIdHelper(final int resourceId, int userId) {
         List<Resource> resources = jt.query(
-                "SELECT name, description, restricted, shared_count FROM resources WHERE resource_id = ?;",
+                "SELECT name, description, restricted, shared_count, parent_id FROM resources WHERE resource_id = ?;",
                 new Object[]{resourceId},
                 new RowMapper<Resource>() {
                     public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -159,6 +159,7 @@ public class ResourceService {
                         resource.setName(rs.getString("name"));
                         resource.setDescription(rs.getString("description"));
                         resource.setRestricted(rs.getBoolean("restricted"));
+                        resource.setParent_id(rs.getInt("parent_id"));
                         resource.setShared_count(getSharedCount(resourceId));
                         return resource;
                     }
@@ -263,7 +264,7 @@ public class ResourceService {
                 if (current.tag != null) {
                     tagList.add(current.tag);
                 }
-                Resource r = new Resource(current.resourceId, current.name, current.description, tagList, current.restricted, sharedCount);
+                Resource r = new Resource(current.resourceId, current.name, current.description, tagList, current.restricted, sharedCount, current.parentId);
                 processList.put(current.resourceId, r);
             }
         }
@@ -330,6 +331,7 @@ public class ResourceService {
         private int resourceId;
         private String tag;
         private boolean restricted;
+        private int parentId;
     }
 
     public StandardResponse getResourceForest(int userId) {
@@ -356,7 +358,7 @@ public class ResourceService {
 
     private List<RT> getResourcesWithTags() {
         final String statement =
-                "SELECT resources.name, resources.description, resources.restricted, resources.resource_id, resourcetags.tag " +
+                "SELECT resources.name, resources.description, resources.restricted, resources.resource_id, resources.parent_id, resourcetags.tag " +
                         "FROM resourcetags INNER JOIN resources " +
                         "ON resourcetags.resource_id = resources.resource_id " +
                         "ORDER BY resourcetags.resource_id ASC ;";
@@ -371,6 +373,7 @@ public class ResourceService {
                         rt.restricted = rs.getBoolean("restricted");
                         rt.resourceId = rs.getInt("resource_id");
                         rt.tag = rs.getString("tag");
+                        rt.parentId = rs.getInt("parent_id");
                         return rt;
                     }
                 });
@@ -379,7 +382,7 @@ public class ResourceService {
 
     private List<RT> getResourcesWithoutTags() {
         final String noTagsStatement =
-                "SELECT name, description, restricted, resource_id " +
+                "SELECT name, description, restricted, resource_id, parent_id " +
                         "FROM resources " +
                         "WHERE NOT EXISTS (SELECT 1 FROM resourcetags WHERE resourcetags.resource_id = resources.resource_id) " +
                         "ORDER BY resource_id ASC ;";
@@ -393,6 +396,7 @@ public class ResourceService {
                         rt.description = rs.getString("description");
                         rt.restricted = rs.getBoolean("restricted");
                         rt.resourceId = rs.getInt("resource_id");
+                        rt.parentId = rs.getInt("parent_id");
                         rt.tag = null;
                         return rt;
                     }
