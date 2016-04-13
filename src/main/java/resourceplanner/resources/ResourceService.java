@@ -183,20 +183,24 @@ public class ResourceService {
         List<Resource> children = new ArrayList<Resource>();
         for (int childId : childrenIds) {
             Resource child = getResourceByIdHelper(childId, userId);
-            if (child == null) {
-                return null;
-            }
             children.add(child);
         }
         resource.setChildren(children);
 
         Set<Integer> allViewableResources = getViewableResources(userId);
+        Set<Integer> allReservableResources = getReservableResources(userId);
         if(allViewableResources.contains(resourceId) || userId == 1){
-            return resource;
+            resource.setCan_view(true);
+        } else {
+            resource.setCan_view(false);
+        }
+        if (allReservableResources.contains(resourceId) || userId == 1) {
+            resource.setCan_reserve(true);
         }
         else{
-            return null;
+            resource.setCan_reserve(false);
         }
+        return resource;
     }
 
     public StandardResponse getResourceById(final int resourceId, int userId) {
@@ -238,6 +242,14 @@ public class ResourceService {
         return allViewableResources;
     }
 
+    public Set<Integer> getReservableResources(int userId) {
+        List<Integer> userReservable = permissionService.getUserReservableResources(userId);
+        List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
+        Set<Integer> allReservableResources = new HashSet<Integer>(userReservable);
+        allReservableResources.addAll(groupReservable);
+        return allReservableResources;
+    }
+
     public StandardResponse getResource(String[] requiredTags, String[] excludedTags, int userId) {
         if (requiredTags == null) {
             requiredTags = new String[0];
@@ -264,7 +276,14 @@ public class ResourceService {
                 if (current.tag != null) {
                     tagList.add(current.tag);
                 }
-                Resource r = new Resource(current.resourceId, current.name, current.description, tagList, current.restricted, sharedCount, current.parentId);
+                Resource r = new Resource();
+                r.setResource_id(current.resourceId);
+                r.setName(current.name);
+                r.setDescription(current.description);
+                r.setTags(tagList);
+                r.setRestricted(current.restricted);
+                r.setShared_count(sharedCount);
+                r.setParent_id(current.parentId);
                 processList.put(current.resourceId, r);
             }
         }
@@ -312,15 +331,30 @@ public class ResourceService {
 
         if(userId != 1){
             Set<Integer> allViewableResources = getViewableResources(userId);
+            Set<Integer> allReservableResources = getReservableResources(userId);
             List<Resource> finalResponse = new ArrayList<Resource>();
             for(Resource r : response){
-                if(allViewableResources.contains(r.getResource_id())){
-                    finalResponse.add(r);
+                if (allReservableResources.contains(r.getResource_id())) {
+                    r.setCan_reserve(true);
+                } else {
+                    r.setCan_reserve(false);
                 }
+                if (allViewableResources.contains(r.getResource_id())){
+                    r.setCan_view(true);
+                } else {
+                    r.setCan_view(false);
+                    r.setName("Mystery");
+                    r.setDescription("Mystery");
+                }
+                finalResponse.add(r);
             }
             return new StandardResponse(false, "Successfully retrieved resources", new Resources(finalResponse));
         }
         else{
+            for (Resource r : response) {
+                r.setCan_view(true);
+                r.setCan_reserve(true);
+            }
             return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
         }
     }
