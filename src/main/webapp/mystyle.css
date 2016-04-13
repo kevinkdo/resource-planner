@@ -98,3 +98,13 @@ input[type="date"]::-webkit-clear-button {
   stroke-width: 10px;
 }
 
+.editButton {
+  fill: blue;
+  stroke-width: 10px;
+}
+
+.helpText {
+  fill: black;
+  stroke-width: 10px;
+}
+
