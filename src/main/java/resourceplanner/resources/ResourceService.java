@@ -138,9 +138,15 @@ public class ResourceService {
             );
     }
 
-    private int getSharedCount(int resourceId) {
-        // TODO
-        return 0;
+    public int getSharedCount(int resourceId) {
+        List<Integer> sharedCount = jt.query("SELECT shared_count FROM resources WHERE resource_id = " + resourceId + ";",
+            new RowMapper<Integer>(){
+                public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getInt("shared_count");
+                }
+            }
+        );
+        return sharedCount.get(0);
     }
 
     public Resource getResourceByIdHelper(final int resourceId, int userId) {
