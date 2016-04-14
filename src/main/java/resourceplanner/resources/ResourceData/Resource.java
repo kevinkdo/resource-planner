@@ -13,17 +13,40 @@ public class Resource {
     private boolean restricted;
     private int shared_count;
     private List<Resource> children;
+    private int parent_id;
+    private boolean can_view;
+    private boolean can_reserve;
 
-    public Resource(int resource_id, String name, String description, List<String> tags, boolean restricted) {
+    public Resource(int resource_id, String name, String description, List<String> tags, boolean restricted, int shared_count, int parent_id, boolean can_view, boolean can_reserve) {
         this.resource_id = resource_id;
         this.name = name;
         this.description = description;
         this.tags = tags;
         this.restricted = restricted;
+        this.shared_count = shared_count;
+        this.parent_id = parent_id;
+        this.can_view = can_view;
+        this.can_reserve = can_reserve;
     }
 
     public Resource() {
 
+    }
+
+    public boolean getCan_view() {
+        return can_view;
+    }
+
+    public boolean getCan_reserve() {
+        return can_reserve;
+    }
+
+    public void setCan_view(boolean can_view) {
+        this.can_view = can_view;
+    }
+
+    public void setCan_reserve(boolean can_reserve) {
+        this.can_reserve = can_reserve;
     }
 
     public int getResource_id() {
@@ -80,5 +103,13 @@ public class Resource {
 
     public List<Resource> getChildren() {
         return children;
+    }
+
+    public void setParent_id(int parent_id) {
+        this.parent_id = parent_id;
+    }
+
+    public int getParent_id() {
+        return parent_id;
     }
 }

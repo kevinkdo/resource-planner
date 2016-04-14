@@ -151,7 +151,7 @@ public class ResourceService {
 
     public Resource getResourceByIdHelper(final int resourceId, int userId) {
         List<Resource> resources = jt.query(
-                "SELECT name, description, restricted, shared_count FROM resources WHERE resource_id = ?;",
+                "SELECT name, description, restricted, shared_count, parent_id FROM resources WHERE resource_id = ?;",
                 new Object[]{resourceId},
                 new RowMapper<Resource>() {
                     public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -159,7 +159,8 @@ public class ResourceService {
                         resource.setName(rs.getString("name"));
                         resource.setDescription(rs.getString("description"));
                         resource.setRestricted(rs.getBoolean("restricted"));
-                        resource.setShared_count(rs.getInt("shared_count"));
+                        resource.setParent_id(rs.getInt("parent_id"));
+                        resource.setShared_count(getSharedCount(resourceId));
                         return resource;
                     }
                 });
@@ -182,20 +183,24 @@ public class ResourceService {
         List<Resource> children = new ArrayList<Resource>();
         for (int childId : childrenIds) {
             Resource child = getResourceByIdHelper(childId, userId);
-            if (child == null) {
-                return null;
-            }
             children.add(child);
         }
         resource.setChildren(children);
 
         Set<Integer> allViewableResources = getViewableResources(userId);
+        Set<Integer> allReservableResources = getReservableResources(userId);
         if(allViewableResources.contains(resourceId) || userId == 1){
-            return resource;
+            resource.setCan_view(true);
+        } else {
+            resource.setCan_view(false);
+        }
+        if (allReservableResources.contains(resourceId) || userId == 1) {
+            resource.setCan_reserve(true);
         }
         else{
-            return null;
+            resource.setCan_reserve(false);
         }
+        return resource;
     }
 
     public StandardResponse getResourceById(final int resourceId, int userId) {
@@ -237,6 +242,14 @@ public class ResourceService {
         return allViewableResources;
     }
 
+    public Set<Integer> getReservableResources(int userId) {
+        List<Integer> userReservable = permissionService.getUserReservableResources(userId);
+        List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
+        Set<Integer> allReservableResources = new HashSet<Integer>(userReservable);
+        allReservableResources.addAll(groupReservable);
+        return allReservableResources;
+    }
+
     public StandardResponse getResource(String[] requiredTags, String[] excludedTags, int userId) {
         if (requiredTags == null) {
             requiredTags = new String[0];
@@ -255,6 +268,7 @@ public class ResourceService {
         Set<String> required = new HashSet<String>(Arrays.asList(requiredTags));
 
         for (RT current : rts) {
+            int sharedCount = getSharedCount(current.resourceId);
             if (processList.keySet().contains(current.resourceId)) {
                 processList.get(current.resourceId).getTags().add(current.tag);
             } else {
@@ -262,7 +276,14 @@ public class ResourceService {
                 if (current.tag != null) {
                     tagList.add(current.tag);
                 }
-                Resource r = new Resource(current.resourceId, current.name, current.description, tagList, current.restricted);
+                Resource r = new Resource();
+                r.setResource_id(current.resourceId);
+                r.setName(current.name);
+                r.setDescription(current.description);
+                r.setTags(tagList);
+                r.setRestricted(current.restricted);
+                r.setShared_count(sharedCount);
+                r.setParent_id(current.parentId);
                 processList.put(current.resourceId, r);
             }
         }
@@ -310,15 +331,30 @@ public class ResourceService {
 
         if(userId != 1){
             Set<Integer> allViewableResources = getViewableResources(userId);
+            Set<Integer> allReservableResources = getReservableResources(userId);
             List<Resource> finalResponse = new ArrayList<Resource>();
             for(Resource r : response){
-                if(allViewableResources.contains(r.getResource_id())){
-                    finalResponse.add(r);
+                if (allReservableResources.contains(r.getResource_id())) {
+                    r.setCan_reserve(true);
+                } else {
+                    r.setCan_reserve(false);
                 }
+                if (allViewableResources.contains(r.getResource_id())){
+                    r.setCan_view(true);
+                } else {
+                    r.setCan_view(false);
+                    r.setName("Mystery");
+                    r.setDescription("Mystery");
+                }
+                finalResponse.add(r);
             }
             return new StandardResponse(false, "Successfully retrieved resources", new Resources(finalResponse));
         }
         else{
+            for (Resource r : response) {
+                r.setCan_view(true);
+                r.setCan_reserve(true);
+            }
             return new StandardResponse(false, "Successfully retrieved resources", new Resources(response));
         }
     }
@@ -329,6 +365,7 @@ public class ResourceService {
         private int resourceId;
         private String tag;
         private boolean restricted;
+        private int parentId;
     }
 
     public StandardResponse getResourceForest(int userId) {
@@ -355,7 +392,7 @@ public class ResourceService {
 
     private List<RT> getResourcesWithTags() {
         final String statement =
-                "SELECT resources.name, resources.description, resources.restricted, resources.resource_id, resourcetags.tag " +
+                "SELECT resources.name, resources.description, resources.restricted, resources.resource_id, resources.parent_id, resourcetags.tag " +
                         "FROM resourcetags INNER JOIN resources " +
                         "ON resourcetags.resource_id = resources.resource_id " +
                         "ORDER BY resourcetags.resource_id ASC ;";
@@ -370,6 +407,7 @@ public class ResourceService {
                         rt.restricted = rs.getBoolean("restricted");
                         rt.resourceId = rs.getInt("resource_id");
                         rt.tag = rs.getString("tag");
+                        rt.parentId = rs.getInt("parent_id");
                         return rt;
                     }
                 });
@@ -378,7 +416,7 @@ public class ResourceService {
 
     private List<RT> getResourcesWithoutTags() {
         final String noTagsStatement =
-                "SELECT name, description, restricted, resource_id " +
+                "SELECT name, description, restricted, resource_id, parent_id " +
                         "FROM resources " +
                         "WHERE NOT EXISTS (SELECT 1 FROM resourcetags WHERE resourcetags.resource_id = resources.resource_id) " +
                         "ORDER BY resource_id ASC ;";
@@ -392,6 +430,7 @@ public class ResourceService {
                         rt.description = rs.getString("description");
                         rt.restricted = rs.getBoolean("restricted");
                         rt.resourceId = rs.getInt("resource_id");
+                        rt.parentId = rs.getInt("parent_id");
                         rt.tag = null;
                         return rt;
                     }
