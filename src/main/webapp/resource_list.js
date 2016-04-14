@@ -110,10 +110,6 @@ const ResourceList = React.createClass({
     );
   },
 
-  clickOut() {
-    //this.setState({"selected_id": 0});
-  },
-
   componentDidMount() {
     this.refresh();
   },
@@ -192,7 +188,7 @@ const ResourceList = React.createClass({
         </ul>
         <br/>
         <br/>
-        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate} setSelectedId={(new_id)=> me.setState({selected_id: new_id})} selected_id={me.state.selected_id} setSelectedLink={(link_ids)=> me.setState({selected_link: link_ids})} selected_link={me.state.selected_link}/>
+        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate} setSelectedId={(new_id)=> me.setState({selected_id: new_id})} selected_id={me.state.selected_id} setSelectedLink={(link_ids)=> me.setState({selected_link: link_ids})} selected_link={me.state.selected_link} clearClick={() => me.setState({selected_id: 0, selected_link: {source_id: 0, target_id: 0}})}/>
       </div>
     );
     return (

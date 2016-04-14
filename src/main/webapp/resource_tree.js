@@ -143,18 +143,14 @@ const ResourceTree = React.createClass({
       if (link.source.ignore) {
         return null;
       }
-      console.log(me.props.selected_link.source_id);
-      console.log(link.source.resource_id);
-      console.log(me.props.selected_link.target_id);
-      console.log(link.target.resource_id);
-      console.log((me.props.selected_link.source == link.source.resource_id) && (me.props.selected_link.target.resource_id == link.target.resource_id));
       return <TreeLink key={nodeId++} source={link.source} target={link.target} deleteLink={me.deleteLink} refresh={me.refresh} setSelectedLink={me.props.setSelectedLink} is_selected={me.props.selected_link.source_id == link.source.resource_id && me.props.selected_link.target_id == link.target.resource_id}/>;
     });
 
     var helpText = <text className="helpText" x={0} y={0}>Click on a node to access node options. Click 'edit' to go to the resource edit page for that resource. Click the 'X' to delete the resource and make it's children children of the deleted node's parent. Click on a link to access link options. Click the 'X' to make the node and it's children it's own tree with the child node of the link becoming the new root.</text>;
 
     var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;
+    var clearButton = <button type="button" onClick={me.props.clearClick}>Clear</button>;
 
-    return <div>{helpText}<br/>{svg}</div>;        
+    return <div>{helpText}<br/>{clearButton}<br/>{svg}</div>;        
   }
 });

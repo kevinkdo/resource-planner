@@ -1,9 +1,15 @@
 const TreeNode = React.createClass({
+  getInitialState() {
+    return {
+      clicked: false
+    };
+  },
+
   getFill() {
     if (this.props.is_selected) {
       return '#5cb85c';
     } else {
-      return this.props.restricted ? "#d9534f": "#5bc0de"
+      return this.props.restricted ? "#d9534f": "#5bc0de";
     }
   },
 
