@@ -10,12 +10,7 @@ const ResourceList = React.createClass({
       subroute: "list",
       resources: {},
       error_msg: error_msg,
-      is_error: is_error, 
-      selected_id: 0,
-      selected_link: {
-        source_id: 0,
-        target_id: 0
-      }
+      is_error: is_error
     };
   },
 
@@ -188,7 +183,7 @@ const ResourceList = React.createClass({
         </ul>
         <br/>
         <br/>
-        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate} setSelectedId={(new_id)=> me.setState({selected_id: new_id})} selected_id={me.state.selected_id} setSelectedLink={(link_ids)=> me.setState({selected_link: link_ids})} selected_link={me.state.selected_link} clearClick={() => me.setState({selected_id: 0, selected_link: {source_id: 0, target_id: 0}})}/>
+        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate} />
       </div>
     );
     return (
