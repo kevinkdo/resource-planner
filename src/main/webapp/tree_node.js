@@ -1,10 +1,4 @@
 const TreeNode = React.createClass({
-  getInitialState() {
-    return {
-      clicked: false
-    };
-  },
-
   getFill() {
     if (this.props.is_selected) {
       return '#5cb85c';

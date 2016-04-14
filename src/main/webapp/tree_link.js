@@ -3,7 +3,7 @@ const TreeLink = React.createClass({
     if (this.props.is_selected) {
       return '#5cb85c';
     } else {
-      return "#999"
+      return "#999";
     }
   },
 
