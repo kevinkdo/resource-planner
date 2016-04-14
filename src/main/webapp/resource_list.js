@@ -10,7 +10,12 @@ const ResourceList = React.createClass({
       subroute: "list",
       resources: {},
       error_msg: error_msg,
-      is_error: is_error,
+      is_error: is_error, 
+      selected_id: 0,
+      selected_link: {
+        source_id: 0,
+        target_id: 0
+      }
     };
   },
 
@@ -105,6 +110,10 @@ const ResourceList = React.createClass({
     );
   },
 
+  clickOut() {
+    //this.setState({"selected_id": 0});
+  },
+
   componentDidMount() {
     this.refresh();
   },
@@ -183,7 +192,7 @@ const ResourceList = React.createClass({
         </ul>
         <br/>
         <br/>
-        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate}/>
+        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate} setSelectedId={(new_id)=> me.setState({selected_id: new_id})} selected_id={me.state.selected_id} setSelectedLink={(link_ids)=> me.setState({selected_link: link_ids})} selected_link={me.state.selected_link}/>
       </div>
     );
     return (
@@ -195,7 +204,7 @@ const ResourceList = React.createClass({
             <div className="col-xs-4 col-md-3">
               {leftpane}
             </div>
-            <div className="col-xs-8 col-md-9">
+            <div className="col-xs-8 col-md-9" onClick={me.clickOut}>
               <h3>Resources <button type="button" className="btn btn-success pull-right" onClick={() => this.props.setPstate({route: "resource_creator"})}><span className="glyphicon glyphicon-time" aria-hidden="true"></span> New resource</button></h3>
               {!this.state.error_msg ? <div></div> :
                 <div className={"alert " + (this.state.is_error ? "alert-danger" : "alert-success")}>

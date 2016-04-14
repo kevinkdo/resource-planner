@@ -85,6 +85,25 @@ const ResourceTree = React.createClass({
     );
   },
 
+  //click on one node and then click on another node to make it its parent 
+  //perhaps color the other nodes so you know what's available 
+  updateParent(resourceId, newParent) {
+    var me = this;
+    send_xhr("PUT", "/api/resources/" + resourceId.toString(), localStorage.getItem("session"),
+      JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: newParent, shared_count: node.shared_count}), 
+      function(obj) {
+        me.refresh(); 
+      },
+      function(obj) {
+        me.setState({error_msg: obj.error_msg, is_error: true});
+      }
+    );
+  },
+
+  setSelectedResource(id) {
+    this.setState({selected_id: id});
+  },
+
   refresh() {
     var me = this;
     send_xhr("GET", "/api/resources/forest", localStorage.getItem("session"), null,
@@ -103,7 +122,6 @@ const ResourceTree = React.createClass({
 
   componentDidMount() {
     this.refresh();
-
   },
 
   render() {
@@ -118,16 +136,23 @@ const ResourceTree = React.createClass({
       if (node.ignore) {
         return null;
       }
-      return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate}/>;
+      return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} dragging={me.state.sourceId != 0 ? true : false} selecting={me.state.selecting} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate} setSelectedId={me.props.setSelectedId} is_selected={me.props.selected_id == node.resource_id}/>;
     });
 
     var renderedLinks = links.map(function(link) {
       if (link.source.ignore) {
         return null;
       }
-      return <TreeLink key={nodeId++} source={link.source} target={link.target} deleteLink={me.deleteLink} refresh={me.refresh}/>;
+      console.log(me.props.selected_link.source_id);
+      console.log(link.source.resource_id);
+      console.log(me.props.selected_link.target_id);
+      console.log(link.target.resource_id);
+      console.log((me.props.selected_link.source == link.source.resource_id) && (me.props.selected_link.target.resource_id == link.target.resource_id));
+      return <TreeLink key={nodeId++} source={link.source} target={link.target} deleteLink={me.deleteLink} refresh={me.refresh} setSelectedLink={me.props.setSelectedLink} is_selected={me.props.selected_link.source_id == link.source.resource_id && me.props.selected_link.target_id == link.target.resource_id}/>;
     });
-    var helpText = <text className="helpText" x={0} y={0}>Click on a node to access node options. Click 'edit' to go to the resource edit page for that resource. Click the 'X' to delete the resource and make it's children children of the deleted node's parent. Click on a link to access link options. Click the 'X' to make the node and it's children it's own tree with the child node of the link becoming the new root.</text>
+
+    var helpText = <text className="helpText" x={0} y={0}>Click on a node to access node options. Click 'edit' to go to the resource edit page for that resource. Click the 'X' to delete the resource and make it's children children of the deleted node's parent. Click on a link to access link options. Click the 'X' to make the node and it's children it's own tree with the child node of the link becoming the new root.</text>;
+
     var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;
 
     return <div>{helpText}<br/>{svg}</div>;        
