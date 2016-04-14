@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <title>Resource Manager</title>
     <script src="thirdparty/jquery-2.2.0.min.js"></script>
-    <script src="thirdparty/react-0.14.6/react.min.js"></script>
-    <script src="thirdparty/react-0.14.6/react-dom.min.js"></script>
+    <script src="thirdparty/browser.min.js"></script>
+    <script src="thirdparty/react-0.14.6/react.js"></script>
+    <script src="thirdparty/react-0.14.6/react-dom.js"></script>
     <script src="thirdparty/jwt-decode.min.js"></script>
     <script src="thirdparty/d3.min.js"></script>
     <script src="thirdparty/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
@@ -13,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="mystyle.css">
   </head>
   <body>
-    <div id="main">If you see this, then your frontend build is not working.</a></div>
-    <script src="main-build.js"></script>
+    <div id="main"></div>
+    <script type="text/babel" src="main-build.js"></script>
   </body>
 </html>

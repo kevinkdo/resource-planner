@@ -77,3 +77,34 @@ input[type="date"]::-webkit-clear-button {
     transform: scale(1.0);
   }
 }
+
+.nodelabel {
+  font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+  font-size: 16px;
+}
+
+.nodesubscript {
+  font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+  font-size: 12px;
+}
+
+.link {
+  fill: none;
+  stroke-width: 3px;
+}
+
+.deleteButton {
+  fill: red;
+  stroke-width: 10px;
+}
+
+.editButton {
+  fill: blue;
+  stroke-width: 10px;
+}
+
+.helpText {
+  fill: black;
+  stroke-width: 10px;
+}
+

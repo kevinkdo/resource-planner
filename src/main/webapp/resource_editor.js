@@ -4,7 +4,7 @@ const ResourceEditor = React.createClass({
     var me = this;
     this.setState({sending: true});
     send_xhr("PUT", "/api/resources/" + this.props.pstate.view_id, localStorage.getItem("session"),
-      JSON.stringify({restricted: this.state.restricted, name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0)}),
+      JSON.stringify({restricted: this.state.restricted, name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0), parent_id: this.state.parent_id, shared_count: this.state.shared_count}),
       function(obj) {
         me.props.setPstate({ route: "resource_list", is_error: false, error_msg: "Successfully edited resource!" });
       },
@@ -111,7 +111,7 @@ const ResourceEditor = React.createClass({
                     <input type="number" className="form-control" id="resource_editor_parent_id" placeholder="Parent ID" value={this.state.parent_id} onChange={(evt)=>this.set("parent_id", evt.target.value)}/>
                   </div>
                   <div className="form-group">
-                    <label htmlFor="resource_editor_shared_count">Shared Count</label>
+                    <label htmlFor="resource_editor_shared_count">Maximum simultaneous reservations (0 for unlimited)</label>
                     <input type="number" className="form-control" id="resource_editor_shared_count" placeholder="Shared Count" value={this.state.shared_count} onChange={(evt)=>this.set("shared_count", evt.target.value)}/>
                   </div>
                   <div className="btn-toolbar">

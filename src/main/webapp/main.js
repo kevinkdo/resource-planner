@@ -65,4 +65,6 @@ var userId = function() {
   return jwt_decode(localStorage.getItem("session")).user_id;
 };
 
+var nodeId = 100;
+
 ReactDOM.render(<Router />, document.getElementById("main"));
