@@ -19,11 +19,11 @@ const ResourceTree = React.createClass({
   },
 
   setSelectedId(new_id) {
-    this.setState({selected_id: new_id});
+    this.setState({selected_id: new_id, selected_link: {source_id: 0, target_id: 0}});
   },
 
   setSelectedLink(new_link) {
-    this.setState({selected_link: new_link})
+    this.setState({selected_id: 0, selected_link: new_link})
   },
 
   clearClick() {
