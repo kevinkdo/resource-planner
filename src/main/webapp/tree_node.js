@@ -20,8 +20,13 @@ const TreeNode = React.createClass({
     this.props.refresh();
   },
 
+  onNodeClick(evt) {
+    this.props.setSelectedId(this.props.resource_id);
+    evt.stopPropagation();
+  },
+
   render() {
-    var marker = <circle r="8" fill={this.getFill()} cx={this.props.x+8} cy={this.props.y+8} onClick={() => this.props.setSelectedId(this.props.resource_id)}/>;
+    var marker = <circle r="8" fill={this.getFill()} cx={this.props.x+8} cy={this.props.y+8} onClick={this.onNodeClick}/>;
     var text = <text className="nodelabel" x={this.props.x + 20} y={this.props.y + 13}>{this.props.name}</text>;
     var deleteButton = <text className="deleteButton" x={this.props.x - 15} y={this.props.y + 13} onClick={this.handleDeleteClick}>{this.props.is_selected ? "X" : ""}</text>;
     var editButton = <text className="editButton" x={this.props.x - 45} y={this.props.y + 13} onClick={this.handleEditClick}>{this.props.is_selected ? "edit" : ""}</text>;

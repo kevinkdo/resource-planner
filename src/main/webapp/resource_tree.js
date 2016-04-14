@@ -117,9 +117,8 @@ const ResourceTree = React.createClass({
 
     var helpText = <text className="helpText" x={0} y={0}>Click on a node to access node options. Click 'edit' to go to the resource edit page for that resource. Click the 'X' to delete the resource and make it's children children of the deleted node's parent. Click on a link to access link options. Click the 'X' to make the node and it's children it's own tree with the child node of the link becoming the new root. Click the clear button to unselect any selected nodes or links.</text>;
 
-    var svg = <svg id="mysvg" width={width} height={height}>{renderedNodes}{renderedLinks}</svg>;
-    var clearButton = <button type="button" onClick={me.props.clearClick}>Clear</button>;
+    var svg = <svg id="mysvg" width={width} height={height} onClick={me.props.clearClick}>{renderedNodes}{renderedLinks}</svg>;
 
-    return <div>{helpText}<br/>{clearButton}<br/>{svg}</div>;        
+    return <div>{helpText}<br/>{svg}</div>;
   }
 });
