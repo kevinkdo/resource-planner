@@ -128,7 +128,7 @@ const ResourceTree = React.createClass({
       if (node.ignore) {
         return null;
       }
-      return <TreeNode key={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} dragging={me.state.sourceId != 0 ? true : false} startDrag={me.startDrag} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate} setSelectedId={me.setSelectedId} is_selected={me.state.selected_id == node.resource_id}/>;
+      return <TreeNode key={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} sourceId={me.state.sourceId} targetId={me.state.targetId} startDrag={me.startDrag} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate} setSelectedId={me.setSelectedId} is_selected={me.state.selected_id == node.resource_id}/>;
     });
 
     var renderedLinks = links.map(function(link) {
