@@ -5,6 +5,8 @@ const ResourceTree = React.createClass({
       sourceId: 0,
       xOffset: 0,
       yOffset: 0,
+      clientX: 0,
+      clientY: 0,
       selected_id: 0,
       selected_link: {
         source_id: 0,
@@ -14,7 +16,8 @@ const ResourceTree = React.createClass({
         name: "Dummy",
         children: [],
         ignore: true
-      }
+      },
+      links: []
     };
   },
 
@@ -40,7 +43,22 @@ const ResourceTree = React.createClass({
     this.setState({
       sourceId: dragState.sourceId,
       xOffset: dragState.xOffset,
-      yOffset: dragState.yOffset
+      yOffset: dragState.yOffset,
+      clientX: dragState.clientX,
+      clientY: dragState.clientY
+    });
+  },
+
+  handleMouseMove: function(evt) {
+    this.setState({
+      clientX: evt.clientX,
+      clientY: evt.clientY
+    });
+  },
+
+  handleMouseUp: function() {
+    this.setState({
+      sourceId: 0
     });
   },
 
@@ -70,10 +88,6 @@ const ResourceTree = React.createClass({
     );
   },
 
-  setSelectedResource(id) {
-    this.setState({selected_id: id});
-  },
-
   refresh() {
     var me = this;
     send_xhr("GET", "/api/resources/forest", localStorage.getItem("session"), null,
@@ -100,12 +114,21 @@ const ResourceTree = React.createClass({
     var tree = d3.layout.tree().size([width*5/6, height*5/6]);
     var nodes = tree.nodes(this.state.tree);
     var links = tree.links(nodes);
-    
+
+    if (me.state.sourceId != 0) {
+      nodes.forEach(function(node) {
+        if (node.resource_id == me.state.sourceId) {
+          node.x = me.state.clientX - me.state.xOffset;
+          node.y = me.state.clientY - me.state.yOffset;
+        }
+      });
+    }
+
     var renderedNodes = nodes.map(function(node) {      
       if (node.ignore) {
         return null;
       }
-      return <TreeNode key={node.id} id={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} dragging={me.state.sourceId != 0 ? true : false} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate} setSelectedId={me.setSelectedId} is_selected={me.state.selected_id == node.resource_id}/>;
+      return <TreeNode key={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} dragging={me.state.sourceId != 0 ? true : false} startDrag={me.startDrag} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate} setSelectedId={me.setSelectedId} is_selected={me.state.selected_id == node.resource_id}/>;
     });
 
     var renderedLinks = links.map(function(link) {
@@ -117,7 +140,7 @@ const ResourceTree = React.createClass({
 
     var helpText = <text className="helpText" x={0} y={0}>Click on a node to access node options. Click 'edit' to go to the resource edit page for that resource. Click the 'X' to delete the resource and make it's children children of the deleted node's parent. Click on a link to access link options. Click the 'X' to make the node and it's children it's own tree with the child node of the link becoming the new root. Click the clear button to unselect any selected nodes or links.</text>;
 
-    var svg = <svg id="mysvg" width={width} height={height} onClick={me.clearClick}>{renderedNodes}{renderedLinks}</svg>;
+    var svg = <svg id="mysvg" width={width} height={height} onClick={me.clearClick} onMouseMove={me.state.sourceId != 0 ? this.handleMouseMove : null} onMouseUp={me.state.sourceId != 0 ? this.handleMouseUp : null}>{renderedNodes}{renderedLinks}</svg>;
 
     return <div>{helpText}<br/>{svg}</div>;
   }

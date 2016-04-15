@@ -108,3 +108,22 @@ input[type="date"]::-webkit-clear-button {
   stroke-width: 10px;
 }
 
+.noshow {
+  display: none;
+}
+
+.show {
+  display:block;
+}
+
+.draggable {
+  cursor: move;
+}
+
+.yespointer {
+  pointer-events: all;
+}
+
+.nopointer {
+  pointer-events: none;
+}
