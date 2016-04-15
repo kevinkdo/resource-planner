@@ -58,7 +58,8 @@ const ResourceTree = React.createClass({
 
   handleMouseUp: function() {
     this.setState({
-      sourceId: 0
+      sourceId: 0,
+      targetId: 0
     });
   },
 
