@@ -2,7 +2,6 @@ const GroupManager = React.createClass({
   getInitialState() {  
     var error_msg = this.props.pstate.error_msg;
     var is_error = this.props.pstate.is_error;
-    this.props.setPstate({error_msg: ""});
     return {
       initial_load: true,
       new_group_name: "",
@@ -74,6 +73,7 @@ const GroupManager = React.createClass({
   },
 
   componentDidMount() {
+    this.props.setPstate({error_msg: ""});
     this.refresh();
   },
 

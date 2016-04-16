@@ -12,7 +12,7 @@ const Navbar = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/users/" + userId(), localStorage.getItem("session"), null,
+    this.req = send_xhr("GET", "/api/users/" + userId(), localStorage.getItem("session"), null,
       function(obj) {
         obj.data.initial_load = false;
         me.setState({username: obj.data.username});
@@ -21,6 +21,10 @@ const Navbar = React.createClass({
         me.setState({initial_load: false, error_msg: obj.error_msg});
       }
     );
+  },
+
+  componentWillUnmount() {
+    this.req.abort();
   },
 
   render() {

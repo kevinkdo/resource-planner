@@ -47,29 +47,29 @@ const Router = React.createClass({
   render() {
     switch (this.state.route) {
       case "login":
-        return <Login setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <Login setPstate={this.setStateWrapper} pstate={this.state} />
       case "group_manager":
-        return <GroupManager setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <GroupManager setPstate={this.setStateWrapper} pstate={this.state} />
       case "group_editor":
-        return <GroupEditor setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <GroupEditor setPstate={this.setStateWrapper} pstate={this.state} />
       case "settings":
-        return <Settings setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <Settings setPstate={this.setStateWrapper} pstate={this.state} />
       case "reservation_list":
-        return <ReservationList setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <ReservationList setPstate={this.setStateWrapper} pstate={this.state} />
       case "reservation_creator":
-        return <ReservationCreator setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <ReservationCreator setPstate={this.setStateWrapper} pstate={this.state} />
       case "reservation_editor":
-        return <ReservationEditor setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <ReservationEditor setPstate={this.setStateWrapper} pstate={this.state} />
       case "resource_list":
-        return <ResourceList setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <ResourceList setPstate={this.setStateWrapper} pstate={this.state} />
       case "resource_creator":
-        return <ResourceCreator setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <ResourceCreator setPstate={this.setStateWrapper} pstate={this.state} />
       case "resource_editor":
-        return <ResourceEditor setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <ResourceEditor setPstate={this.setStateWrapper} pstate={this.state} />
       case "permissions_manager":
-        return <PermissionsManager setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <PermissionsManager setPstate={this.setStateWrapper} pstate={this.state} />
       case "admin_console":
-        return <AdminConsole setPstate={this.setStateWrapper.bind(this)} pstate={this.state} />
+        return <AdminConsole setPstate={this.setStateWrapper} pstate={this.state} />
     }
     return <div>ERROR</div>;
   }

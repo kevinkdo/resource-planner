@@ -131,7 +131,7 @@ const GroupEditor = React.createClass({
                           </tr>
                         </thead>
                         <tbody>
-                          {me.state.all_users.map(x => <tr><td>{x.user_id}</td><td>{x.username}</td></tr>)}
+                          {me.state.all_users.map(x => <tr key={x.user_id}><td>{x.user_id}</td><td>{x.username}</td></tr>)}
                         </tbody>
                       </table>
                     </div>
