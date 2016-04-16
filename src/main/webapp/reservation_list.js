@@ -119,7 +119,7 @@ const ReservationList = React.createClass({
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
-    send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
+    var xhr1 = send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
         obj.data.reservations.forEach(function(x) {
@@ -139,7 +139,7 @@ const ReservationList = React.createClass({
         });
       }
     );
-    send_xhr("GET", "/api/reservations/approvableReservations", localStorage.getItem("session"), null,
+    var xhr2 = send_xhr("GET", "/api/reservations/approvableReservations", localStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
         obj.data.reservations.forEach(function(x) {
@@ -159,13 +159,15 @@ const ReservationList = React.createClass({
         });
       }
     );
+    this.reqs.push(xhr1, xhr2);
   },
 
   componentDidMount() {
     var me = this;
+    this.reqs = [];
     this.props.setPstate({error_msg: ""});
     this.refresh();
-    send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
+    var xhr = send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {
         me.setState({
           tags: obj.data.tags.map(x => ({name: x, state: ""})),
@@ -180,6 +182,11 @@ const ReservationList = React.createClass({
         });
       }
     );
+    this.reqs.push(xhr);
+  },
+
+  componentWillUnmount() {
+    this.reqs.forEach((req) => req.abort());
   },
 
   render() {

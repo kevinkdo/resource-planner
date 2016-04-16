@@ -9,9 +9,8 @@ var send_xhr = function(verb, endpoint, token, data, success_callback, error_cal
         } else {
           success_callback(responseObject);
         }
-      } else {
+      } else if (xhr.status != 0) {
         alert('Backed has crashed. Please reload the page.');
-        alert(xhr.status);
       }
     }
   };
@@ -24,6 +23,7 @@ var send_xhr = function(verb, endpoint, token, data, success_callback, error_cal
     xhr.setRequestHeader("Authorization", "Bearer " + token);
   }
   xhr.send(data);
+  return xhr;
 };
 
 //Convert Date object to y-m-d string for date input
