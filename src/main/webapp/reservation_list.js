@@ -11,7 +11,6 @@ const ReservationList = React.createClass({
     var end_time = formatTime(end);   
     var error_msg = this.props.pstate.error_msg;
     var is_error = this.props.pstate.is_error;
-    this.props.setPstate({error_msg: ""});
     return {
       loading_tags: true,
       loading_table: true,
@@ -164,6 +163,7 @@ const ReservationList = React.createClass({
 
   componentDidMount() {
     var me = this;
+    this.props.setPstate({error_msg: ""});
     this.refresh();
     send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
       function(obj) {

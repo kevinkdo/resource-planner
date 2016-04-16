@@ -9,6 +9,9 @@ var send_xhr = function(verb, endpoint, token, data, success_callback, error_cal
         } else {
           success_callback(responseObject);
         }
+      } else {
+        alert('Backed has crashed. Please reload the page.');
+        alert(xhr.status);
       }
     }
   };
