@@ -91,7 +91,7 @@ public class ReservationService {
             if (timeOpen(req.getBegin_time(), req.getEnd_time(), i) == 2) {
                 if(!canReserveWithSharedInTimespan(i, req.getBegin_time(), req.getEnd_time())){
                     //Time not available for this resource
-                    return new StandardResponse(true, "Reservation for resource with id " + i + " already exists at that time");
+                    return new StandardResponse(true, "Resource with id " + i + " is fully reserved during this time frame");
                 }
             }
         }
@@ -761,7 +761,7 @@ public class ReservationService {
                 new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                         TempRes t = new TempRes();
-                        t.reservation_id = rs.getInt("reservations.reservation_id");
+                        t.reservation_id = rs.getInt("reservation_id");
                         t.title = rs.getString("title");
                         t.description = rs.getString("description");
                         t.user_id = rs.getInt("user_id");
