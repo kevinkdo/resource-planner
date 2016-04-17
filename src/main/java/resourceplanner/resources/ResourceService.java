@@ -212,9 +212,6 @@ public class ResourceService {
         }
 
         Resource r = getResourceByIdHelper(resourceId, userId);
-        if (r == null) {
-            return new StandardResponse(true, "You don't have view permissions for all children of the resource");
-        }
         return new StandardResponse(false, "Successfully fetched resource", r);
     }
 
@@ -526,6 +523,12 @@ public class ResourceService {
         );
         for (int reservationId : reservationIds) {
             emailService.removeScheduledEmails(reservationId);
+        }
+
+        Resource r = getResourceByIdHelper(resourceId, 1);
+        int parent = r.getParent_id();
+        for (Resource child : r.getChildren()) {
+            child.setParent_id(parent);
         }
 
         jt.update("DELETE FROM reservationresources WHERE resource_id = ?;", resourceId);
