@@ -460,6 +460,13 @@ public class ResourceService {
         jt.update("UPDATE reservations SET complete = true WHERE NOT EXISTS (SELECT * from reservationresources WHERE reservationresources.reservation_id = reservations.reservation_id AND resource_approved = false);");
     }
 
+    private void getAllDescendants(Resource r, Set<Integer> set) {
+        for (Resource child : r.getChildren()) {
+            set.add(child.getResource_id());
+            getAllDescendants(child, set);
+        }
+    }
+
     public StandardResponse updateResource(ResourceRequest req, int resourceId) {
         if (!req.isValid()) {
             return new StandardResponse(true, "Invalid request");
@@ -471,11 +478,25 @@ public class ResourceService {
             return new StandardResponse(true, "Resource does not exist");
         }
 
+        // error if parent is itself
+        if (req.getParent_id() == resourceId) {
+            return new StandardResponse(true, "Parent ID cannot be its own resource ID");
+        }
+
         if (req.getParent_id() != 0) {
             int parentResourceExists = jt.queryForObject(
                     "SELECT COUNT(*) FROM resources WHERE resource_id = ?;", Integer.class, req.getParent_id());
             if (parentResourceExists != 1) {
                 return new StandardResponse(true, "Parent resource does not exist");
+            } else {
+                // parent resource exists
+                // make sure that the parent isn't in the set of its children
+                Resource me = getResourceByIdHelper(resourceId, 1);
+                Set<Integer> childrenIds = new HashSet<Integer>();
+                getAllDescendants(me, childrenIds);
+                if (childrenIds.contains(req.getParent_id())) {
+                    return new StandardResponse(true, "Resources cannot form cyclic relations");
+                }
             }
         }
 
