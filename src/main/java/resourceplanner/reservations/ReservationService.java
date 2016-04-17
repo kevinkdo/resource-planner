@@ -65,7 +65,6 @@ public class ReservationService {
         Set<Integer> allReservableResources = new HashSet<Integer>(userReservable);
         allReservableResources.addAll(groupReservable);
 
-
         // for each resource, find out what kind of overlap exists
         for (int i : req.getResource_ids()) {
             if (userId != 1) {
@@ -73,7 +72,15 @@ public class ReservationService {
                     return new StandardResponse(true, "You do not have reservation permission for resource with ID " + i);
                 }
             }
-            Resource r = getResource(i);
+            Resource r = resourceService.getResourceByIdHelper(i, userId);
+
+            // TODO check that count isn't exceeded
+
+            boolean canReserve = hasReservePermission(r);
+            if (!canReserve) {
+                return new StandardResponse(true, "You do not have reservation permission for a child of resource with ID " + i);
+            }
+
             rList.add(r);
             if (r.isRestricted()) {
                 complete = false;
@@ -130,6 +137,19 @@ public class ReservationService {
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), complete);
         emailService.scheduleEmails(reservationId);
         return new StandardResponse(false, "Reservation inserted successfully", res);
+    }
+
+    private boolean hasReservePermission(Resource r) {
+        for (Resource child : r.getChildren()) {
+            if (child.getCan_reserve() == false) {
+                return false;
+            }
+            boolean canReserveChild = hasReservePermission(r);
+            if (!canReserveChild) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isRestricted(int resourceId) {
@@ -657,7 +677,7 @@ public class ReservationService {
 
         List<Resource> rList = new ArrayList<Resource>();
         for (int resourceId : resourceIds) {
-            rList.add(getResource(resourceId));
+            rList.add(resourceService.getResourceByIdHelper(resourceId, 1));
         }
         return rList;
     }
@@ -670,31 +690,6 @@ public class ReservationService {
     }
     private List<Resource> getApprovedResources(int reservationId){
         return getResources(reservationId, 1);
-    }
-
-    private Resource getResource(int resourceId) {
-        List<Resource> resources = jt.query(
-                "SELECT name, description, restricted FROM resources WHERE resource_id = ?;",
-                new Object[]{resourceId},
-                new RowMapper<Resource>() {
-                    public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        Resource resource = new Resource();
-                        resource.setName(rs.getString("name"));
-                        resource.setDescription(rs.getString("description"));
-                        resource.setRestricted(rs.getBoolean("restricted"));
-                        return resource;
-                    }
-                });
-
-        Resource resource = resources.get(0);
-
-        List<String> tags = jt.queryForList(
-                "SELECT tag FROM resourcetags WHERE resource_id = ?;",
-                new Object[]{resourceId},
-                String.class);
-        resource.setTags(tags);
-        resource.setResource_id(resourceId);
-        return resource;
     }
 
     public User getUser(int userId) {
