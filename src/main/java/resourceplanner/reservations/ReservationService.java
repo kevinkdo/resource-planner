@@ -826,7 +826,7 @@ public class ReservationService {
             new RowMapper<TempRes>() {
                 public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                     TempRes t = new TempRes();
-                    t.reservation_id = rs.getInt("reservations.reservation_id");
+                    t.reservation_id = rs.getInt("reservation_id");
                     t.title = rs.getString("title");
                     t.description = rs.getString("description");
                     t.user_id = rs.getInt("user_id");
@@ -1052,7 +1052,7 @@ public class ReservationService {
             //if max number is greater than shared count, this will be removed. 
 
             for(TempRes temp : incompleteReservationsWithResource){
-                if(findMaximumConcurrentOnResource(r.getResource_id(), temp, t.begin_time, t.end_time) >= shared_count - 1){
+                if(findMaximumConcurrentOnResource(r.getResource_id(), temp, t.begin_time, t.end_time) >= shared_count){
                     finalOutput.add(temp);
                 }
             }
