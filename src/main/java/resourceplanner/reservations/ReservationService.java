@@ -74,8 +74,6 @@ public class ReservationService {
             }
             Resource r = resourceService.getResourceByIdHelper(i, userId);
 
-            // TODO check that count isn't exceeded
-
             boolean canReserve = hasReservePermission(r);
             if (!canReserve) {
                 return new StandardResponse(true, "You do not have reservation permission for a child of resource with ID " + i);
@@ -91,7 +89,7 @@ public class ReservationService {
             if (timeOpen(req.getBegin_time(), req.getEnd_time(), i) == 2) {
                 if(!canReserveWithSharedInTimespan(i, req.getBegin_time(), req.getEnd_time())){
                     //Time not available for this resource
-                    return new StandardResponse(true, "Resource with id " + i + " is fully reserved during this time frame");
+                    return new StandardResponse(true, "Resource '" + r.getName() + "' is fully reserved during this time frame");
                 }
             }
         }
