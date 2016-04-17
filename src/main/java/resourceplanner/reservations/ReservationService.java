@@ -963,7 +963,8 @@ public class ReservationService {
             return new StandardResponse(true, "Reservation is already approved");
         }
         System.out.println("Checking to be canceled");
-        List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes);
+        List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes, 1);
+        System.out.println(overlapping.size() + " reservations to be canceled:");
         List<Reservation> overlappingReservations = convertTempListToReservationList(overlapping);
         return new StandardResponse(false, "To-be-canceled reservations returned", overlappingReservations);
     }
@@ -1013,7 +1014,7 @@ public class ReservationService {
                 });
     }
 
-    private List<TempRes> getOverlappingIncompleteReservations(TempRes t){
+    private List<TempRes> getOverlappingIncompleteReservations(TempRes t, int preApprovalFactor){
         Set<TempRes> finalOutput = new HashSet<TempRes>();
 
         List<Resource> originalResources = getResources(t.reservation_id);
@@ -1052,7 +1053,7 @@ public class ReservationService {
             //if max number is greater than shared count, this will be removed. 
 
             for(TempRes temp : incompleteReservationsWithResource){
-                if(findMaximumConcurrentOnResource(r.getResource_id(), temp, t.begin_time, t.end_time) >= shared_count){
+                if(findMaximumConcurrentOnResource(r.getResource_id(), temp, t.begin_time, t.end_time) >= shared_count - preApprovalFactor){
                     finalOutput.add(temp);
                 }
             }
@@ -1118,8 +1119,9 @@ public class ReservationService {
 
     private void deleteOverlappingIncompleteReservations(int reservationId){
         TempRes t = getTempResFromId(reservationId);
-        List<TempRes> overlappingIncomplete = getOverlappingIncompleteReservations(t);
+        List<TempRes> overlappingIncomplete = getOverlappingIncompleteReservations(t, 0);
         for(TempRes toCancel : overlappingIncomplete){
+            System.out.println("Deleting: " + toCancel.title);
             emailService.sendCanceledEmail(toCancel.reservation_id);
             deleteReservation(toCancel.reservation_id, true, 1);
         }
