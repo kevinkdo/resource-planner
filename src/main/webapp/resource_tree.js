@@ -29,7 +29,18 @@ const ResourceTree = React.createClass({
     if (this.state.sourceId == 0) {
       this.setState({selected_id: 0, selected_link: {source_id: 0, target_id: 0}});
     } else {
-      // TODO Fire a PUT request here
+      var me = this;
+      send_xhr("PUT", "/api/resources/" + this.state.sourceId.toString(), localStorage.getItem("session"),
+        JSON.stringify({parent_id: this.state.targetId}), 
+        function(obj) {
+          me.refresh(); 
+          console.log("much success")
+        },
+        function(obj) {
+          me.setState({error_msg: obj.error_msg, is_error: true});
+        }
+      );
+
       this.setState({
         sourceId: 0,
         targetId: 0
@@ -128,7 +139,7 @@ const ResourceTree = React.createClass({
       if (node.ignore) {
         return null;
       }
-      return <TreeNode key={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} sourceId={me.state.sourceId} targetId={me.state.targetId} startDrag={me.startDrag} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate} is_selected={me.state.selected_id == node.resource_id}/>;
+      return <TreeNode key={node.id} x={node.x} y={node.y} name={node.name} resource_id={node.resource_id} setTargetId={me.setTargetId} sourceId={me.state.sourceId} targetId={me.state.targetId} startDrag={me.startDrag} subscript={node.subscript} restricted={node.restricted} refresh={me.refresh} deleteNode={me.deleteNode} setPstate={me.props.setPstate} is_selected={me.state.selected_id == node.resource_id} can_view={node.can_view}/>;
     });
 
     var renderedLinks = links.map(function(link) {
