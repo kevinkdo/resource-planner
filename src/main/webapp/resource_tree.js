@@ -44,9 +44,7 @@ const ResourceTree = React.createClass({
         sourceId: 0,
         targetId: 0
       });  
-    }
-
-    
+    }    
   },
 
   setTargetId(targetId) {
