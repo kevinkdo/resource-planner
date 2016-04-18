@@ -28,24 +28,25 @@ const ResourceTree = React.createClass({
   clickHandler() {
     if (this.state.sourceId == 0) {
       this.setState({selected_id: 0, selected_link: {source_id: 0, target_id: 0}});
-    } else {
+    } else if (this.state.sourceID != 0 && this.state.targetId != 0){
       var me = this;
       send_xhr("PUT", "/api/resources/" + this.state.sourceId.toString(), localStorage.getItem("session"),
         JSON.stringify({parent_id: this.state.targetId}), 
         function(obj) {
           me.refresh(); 
-          console.log("much success")
         },
         function(obj) {
           me.setState({error_msg: obj.error_msg, is_error: true});
         }
-      );
+      ); 
 
       this.setState({
         sourceId: 0,
         targetId: 0
-      });
+      });  
     }
+
+    
   },
 
   setTargetId(targetId) {
