@@ -9,6 +9,7 @@ baseUrl = protocol + '://' + host
 resetUrl = '"/admin/init"' 
 tagUrl = '"/api/tags"'
 resourceUrl = '"/api/resources"'
+forestUrl = '+ "/forest"'
 registerUrl = '"/auth/register"'
 loginUrl = '"/auth/login"'
 reserveUrl = '"/api/reservations"'
@@ -60,7 +61,8 @@ optionsPrint = {
   19: (Verbs.Get, 'Get permissions by user ID'),
   20: (Verbs.Get, 'Get all incomplete reservations that you can approve'),
   21: (Verbs.Get, 'Get all incomplete reservations that would be canceled with approval of reservation ID (type in)'),  
-  22: (Verbs.Post, 'Approve or deny a reservation')
+  22: (Verbs.Post, 'Approve or deny a reservation'),
+  23: (Verbs.Get, 'Get resource forest')
 }
 
 
@@ -91,7 +93,7 @@ def processSelection(input):
   if input in optionsPrint:
     if optionsPrint[input][0] is Verbs.Put or optionsPrint[input][0] is Verbs.Get or optionsPrint[input][0] is Verbs.Delete:
       temp = raw_input('input the desired ID or hit enter if non-applicable: ')
-      if temp == '' and (input is not 1 and input is not 15 and input is not 20):
+      if temp == '' and (input is not 1 and input is not 15 and input is not 20 and input is not 23):
         while temp == '':
           temp = raw_input('ID required. Input the desired ID: ')
       else:
@@ -134,7 +136,8 @@ def processSelection(input):
       19: getRequest + userUrl + requestID + permissionUrl + requestEnding,
       20: getRequest + reserveUrl + incompleteReservationUrl + requestEnding,
       21: getRequest + reserveUrl + cancelIncompleteReservationUrl + requestID + requestEnding,
-      22: postRequest + reserveUrl + approveIncompletReservationUrl + requestID + requestPayload + requestEnding
+      22: postRequest + reserveUrl + approveIncompletReservationUrl + requestID + requestPayload + requestEnding,
+      23: getRequest + resourceUrl + forestUrl + requestEnding
     }
     print updatedDict[input]
     exec(updatedDict[input])
