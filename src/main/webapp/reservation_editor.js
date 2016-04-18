@@ -143,9 +143,9 @@ const ReservationEditor = React.createClass({
                       <button type="button" className="btn btn-link" onClick={this.removeResource}>Remove a resource from this reservation</button>
                     </div>
                     {me.state.resource_ids.map((resource_id, index) =>
-                      <select className="form-control" defaultValue={resource_id} onChange={(evt)=>this.setResourceIdAtIndex(evt.target.value, index)}>
+                      <select key={"select number" + index.toString()} className="form-control" defaultValue={resource_id} onChange={(evt)=>this.setResourceIdAtIndex(evt.target.value, index)}>
                         {me.state.all_resources.map(x =>
-                          <option value={x.resource_id}>{x.name}</option>
+                          <option key={x.resource_id} value={x.resource_id}>{x.name}</option>
                         )}
                       </select>
                     )}

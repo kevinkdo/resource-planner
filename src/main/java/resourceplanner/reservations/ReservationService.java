@@ -65,7 +65,6 @@ public class ReservationService {
         Set<Integer> allReservableResources = new HashSet<Integer>(userReservable);
         allReservableResources.addAll(groupReservable);
 
-
         // for each resource, find out what kind of overlap exists
         for (int i : req.getResource_ids()) {
             if (userId != 1) {
@@ -73,7 +72,13 @@ public class ReservationService {
                     return new StandardResponse(true, "You do not have reservation permission for resource with ID " + i);
                 }
             }
-            Resource r = getResource(i);
+            Resource r = resourceService.getResourceByIdHelper(i, userId);
+
+            boolean canReserve = hasReservePermission(r);
+            if (!canReserve) {
+                return new StandardResponse(true, "You do not have reservation permission for a child of resource with ID " + i);
+            }
+
             rList.add(r);
             if (r.isRestricted()) {
                 complete = false;
@@ -84,7 +89,7 @@ public class ReservationService {
             if (timeOpen(req.getBegin_time(), req.getEnd_time(), i) == 2) {
                 if(!canReserveWithSharedInTimespan(i, req.getBegin_time(), req.getEnd_time())){
                     //Time not available for this resource
-                    return new StandardResponse(true, "Reservation for resource with id " + i + " already exists at that time");
+                    return new StandardResponse(true, "Resource '" + r.getName() + "' is fully reserved during this time frame");
                 }
             }
         }
@@ -130,6 +135,19 @@ public class ReservationService {
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), complete);
         emailService.scheduleEmails(reservationId);
         return new StandardResponse(false, "Reservation inserted successfully", res);
+    }
+
+    private boolean hasReservePermission(Resource r) {
+        for (Resource child : r.getChildren()) {
+            if (child.getCan_reserve() == false) {
+                return false;
+            }
+            boolean canReserveChild = hasReservePermission(r);
+            if (!canReserveChild) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isRestricted(int resourceId) {
@@ -657,7 +675,7 @@ public class ReservationService {
 
         List<Resource> rList = new ArrayList<Resource>();
         for (int resourceId : resourceIds) {
-            rList.add(getResource(resourceId));
+            rList.add(resourceService.getResourceByIdHelper(resourceId, 1));
         }
         return rList;
     }
@@ -670,31 +688,6 @@ public class ReservationService {
     }
     private List<Resource> getApprovedResources(int reservationId){
         return getResources(reservationId, 1);
-    }
-
-    private Resource getResource(int resourceId) {
-        List<Resource> resources = jt.query(
-                "SELECT name, description, restricted FROM resources WHERE resource_id = ?;",
-                new Object[]{resourceId},
-                new RowMapper<Resource>() {
-                    public Resource mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        Resource resource = new Resource();
-                        resource.setName(rs.getString("name"));
-                        resource.setDescription(rs.getString("description"));
-                        resource.setRestricted(rs.getBoolean("restricted"));
-                        return resource;
-                    }
-                });
-
-        Resource resource = resources.get(0);
-
-        List<String> tags = jt.queryForList(
-                "SELECT tag FROM resourcetags WHERE resource_id = ?;",
-                new Object[]{resourceId},
-                String.class);
-        resource.setTags(tags);
-        resource.setResource_id(resourceId);
-        return resource;
     }
 
     public User getUser(int userId) {
@@ -766,7 +759,7 @@ public class ReservationService {
                 new RowMapper<TempRes>() {
                     public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                         TempRes t = new TempRes();
-                        t.reservation_id = rs.getInt("reservations.reservation_id");
+                        t.reservation_id = rs.getInt("reservation_id");
                         t.title = rs.getString("title");
                         t.description = rs.getString("description");
                         t.user_id = rs.getInt("user_id");
@@ -831,7 +824,7 @@ public class ReservationService {
             new RowMapper<TempRes>() {
                 public TempRes mapRow(ResultSet rs, int rowNum) throws SQLException {
                     TempRes t = new TempRes();
-                    t.reservation_id = rs.getInt("reservations.reservation_id");
+                    t.reservation_id = rs.getInt("reservation_id");
                     t.title = rs.getString("title");
                     t.description = rs.getString("description");
                     t.user_id = rs.getInt("user_id");
@@ -968,7 +961,8 @@ public class ReservationService {
             return new StandardResponse(true, "Reservation is already approved");
         }
         System.out.println("Checking to be canceled");
-        List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes);
+        List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes, 1);
+        System.out.println(overlapping.size() + " reservations to be canceled:");
         List<Reservation> overlappingReservations = convertTempListToReservationList(overlapping);
         return new StandardResponse(false, "To-be-canceled reservations returned", overlappingReservations);
     }
@@ -1018,7 +1012,7 @@ public class ReservationService {
                 });
     }
 
-    private List<TempRes> getOverlappingIncompleteReservations(TempRes t){
+    private List<TempRes> getOverlappingIncompleteReservations(TempRes t, int preApprovalFactor){
         Set<TempRes> finalOutput = new HashSet<TempRes>();
 
         List<Resource> originalResources = getResources(t.reservation_id);
@@ -1057,7 +1051,7 @@ public class ReservationService {
             //if max number is greater than shared count, this will be removed. 
 
             for(TempRes temp : incompleteReservationsWithResource){
-                if(findMaximumConcurrentOnResource(r.getResource_id(), temp, t.begin_time, t.end_time) >= shared_count - 1){
+                if(findMaximumConcurrentOnResource(r.getResource_id(), temp, t.begin_time, t.end_time) >= shared_count - preApprovalFactor){
                     finalOutput.add(temp);
                 }
             }
@@ -1123,8 +1117,9 @@ public class ReservationService {
 
     private void deleteOverlappingIncompleteReservations(int reservationId){
         TempRes t = getTempResFromId(reservationId);
-        List<TempRes> overlappingIncomplete = getOverlappingIncompleteReservations(t);
+        List<TempRes> overlappingIncomplete = getOverlappingIncompleteReservations(t, 0);
         for(TempRes toCancel : overlappingIncomplete){
+            System.out.println("Deleting: " + toCancel.title);
             emailService.sendCanceledEmail(toCancel.reservation_id);
             deleteReservation(toCancel.reservation_id, true, 1);
         }

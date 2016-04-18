@@ -2,7 +2,6 @@ const ResourceList = React.createClass({
   getInitialState() {
     var error_msg = this.props.pstate.error_msg;
     var is_error = this.props.pstate.is_error;
-    this.props.setPstate({error_msg: ""});
     return {
       loading_tags: true,
       loading_table: true,
@@ -106,6 +105,7 @@ const ResourceList = React.createClass({
   },
 
   componentDidMount() {
+    this.props.setPstate({error_msg: ""});
     this.refresh();
   },
 
