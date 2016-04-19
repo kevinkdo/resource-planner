@@ -39,12 +39,11 @@ const ResourceTree = React.createClass({
           me.setState({error_msg: obj.error_msg, is_error: true});
         }
       ); 
-
-      this.setState({
+    }   
+    this.setState({
         sourceId: 0,
         targetId: 0
-      });  
-    }    
+      });   
   },
 
   setTargetId(targetId) {
