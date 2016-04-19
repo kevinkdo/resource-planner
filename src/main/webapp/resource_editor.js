@@ -40,6 +40,7 @@ const ResourceEditor = React.createClass({
 
   getInitialState() {
     return {
+      all_resources: [{resource_id: 0, name: "No parent object"}],
       initial_load: true,
       sending: false,
       name: "",
@@ -65,9 +66,23 @@ const ResourceEditor = React.createClass({
         me.setState({initial_load: false, error_msg: obj.error_msg, is_error: true});
       }
     );
+
+    send_xhr("GET", "/api/resources/", localStorage.getItem("session"), null,
+      function(obj) {
+        me.state.all_resources = me.state.all_resources.concat(obj.data.resources);
+        me.setState({
+          all_resources: me.state.all_resources,
+          initial_load_resources: false
+        });
+      },
+      function(obj) {
+        me.setState({initial_load_resources: false, error_msg: obj.error_msg, is_error: true});
+      }
+    );
   },
 
   render() {
+    var me = this;
     var last_tag = this.state.tags[this.state.tags.length-1];
     return (
       <div>
@@ -108,7 +123,11 @@ const ResourceEditor = React.createClass({
                   </div>
                   <div className="form-group">
                     <label htmlFor="resource_editor_parent_id">Parent ID</label>
-                    <input type="number" className="form-control" id="resource_editor_parent_id" placeholder="Parent ID" value={this.state.parent_id} onChange={(evt)=>this.set("parent_id", evt.target.value)}/>
+                    <select className="form-control" defaultValue={me.state.parent_id} onChange={(evt)=>this.set("parent_id", evt.target.value)}>
+                      {me.state.all_resources.map(x =>
+                        <option key={x.resource_id} value={x.resource_id}>{x.name}</option>
+                      )}
+                    </select>
                   </div>
                   <div className="form-group">
                     <label htmlFor="resource_editor_shared_count">Maximum simultaneous reservations (0 for unlimited)</label>

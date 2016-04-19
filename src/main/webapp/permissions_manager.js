@@ -157,7 +157,7 @@ const PermissionsManager = React.createClass({
     var group_ids = me.state.data.groups.map(x => x.group_id);
     var resource_ids = me.state.data.resources.map(x => x.resource_id);
     var resource_names = me.state.data.resources.map(x => x.resource_name);
-    var user_management = me.state.data.system_permissions.user_permissions.length > 0;
+    var user_management = me.state.data.system_permissions.user_permissions.length > 0 || me.state.data.system_permissions.group_permissions.length;
     return (
       <table className="table table-hover">
         <thead>
