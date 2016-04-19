@@ -24,7 +24,7 @@ class TagTestCases(unittest.TestCase):
       assert decoded['error_msg'] == 'Successfully retrieved tags'
 
   def test_GetTagsAfterPosting(self):
-      resource = {"name":"some resource", "description":"some resource description", "tags":["tag1","tag2"], "restricted": False}
+      resource = {"name":"some resource", "description":"some resource description", "tags":["tag1","tag2"], "restricted": False, 'shared_count': 1, 'parent_id': 0}
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(resource), headers = adminHeaders, verify = False)
       r = requests.get(params.baseUrl + params.tagUrl, headers = params.headers, verify = False)
       decoded = r.json()

@@ -49,8 +49,8 @@ permissions = {
 class GroupsTestCases(unittest.TestCase):
   def setUp(self):
       requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)  
-      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[], 'restricted': False}
-      r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(reserveAcessResource), headers = params.headers, verify = False)     
+      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[], 'restricted': False, 'shared_count': 1, 'parent_id': 0}
+      r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(reserveAcessResource), headers = params.headers, verify = False) 
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithAll), headers = params.headers, verify = False)
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithResource), headers = params.headers, verify = False)
       r = requests.post(params.baseUrl + params.userUrl, json.dumps(params.userWithNone), headers = params.headers, verify = False)
@@ -152,19 +152,19 @@ class GroupsTestCases(unittest.TestCase):
       assert decoded["error_msg"] == "Group does not exist"
 
   def test_UserHasLowerReservationManagementPermissionsThanGroup(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 2, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
       assert decoded['error_msg'] == 'Reservation inserted successfully'
 
   def test_UserHasHigherReservationManagementPermissionsThanGroup(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none",  "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 2, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
       assert decoded['error_msg'] == 'Reservation inserted successfully'
 
   def test_UserHasLowerResourceManagementPermissionsThanGroup(self):

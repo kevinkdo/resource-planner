@@ -42,8 +42,8 @@ permissions = {
 class ReservationTestCases(unittest.TestCase):
   def setUp(self):
       r = requests.get(params.baseUrl + params.resetUrl, headers = params.headers, verify = False)
-      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[], 'restricted': False}
-      noReserveAccessResource = {'name':'noaccess', 'description':'', 'tags':[], 'restricted': False}
+      reserveAcessResource = {'name':'reserveaccess', 'description':'', 'tags':[], 'restricted': False, 'shared_count': 1, 'parent_id': 0}
+      noReserveAccessResource = {'name':'noaccess', 'description':'', 'tags':[], 'restricted': False, 'shared_count': 1, 'parent_id': 0}
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(reserveAcessResource), headers = params.headers, verify = False)
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(noReserveAccessResource), headers = params.headers, verify = False)
       
@@ -65,203 +65,204 @@ class ReservationTestCases(unittest.TestCase):
       # need uer without reserve mp and without reserve access
 
   def test_CreateValidReservationWithValidUserIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 2, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
       assert decoded['error_msg'] == 'Reservation inserted successfully'
 
   def test_CreateValidReservationWithValidUserIDWithReservationManagementPermissionsWithoutReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "2", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_id": [2], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Resource cannot be reserved by user'
+      assert decoded['error_msg'] == 'Request is not valid'
 
   def test_CreateValidReservationWithValidUserIDWithoutReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "3", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "3", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = RSMPHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 3, u'resource_id': 1, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1}
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'resource', u'should_email': False, u'user_id': 3, u'reservation_p': False, u'resource_p': True, u'user_p': False, u'email': u'resource@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
       assert decoded['error_msg'] == 'Reservation inserted successfully'
 
   def test_CreateValidReservationWithValidUserIDWithoutReservationManagementPermissionsWithoutReserveAccess(self):
-      reservation = {"user_id": "3", "resource_id": "2", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "3", "resource_ids": [2], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = RSMPHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Resource cannot be reserved by user'
+      assert decoded['error_msg'] == 'You do not have reservation permission for resource with ID 2'
 
-  def test_CreateValidReservationWithInvalidUserIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "5", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
-      decoded = r.json()
-      assert decoded['is_error'] == True
-      assert decoded['data'] == None
-      assert decoded['error_msg'] == 'User does not exist'
+  # def test_CreateValidReservationWithInvalidUserIDWithReservationManagementPermissionsWithReserveAccess(self):
+  #     reservation = {"title": "none", "description": "none", "user_id": "5", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+  #     r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
+  #     decoded = r.json()      
+  #     print decoded
+  #     assert decoded['is_error'] == True
+  #     assert decoded['data'] == None
+  #     assert decoded['error_msg'] == 'User does not exist'
 
   def test_CreateInvalidReservationWithInvalidResourceIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "5", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [5], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Resource does not exist'
+      assert decoded['error_msg'] == 'Resource with id 5 does not exist'
 
   def test_CreateInvalidReservationInvalidTimeRangeWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2012-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2012-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Begin time after end time'
+      assert decoded['error_msg'] == 'Begin time is after end time'
 
   def test_GetReservationWithValidIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       r = requests.get(params.baseUrl + params.reserveUrl + "/1", headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}
-      assert decoded['error_msg'] == 'Reservation with given ID found'
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
+      assert decoded['error_msg'] == 'Successfully retrieved reservation'
 
   def test_GetReservationWithValidIDWithoutReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       r = requests.get(params.baseUrl + params.reserveUrl + "/1", headers = RSMPHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}
-      assert decoded['error_msg'] == 'Reservation with given ID found'
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
+      assert decoded['error_msg'] == 'Successfully retrieved reservation'
 
   def test_GetReservationWithInvalidIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       r = requests.get(params.baseUrl + params.reserveUrl + "/10", headers = allHeaders, verify = False)
-      decoded = r.json()
+      decoded = r.json()   
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Reservation with given ID not found'
+      assert decoded['error_msg'] == 'Reservation with that ID does not exist'
 
   def test_GetReservationWithValidQueryWithResourceAndUserListsWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = params.headers, verify = False)
       queryUrl = '/?start=2008-08-06T10:54:17.000Z&end=2015-08-06T10:54:17.000Z&user_ids=1,2&resource_ids=1'
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = params.headers, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}]
-      assert decoded['error_msg'] == 'Matching reservations retrieved'
+      assert decoded['data'] == {u'reservations': [{u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}]}
+      assert decoded['error_msg'] == 'Successfully retrieved reservations'
 
   def test_GetReservationWithQueryValidTimeRangeWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       queryUrl = '/?start=2008-08-06T10:54:17.000Z&end=2015-08-06T10:54:17.000Z'
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == [{u'should_email': True, u'resource': {'restricted': False, u'description': u'', u'tags': [], u'name': u'reserveaccess', u'resource_id': 1}, u'end_time': u'2011-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}}]
-      assert decoded['error_msg'] == 'Matching reservations retrieved'
+      assert decoded['data'] == {u'reservations': [{u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}]}
+      assert decoded['error_msg'] == 'Successfully retrieved reservations given no parameters'
 
   def test_GetReservationWtihQueryInvalidTimeRangeWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       queryUrl = '/?start=2015-08-06T10:54:17.000Z&end=2008-08-06T10:54:17.000Z'
       r = requests.get(params.baseUrl + params.reserveUrl + queryUrl, headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Invalid input parameters (Issue with start and end times)'
+      assert decoded['error_msg'] == 'Request is not valid'
 
   def test_PutReservationWithValidIDUpdateAllFieldsWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
-      update = {"user_id":2,"resource_id":1,"begin_time":"2016-03-02T05:27:00.000Z","end_time":"2016-03-02T05:28:00.000Z","should_email":True}
+      update = {"title": "none", "description": "none", "user_id":2,"resource_ids": [1],"begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T10:59:00.000Z","should_email":True}
       r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 2, u'resource_id': 1, u'end_time': u'2016-03-02T05:28:00.000Z', u'begin_time': u'2016-03-02T05:27:00.000Z', u'reservation_id': 1}
-      assert decoded['error_msg'] == 'Successfully updated reservation'
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T10:59:00.000Z'}
+      assert decoded['error_msg'] == 'Reservation successfully updated'
 
   def test_PutReservationWithValidIDUpdateAllFieldsWithReservationManagementPermissionsWithoutReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
-      update = {"user_id":2,"resource_id":2,"begin_time":"2016-03-02T05:27:00.000Z","end_time":"2016-03-02T05:28:00.000Z","should_email":True}
+      update = {"title": "none", "description": "none", "user_id":2,"resource_ids": [2],"begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T10:59:00.000Z","should_email":True}
       r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Resource not reservable by user' 
+      assert decoded['error_msg'] == 'Cannot add new resources to reservation' 
 
   def test_PutReservationWithInvalidIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
-      update = {"user_id":2,"resource_id":1,"begin_time":"2016-03-02T05:27:00.000Z","end_time":"2016-03-02T05:28:00.000Z","should_email":True}
+      update = {"title": "none", "description": "none", "user_id":2,"resource_ids":[1],"begin_time":"2016-03-02T05:27:00.000Z","end_time":"2016-03-02T05:28:00.000Z","should_email":True}
       r = requests.put(params.baseUrl + params.reserveUrl + '/5', data = json.dumps(update), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'No reservation with given ID exists'
+      assert decoded['error_msg'] == 'Reservation with that ID does not exist'
 
   def test_PutReservationWithValidIDOfAnotherUserWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "3", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "3", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = RSMPHeaders, verify = False)
-      update = {"user_id":3,"resource_id":1,"begin_time":"2016-03-02T05:27:00.000Z","end_time":"2016-03-02T05:28:00.000Z","should_email":True}
+      update = {"title": "none", "description": "none", "user_id":3,"resource_ids":[1],"begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T10:59:00.000Z","should_email":True}
       r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 3, u'resource_id': 1, u'end_time': u'2016-03-02T05:28:00.000Z', u'begin_time': u'2016-03-02T05:27:00.000Z', u'reservation_id': 1}
-      assert decoded['error_msg'] == 'Successfully updated reservation'
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'resource', u'should_email': False, u'user_id': 3, u'reservation_p': False, u'resource_p': True, u'user_p': False, u'email': u'resource@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T10:59:00.000Z'}
+      assert decoded['error_msg'] == 'Reservation successfully updated'
 
   def test_PutReservationWithValidIDOfAnotherUserWithoutReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
-      update = {"user_id":2,"resource_id":1,"begin_time":"2016-03-02T05:27:00.000Z","end_time":"2016-03-02T05:28:00.000Z","should_email":True}
+      update = {"title": "none", "description": "none", "user_id":"2","resource_ids": [1],"begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T10:59:00.000Z","should_email":True}
       r = requests.put(params.baseUrl + params.reserveUrl + '/1', data = json.dumps(update), headers = RSMPHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Non-admin trying to alter another user\'s reservation'
+      assert decoded['error_msg'] == 'You don\'t have permissions to edit this reservation'
 
   def test_DeleteReservationWithValidIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "3", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "3", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = RSMPHeaders, verify = False)
       r = requests.delete(params.baseUrl + params.reserveUrl + "/1", headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Reservation successfully deleted'
+      assert decoded['error_msg'] == 'Successfully deleted reservation'
 
   def test_DeleteReservationWithValidIDWithoutReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       r = requests.delete(params.baseUrl + params.reserveUrl + "/1", headers = RSMPHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'Non-Admin user attempting to delete reservation for another user'
+      assert decoded['error_msg'] == 'You don\'t have permissions to delete this reservation'
 
   def test_DeleteReservationWithInvalidIDWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation = {"user_id": "3", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation = {"title": "none", "description": "none", "user_id": "3", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = RSMPHeaders, verify = False)
       r = requests.delete(params.baseUrl + params.reserveUrl + "/5", headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
       assert decoded['data'] == None
-      assert decoded['error_msg'] == 'No reservation with given ID exists'
+      assert decoded['error_msg'] == 'Reservation with that ID does not exist'
 
   def test_CreateTouchingReservationsWithReservationManagementPermissionsWithReserveAccess(self):
-      reservation1 = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
-      reservation2 = {"user_id": "2", "resource_id": "1", "begin_time": "2011-08-06T11:00:00.000Z", "end_time": "2012-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation1 = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T10:54:00.000Z", "end_time": "2011-08-06T11:00:00.000Z", "should_email": "true"}
+      reservation2 = {"title": "none", "description": "none", "user_id": "2", "resource_ids": [1], "begin_time": "2011-08-06T11:00:00.000Z", "end_time": "2012-08-06T11:00:00.000Z", "should_email": "true"}
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation1), headers = allHeaders, verify = False)
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation2), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'user_id': 2, u'resource_id': 1, u'end_time': u'2012-08-06T11:00:00.000Z', u'begin_time': u'2011-08-06T11:00:00.000Z', u'reservation_id': 2}
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T11:00:00.000Z', u'reservation_id': 2, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2012-08-06T11:00:00.000Z'}
       assert decoded['error_msg'] == 'Reservation inserted successfully'
       
 if __name__ == '__main__':
