@@ -45,24 +45,24 @@ const ResourceList = React.createClass({
         if (confirmed_delete) {
           send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
             function(obj) {
-              me.refresh();
+              me.refresh("list");
               me.setState({error_msg: ""});
             },
             function(obj) {
-              me.refresh();
+              me.refresh("list");
               me.setState({error_msg: obj.error_msg, is_error: true});
             }
           );
         }
       },
       function(obj) {
-        me.refresh();
+        me.refresh("list");
         me.setState({error_msg: obj.error_msg, is_error: true});
       }
     );
   },
 
-  refresh() {
+  refresh(new_subroute) {
     var me = this;
     var required_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Required").join(",");
     var excluded_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Excluded").join(",");
@@ -75,7 +75,7 @@ const ResourceList = React.createClass({
         me.setState({
           resources: new_resources,
           loading_table: false,
-          subroute: "list"
+          subroute: new_subroute
         });
       },
       function(obj) {
@@ -91,7 +91,7 @@ const ResourceList = React.createClass({
         me.setState({
           tags: new_tags,
           loading_tags: false,
-          subroute: "list"
+          subroute: new_subroute
         });
       },
       function(obj) {
@@ -106,7 +106,7 @@ const ResourceList = React.createClass({
 
   componentDidMount() {
     this.props.setPstate({error_msg: ""});
-    this.refresh();
+    this.refresh("list");
   },
 
   render() {
@@ -119,7 +119,7 @@ const ResourceList = React.createClass({
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={this.refresh}>Load resources</button>
+            <button type="button" className="btn btn-primary" onClick={() => this.refresh("list")}>Load resources</button>
             <h4>Tags</h4>
             {this.state.loading_tags ? <Loader /> :
               <div>
@@ -183,7 +183,7 @@ const ResourceList = React.createClass({
         </ul>
         <br/>
         <br/>
-        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate} />
+        <ResourceTree setPstate={this.props.setPstate} pstate={this.props.pstate} refreshList={me.refresh} />
       </div>
     );
     return (

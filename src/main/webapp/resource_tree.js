@@ -89,6 +89,7 @@ const ResourceTree = React.createClass({
     send_xhr("DELETE", "/api/resources/" + deleted_node_id, localStorage.getItem("session"), null,
       function(obj) {
         me.refresh();
+        me.props.refreshList("hierarchy");
       },
       function(obj) {
         me.refresh();
