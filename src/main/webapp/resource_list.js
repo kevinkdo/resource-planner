@@ -34,7 +34,7 @@ const ResourceList = React.createClass({
 
   deleteResource(id) {
     var me = this;
-    send_xhr("GET", "/api/resources/" + id + "/candelete", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/" + id + "/candelete", sessionStorage.getItem("session"), null,
       function(obj) {
         var confirmed_delete = obj.data.canDelete;
 
@@ -43,7 +43,7 @@ const ResourceList = React.createClass({
         }
 
         if (confirmed_delete) {
-          send_xhr("DELETE", "/api/resources/" + id, localStorage.getItem("session"), null,
+          send_xhr("DELETE", "/api/resources/" + id, sessionStorage.getItem("session"), null,
             function(obj) {
               me.refresh("list");
               me.setState({error_msg: ""});
@@ -66,7 +66,7 @@ const ResourceList = React.createClass({
     var me = this;
     var required_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Required").join(",");
     var excluded_tags_str = Object.keys(this.state.tags).filter(x => this.state.tags[x] == "Excluded").join(",");
-    send_xhr("GET", "/api/resources/?required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/?required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, sessionStorage.getItem("session"), null,
       function(obj) {
         var new_resources = {};
         obj.data.resources.forEach(function(x) {
@@ -82,7 +82,7 @@ const ResourceList = React.createClass({
         me.setState({error_msg: obj.error_msg, is_error: true});
       }
     );
-    send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/tags", sessionStorage.getItem("session"), null,
       function(obj) {
         var new_tags = {};
         obj.data.tags.forEach(function(x) {

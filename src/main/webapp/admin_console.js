@@ -7,7 +7,7 @@ const AdminConsole = React.createClass({
   createUser(evt) {
    	evt.preventDefault();
 	var me = this; this.setState({loading: true});
-	send_xhr("POST", "/api/users", localStorage.getItem("session"),
+	send_xhr("POST", "/api/users", sessionStorage.getItem("session"),
 	  JSON.stringify({username:this.state.username, password:this.state.password, email: this.state.email, should_email: this.state.should_email}),		
       function(obj) {		
         me.props.setPstate({ route: "reservation_list" });		

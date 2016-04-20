@@ -3,7 +3,7 @@ const ReservationCreator = React.createClass({
     evt.preventDefault();
     var me = this;
     this.setState({sending: true});
-    send_xhr("POST", "/api/reservations", localStorage.getItem("session"),
+    send_xhr("POST", "/api/reservations", sessionStorage.getItem("session"),
       JSON.stringify({user_id: this.state.user_id, resource_ids:this.state.resource_ids, begin_time: round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString(), end_time: round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString(), should_email:this.state.should_email, title: this.state.title, description: this.state.description}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list", is_error: false, error_msg: "Successfully created reservation!" });
@@ -82,7 +82,7 @@ const ReservationCreator = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/resources/", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/", sessionStorage.getItem("session"), null,
       function(obj) {
         if (obj.data.resources.length == 0) {
           me.setState({initial_load_resources: false, error_msg: "No resources to reserve!", is_error: true, all_resources: obj.data.resources});

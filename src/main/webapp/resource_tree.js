@@ -30,7 +30,7 @@ const ResourceTree = React.createClass({
       this.setState({selected_id: 0, selected_link: {source_id: 0, target_id: 0}});
     } else if (this.state.sourceID != 0 && this.state.targetId != 0){
       var me = this;
-      send_xhr("PUT", "/api/resources/" + this.state.sourceId.toString(), localStorage.getItem("session"),
+      send_xhr("PUT", "/api/resources/" + this.state.sourceId.toString(), sessionStorage.getItem("session"),
         JSON.stringify({parent_id: this.state.targetId}), 
         function(obj) {
           me.refresh(); 
@@ -73,7 +73,7 @@ const ResourceTree = React.createClass({
 
   deleteLink(node) {
     var me = this;
-    send_xhr("PUT", "/api/resources/" + node.resource_id.toString(), localStorage.getItem("session"),
+    send_xhr("PUT", "/api/resources/" + node.resource_id.toString(), sessionStorage.getItem("session"),
       JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: 0, shared_count: node.shared_count}), 
       function(obj) {
         me.refresh(); 
@@ -86,7 +86,7 @@ const ResourceTree = React.createClass({
 
   deleteNode(deleted_node_id) {
     var me = this;
-    send_xhr("DELETE", "/api/resources/" + deleted_node_id, localStorage.getItem("session"), null,
+    send_xhr("DELETE", "/api/resources/" + deleted_node_id, sessionStorage.getItem("session"), null,
       function(obj) {
         me.refresh();
         me.props.refreshList("hierarchy");
@@ -100,7 +100,7 @@ const ResourceTree = React.createClass({
 
   refresh() {
     var me = this;
-    send_xhr("GET", "/api/resources/forest", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/forest", sessionStorage.getItem("session"), null,
       function(obj) {
         me.state.tree.children = obj.data.resources;
         me.setState({

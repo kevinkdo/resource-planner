@@ -3,7 +3,7 @@ const ResourceEditor = React.createClass({
     evt.preventDefault();
     var me = this;
     this.setState({sending: true});
-    send_xhr("PUT", "/api/resources/" + this.props.pstate.view_id, localStorage.getItem("session"),
+    send_xhr("PUT", "/api/resources/" + this.props.pstate.view_id, sessionStorage.getItem("session"),
       JSON.stringify({restricted: this.state.restricted, name:this.state.name, description:this.state.description || "", tags: this.state.tags.filter(x => x.length > 0), parent_id: this.state.parent_id, shared_count: this.state.shared_count}),
       function(obj) {
         me.props.setPstate({ route: "resource_list", is_error: false, error_msg: "Successfully edited resource!" });
@@ -56,7 +56,7 @@ const ResourceEditor = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/resources/" + this.props.pstate.view_id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/" + this.props.pstate.view_id, sessionStorage.getItem("session"), null,
       function(obj) {
         obj.data.initial_load = false;
         obj.data.tags.push("");
@@ -67,7 +67,7 @@ const ResourceEditor = React.createClass({
       }
     );
 
-    send_xhr("GET", "/api/resources/", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/resources/", sessionStorage.getItem("session"), null,
       function(obj) {
         me.state.all_resources = me.state.all_resources.concat(obj.data.resources);
         me.setState({

@@ -74,7 +74,7 @@ const ReservationList = React.createClass({
 
   deleteReservation(id) {
     var me = this;
-    send_xhr("DELETE", "/api/reservations/" + id, localStorage.getItem("session"), null,
+    send_xhr("DELETE", "/api/reservations/" + id, sessionStorage.getItem("session"), null,
       function(obj) {
         me.refresh();
         me.setState({error_msg: ""});
@@ -88,7 +88,7 @@ const ReservationList = React.createClass({
 
   approveReservation(id, approve_boolean) {
     var me = this;
-    send_xhr("GET", "/api/reservations/canceledWithApproval/" + id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/reservations/canceledWithApproval/" + id, sessionStorage.getItem("session"), null,
       function(obj) {
         var confirmed_approve = ((obj.data.length == 0) || !approve_boolean);
         if (!confirmed_approve) {
@@ -96,7 +96,7 @@ const ReservationList = React.createClass({
         }
 
         if (confirmed_approve) {
-          send_xhr("POST", "/api/reservations/approveReservation/" + id, localStorage.getItem("session"), JSON.stringify({approved: approve_boolean}),
+          send_xhr("POST", "/api/reservations/approveReservation/" + id, sessionStorage.getItem("session"), JSON.stringify({approved: approve_boolean}),
             function(obj) {
               me.refresh();
               me.setState({error_msg: obj.error_msg, is_error: false});
@@ -119,7 +119,7 @@ const ReservationList = React.createClass({
     var me = this;
     var required_tags_str = this.state.tags.filter(x => x.state=="Required").map(x => x.name).join(",");
     var excluded_tags_str = this.state.tags.filter(x => x.state=="Excluded").map(x => x.name).join(",");
-    var xhr1 = send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, localStorage.getItem("session"), null,
+    var xhr1 = send_xhr("GET", "/api/reservations/?start=" + round(this.getDateObject(this.state.start_date, this.state.start_time)).toISOString() + "&end=" + round(this.getDateObject(this.state.end_date, this.state.end_time)).toISOString() + "&required_tags=" + required_tags_str + "&excluded_tags=" + excluded_tags_str, sessionStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
         obj.data.reservations.forEach(function(x) {
@@ -139,7 +139,7 @@ const ReservationList = React.createClass({
         });
       }
     );
-    var xhr2 = send_xhr("GET", "/api/reservations/approvableReservations", localStorage.getItem("session"), null,
+    var xhr2 = send_xhr("GET", "/api/reservations/approvableReservations", sessionStorage.getItem("session"), null,
       function(obj) {
         var new_reservations = {};
         obj.data.reservations.forEach(function(x) {
@@ -167,7 +167,7 @@ const ReservationList = React.createClass({
     this.reqs = [];
     this.props.setPstate({error_msg: ""});
     this.refresh();
-    var xhr = send_xhr("GET", "/api/tags", localStorage.getItem("session"), null,
+    var xhr = send_xhr("GET", "/api/tags", sessionStorage.getItem("session"), null,
       function(obj) {
         me.setState({
           tags: obj.data.tags.map(x => ({name: x, state: ""})),

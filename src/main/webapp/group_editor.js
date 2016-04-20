@@ -17,7 +17,7 @@ const GroupEditor = React.createClass({
       return;
     }
     this.setState({sending: true});
-    send_xhr("PUT", "/api/groups/" + this.props.pstate.view_id, localStorage.getItem("session"),
+    send_xhr("PUT", "/api/groups/" + this.props.pstate.view_id, sessionStorage.getItem("session"),
       JSON.stringify({group_name: this.state.group_name, user_ids: this.state.user_ids.filter(x => x.length > 0)}),
       function(obj) {
         me.props.setPstate({route: "group_manager", is_error: false, error_msg: "Successfully edited group!"});
@@ -61,7 +61,7 @@ const GroupEditor = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/groups/" + this.props.pstate.view_id, localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/groups/" + this.props.pstate.view_id, sessionStorage.getItem("session"), null,
       function(obj) {
         obj.data.user_ids = obj.data.user_ids.map(x => x.toString());
         obj.data.user_ids.push("");
@@ -76,7 +76,7 @@ const GroupEditor = React.createClass({
         me.setState({initial_load_group: false, error_msg: obj.error_msg, is_error: true});
       }
     );
-    send_xhr("GET", "/api/users/", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/users/", sessionStorage.getItem("session"), null,
       function(obj) {
         me.setState({
           all_users: obj.data,

@@ -1,6 +1,6 @@
 const Router = React.createClass({
   getInitialState() {
-    var session = localStorage.getItem("session");
+    var session = sessionStorage.getItem("session");
     return {
       route: session ? "reservation_list" : "login",
       view_id: 0,

@@ -16,7 +16,7 @@ const GroupManager = React.createClass({
     var me = this;
     if (new_group_name != null && new_group_name.length > 0) {
       this.setState({sending: true});
-      send_xhr("POST", "/api/groups", localStorage.getItem("session"),
+      send_xhr("POST", "/api/groups", sessionStorage.getItem("session"),
       JSON.stringify({group_name:new_group_name, user_ids: []}),
       function(obj) {
         me.refresh();
@@ -37,7 +37,7 @@ const GroupManager = React.createClass({
 
   refresh() {
     var me = this;
-    send_xhr("GET", "/api/groups", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/groups", sessionStorage.getItem("session"), null,
       function(obj) {
         var new_groups = {};
         obj.data.forEach(function(x) {
@@ -60,7 +60,7 @@ const GroupManager = React.createClass({
 
   deleteGroup(id) {
     var me = this;
-    send_xhr("DELETE", "/api/groups/" + id, localStorage.getItem("session"), null,
+    send_xhr("DELETE", "/api/groups/" + id, sessionStorage.getItem("session"), null,
       function(obj) {
         me.refresh();
         me.setState({error_msg: ""});       

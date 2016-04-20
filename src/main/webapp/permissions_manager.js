@@ -117,7 +117,7 @@ const PermissionsManager = React.createClass({
   save() {
     var me = this;
     me.setState({sending: true});
-    send_xhr("PUT", "/api/users/" + userId() + "/editablePermissions", localStorage.getItem("session"),
+    send_xhr("PUT", "/api/users/" + userId() + "/editablePermissions", sessionStorage.getItem("session"),
       JSON.stringify(me.state.data),
       function(obj) {
         me.setState({sending: false, error_msg: "Last saved " + new Date().toLocaleString(), is_error: false});
@@ -134,7 +134,7 @@ const PermissionsManager = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/users/" + userId() + "/editablePermissions", localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/users/" + userId() + "/editablePermissions", sessionStorage.getItem("session"), null,
       function(obj) {
         me.setState({
           data: obj.data,

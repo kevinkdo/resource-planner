@@ -10,7 +10,7 @@ const Login = React.createClass({
     send_xhr("POST", "/auth/login", "o",
       JSON.stringify({username:this.state.username, password:this.state.password}),
       function(obj) {
-        localStorage.setItem("session", obj.data.token);
+        sessionStorage.setItem("session", obj.data.token);
         me.props.setPstate({ route: "reservation_list" });
       },
       function(obj) {

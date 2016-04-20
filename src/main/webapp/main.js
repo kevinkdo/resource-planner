@@ -65,7 +65,7 @@ function uniq(a) {
 }
 
 var userId = function() {
-  return jwt_decode(localStorage.getItem("session")).user_id;
+  return jwt_decode(sessionStorage.getItem("session")).user_id;
 };
 
 var nodeId = 100;

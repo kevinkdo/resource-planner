@@ -1,6 +1,6 @@
 const Navbar = React.createClass({
   logout() {
-    localStorage.setItem("session", "");
+    sessionStorage.setItem("session", "");
     this.props.setPstate({ route: "login" });
   },
 
@@ -12,7 +12,7 @@ const Navbar = React.createClass({
 
   componentDidMount() {
     var me = this;
-    this.req = send_xhr("GET", "/api/users/" + userId(), localStorage.getItem("session"), null,
+    this.req = send_xhr("GET", "/api/users/" + userId(), sessionStorage.getItem("session"), null,
       function(obj) {
         obj.data.initial_load = false;
         me.setState({username: obj.data.username});

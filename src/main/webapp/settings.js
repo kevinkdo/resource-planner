@@ -8,7 +8,7 @@ const Settings = React.createClass({
     evt.preventDefault();
     var me = this;
     this.setState({sending: true});
-    send_xhr("PUT", "/api/users/" + userId(), localStorage.getItem("session"),
+    send_xhr("PUT", "/api/users/" + userId(), sessionStorage.getItem("session"),
       JSON.stringify({/*email:this.state.email, username:this.state.username, password:this.state.password, */should_email: this.state.should_email}),
       function(obj) {
         me.props.setPstate({ route: "reservation_list", is_error: false, error_msg: "Successfully saved user settings!" });
@@ -40,7 +40,7 @@ const Settings = React.createClass({
 
   componentDidMount() {
     var me = this;
-    send_xhr("GET", "/api/users/" + userId(), localStorage.getItem("session"), null,
+    send_xhr("GET", "/api/users/" + userId(), sessionStorage.getItem("session"), null,
       function(obj) {
         obj.data.initial_load = false;
         me.setState(obj.data);
