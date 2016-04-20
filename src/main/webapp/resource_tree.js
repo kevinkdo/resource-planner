@@ -77,6 +77,7 @@ const ResourceTree = React.createClass({
       JSON.stringify({restricted: node.restricted, name: node.name, description: node.description || "", tags: node.tags, parent_id: 0, shared_count: node.shared_count}), 
       function(obj) {
         me.refresh(); 
+        me.props.refreshList("hierarchy");
       },
       function(obj) {
         me.setState({error_msg: obj.error_msg, is_error: true});
