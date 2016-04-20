@@ -549,7 +549,8 @@ public class ResourceService {
         Resource r = getResourceByIdHelper(resourceId, 1);
         int parent = r.getParent_id();
         for (Resource child : r.getChildren()) {
-            child.setParent_id(parent);
+            //child.setParent_id(parent);
+            jt.update("UPDATE resources SET parent_id = ? WHERE resource_id = ?;", parent, child.getResource_id());
         }
 
         jt.update("DELETE FROM reservationresources WHERE resource_id = ?;", resourceId);
