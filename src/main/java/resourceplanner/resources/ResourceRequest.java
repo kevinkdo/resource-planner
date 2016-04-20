@@ -24,6 +24,9 @@ public class ResourceRequest {
     }
 
     public String getName() {
+        if(name == null){
+            return null;
+        }
         if (name.length() >= 250) {
             return name.substring(0, 250);
         }
@@ -31,6 +34,9 @@ public class ResourceRequest {
     }
 
     public String getDescription() {
+        if(description == null){
+            return null;
+        }
         if (description.length() >= 2000) {
             return description.substring(0, 2000);
         }
@@ -38,6 +44,9 @@ public class ResourceRequest {
     }
 
     public List<String> getTags() {
+        if(tags == null){
+            return null;
+        }
         tags = new ArrayList<String>(new LinkedHashSet<String>(tags));
         return tags;
     }
