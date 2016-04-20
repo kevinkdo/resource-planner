@@ -348,16 +348,10 @@ public class ResourceService {
                 }
                 if (allViewableResources.contains(r.getResource_id())){
                     r.setCan_view(true);
+                    finalResponse.add(r);
                 } else {
                     r.setCan_view(false);
-                    r.setName("Mystery");
-                    r.setDescription("Mystery");
-                    r.setResource_id(0);
-                    r.setRestricted(false);
-                    r.setShared_count(0);
-                    r.setTags(new ArrayList<String>());
                 }
-                finalResponse.add(r);
             }
             return new StandardResponse(false, "Successfully retrieved resources", new Resources(finalResponse));
         }
