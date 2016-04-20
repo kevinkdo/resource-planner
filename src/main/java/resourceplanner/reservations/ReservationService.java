@@ -138,16 +138,15 @@ public class ReservationService {
     }
 
     private boolean hasReservePermission(Resource r) {
-        for (Resource child : r.getChildren()) {
-            if (child.getCan_reserve() == false) {
-                return false;
-            }
-            boolean canReserveChild = hasReservePermission(r);
-            if (!canReserveChild) {
+        if(!r.getCan_reserve()){
+            return false;
+        }
+        for(Resource child : r.getChildren()){
+            if(!hasReservePermission(child)){
                 return false;
             }
         }
-        return true;
+        return true; 
     }
 
     private boolean isRestricted(int resourceId) {
