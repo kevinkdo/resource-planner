@@ -376,6 +376,7 @@ public class ResourceService {
         private int resourceId;
         private String tag;
         private boolean restricted;
+        private int sharedCount;
         private int parentId;
     }
 
@@ -455,6 +456,7 @@ public class ResourceService {
                         rt.description = rs.getString("description");
                         rt.restricted = rs.getBoolean("restricted");
                         rt.resourceId = rs.getInt("resource_id");
+                        rt.sharedCount = rs.getInt("shared_count");
                         rt.tag = null;
                         return rt;
                     }
@@ -479,8 +481,8 @@ public class ResourceService {
     }
 
     public StandardResponse updateResource(ResourceRequest req, int resourceId) {
-        if (!req.isValid()) {
-            return new StandardResponse(true, "Invalid request");
+        if (!req.isValidPut()) {
+            return new StandardResponse(true, "Invalid request - parent ID must be included");
         }
 
         int resourceExists = jt.queryForObject(
@@ -488,6 +490,7 @@ public class ResourceService {
         if (resourceExists != 1) {
             return new StandardResponse(true, "Resource does not exist");
         }
+
 
         // error if parent is itself
         if (req.getParent_id() == resourceId) {
@@ -512,6 +515,25 @@ public class ResourceService {
         }
 
         RT oldResource = getSpecificResource(resourceId);
+
+        if (req.getName() == null) {
+            req.setName(oldResource.name);
+        }
+
+        if (req.getDescription() == null) {
+            req.setDescription(oldResource.description);
+        }
+
+        if (req.getShared_count() == null) {
+            req.setShared_count(oldResource.sharedCount);
+        }
+
+        if (req.getTags() == null) {
+            List<String> tags = jt.queryForList(
+                    "SELECT DISTINCT tag FROM resourcetags WHERE resource_id = ?;", new Object[]{resourceId}, String.class);
+            req.setTags(tags);
+        }
+
         if(oldResource.restricted == true && !req.isRestricted()){
             updateNewUnrestrictedResource(resourceId);
         }

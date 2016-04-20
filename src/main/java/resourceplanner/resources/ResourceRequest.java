@@ -19,6 +19,10 @@ public class ResourceRequest {
         return name != null && description != null && tags != null && restricted != null && shared_count != null && parent_id != null;
     }
 
+    public boolean isValidPut() {
+        return parent_id != null;
+    }
+
     public String getName() {
         if (name.length() >= 250) {
             return name.substring(0, 250);
@@ -48,5 +52,29 @@ public class ResourceRequest {
 
     public Integer getParent_id() {
         return parent_id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public void setRestricted(Boolean restricted) {
+        this.restricted = restricted;
+    }
+
+    public void setShared_count(Integer shared_count) {
+        this.shared_count = shared_count;
+    }
+
+    public void setParent_id(Integer parent_id) {
+        this.parent_id = parent_id;
     }
 }
