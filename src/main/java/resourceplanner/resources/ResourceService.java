@@ -61,6 +61,10 @@ public class ResourceService {
             }
         }
 
+        if(req.getShared_count() < 0){
+            return new StandardResponse(true, "Shared count must be greater than or equal to 0");
+        }
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jt.update(
                 new PreparedStatementCreator() {
