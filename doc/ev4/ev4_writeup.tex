@@ -104,17 +104,13 @@ Despite the above challenges, on the whole, we are still happy with our current 
 
 
 \subsection{Code Structure}
-TODO: What to write for evolution 4? 
-\subsubsection{Retrospective}
-Our code structure has essentially stayed the same for evolution 3. In evolution 2, we changed our overall code hierarchy to be divided into modules for each set of endpoints, and within each module we placed the different MVC pieces that related to that module. For instance, within the Reservation module, we placed our reservation controller, our reservation service, all reservation data structures, etc. We did this in order to ensure that our code was appropriately compartmentalized, such that someone who, for instance, needs to modify resource code, knows exactly where the relavent classes are. We are still very happy with this decision - it has made updating and modifying code in the backend much cleaner (for instance, instead of sifting through 20+ different custom data structures when making changes, you can go through the exact 3-4 relavent ones). 
+Nothing substantial has changed in regards to our overall code architecture or structure. Backend changes for evolution 4 almost entirely involved modifying existing resource service methods and modifying existing reservation service methods, and as such virtually no higher level code layout changes were required. We are still appreciative of our MVC layout and how our packages are divided based on modules (like reservation module, resource module, etc) as it made it quite easy to know where to make changes for resource and reservation changes in evolution 4. 
 
-Since many of the new requirements in evolution 3 were extensions of previous work (modifications to reservations, modifications to permissions, modifications to email), we did not have to add any significant new modules or classes. Rather, most of our work for evolution 3 involved slightly modifying or extending previously created controllers and services. 
+TODO: Anythinge else?
 
-\subsubsection{Current Design}
-We have no plans to modify the aforementioned code structure, as it has suited us well and helped us maintain clean code at a high level in the backend. 
 
 \subsection{Reservations}
-TODO: What to write for evolution 4? 
+TODO: Jiawei do we want to keep this for evolution 4? 
 \subsubsection{Retrospective}
 Our existing reservations code went through a few changes to accommodate reservation titles, descriptions, and multiple resources. All the reservations code was also refactored to better accommodate future changes to reservations. 
 
@@ -124,28 +120,13 @@ Adding titles and descriptions to reservations was trivial, as there was a one-t
 Overall, the additions to reservations were very simply implemented. Reservations code was then completely refactored to stop using a deprecated JDBC class and start using the new JdbcTemplate class, which provides additional security features and is much simpler to use. 
 
 \subsection{Email}
-TODO: What to write for evolution 4? 
-\label{sec:EMAIL}
-\subsubsection{Retrospective}
-Our original design to handle emails sent at the start and end of reservations was as follows:
-\begin{enumerate}
-    \item An EmailService class was used to handle scheduling emails. This class kept track of queued emails to be sent in the future, and provided a simple API that could be called on reservation creation/modification/deletion to update queued email times, or add new emails to the queue, or delete queued emails.
-    \item An EmailScheduler class, which handled the logic of actually composing the email, based on certain input parameters. This class would define the subject of each email, as well as its content. 
-    \item An EmailUtility class, which handled the actual email API we use to send emails. 
-\end{enumerate}
+\subsection{Retrospective}
+No specific email requirements changed for evolution 4, and as a result we did not have to make any modifications or updates to email-related classes or code. Notably, we feel that our email design frome evolution 3 was done well, as it created a very clean email API for specific events (reservation canceled, reservation starting, etc). The result of this was that, although evolution 4 required a number of changes to reservation code and pending reservation code, these changes could be totally separate from having to modify the email code, even though these features are closely related. 
 
-The basic workflow of the above was, individual service classes would call EmailService, EmailService would call EmailScheduler, and EmailScheduler would call EmailUtility. We felt this overall design was simple, easy to use, and quite extensible to future email requirements. 
+In this sense, the changes we made in evolution 3 in regards to email were very beneficial. We decoupled email from other modules of code as much as possible, and the result was extreme ease in modifying code related to email, without having to worry that it would mess up our emailing system. 
 
-\subsubsection{Current Design}
-Evolution 3 introduced a number of new email requirements. Luckily, our original email scheduling design made adhering to these new requirements easy. Specifically, we only add to do the following things:
-\begin{enumerate}
-    \item We added a few new methods to EmailService to handle instantly-sent emails (such as an email for when an  incomplete reservation gets denied or canceled). These are all just 3-4 lines, and call EmailScheduler the same way former EmailService methods did. 
-    \item We modified the API of EmailService slightly so that it would automatically detect what type of reservation was being scheduled for an email. Based on this info (complete reservation vs incomplete reservation), we alter the content of potential future emails, but all scheduling is done the exact same way as before. 
-    \item We added a number of new potential input parameters to EmailScheduler, to handle the various new kinds of emails we need to send (reservation denied, reservation canceled, reservation about to be canceled, etc). 
-    \item EmailUtility did not change at all. 
-\end{enumerate}
-
-Essentially, none of our old code had to change, none of our scheduling algorithms had to change, and we just had to add a few new types of emails and appropriately check for which type should be sent. As such, we are very happy with how we originally designed emails, and believe our current email code will continue to serve us well in the face of future changes. 
+\subsection{Current Design}
+Since no explicit email changes were needed for evolution 4, there were no new email design decisions made. 
 
 
 \subsection{Permissions}
