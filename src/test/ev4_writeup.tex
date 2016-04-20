@@ -188,7 +188,7 @@ The frontend consists of the parts of the software system that are transferred t
 \subsubsection{Retrospective}
 The frontend is written in React.js, a library written at Facebook for building user interfaces (UIs). We have been pleased with React.js. Our only complaint has been that React.js has occasionally required somewhat large amounts of boilerplate. We have read online that this boilerplate can be significantly reduced with some more advanced React.js techniques like mix-ins. We plan to take advantage of this in future React.js projects, but for now the cost of updating the code to use mix-ins would be higher than the benefit of more concise code.
 
-As we discussed in our Evolution 1 writeup, using React.js allows us to trivially avoid inconsistent UIs, since the view is re-rendered from the whole state. As expected, we did not encounter a single UI bug due displaying inconsistent data.
+As we discussed in our Evolution 1 writeup, using React.js allows us to trivially avoid inconsistent UIs, since the view is re-rendered from the whole state. As expected, we did not encounter a single UI bug due to displaying inconsistent data.
 
 \subsubsection{Current Design}
 We made no changes to our usage of React.js, as we were quite pleased with it.
@@ -213,7 +213,7 @@ One alternative is to perform automated UI testing. We are aware of two differen
 We were very pleased with our decision not to implement automated UI testing. While we did encounter some UI bugs, these bugs did not take long enough to catch that they would have justified the significant cost of implementing automated UI testing. (It's important to note that automated UI testing only decreases the amount of time it takes to catch bugs, not the amount of time it takes to fix them, a process which is more properly called \emph{debugging}.)
 
 \subsubsection{Current Design}
-As a result of our success with the manual UI testing from evolution 1, the only changes to our methodology here are to increase the number of test cases to account for the new functionality introduced by the Evolution 3 requirements.
+As a result of our success with the manual UI testing from evolution 1, the only changes to our methodology here are to increase the number of test cases to account for the new functionality introduced by the Evolution 4 requirements.
 
 \section{Member contributions}
 
@@ -427,6 +427,13 @@ In Evolution 1, Michael Han implemented SSL encryption and created all of the au
         \item Normal user can not edit/delete anything
         \item Admin user can edit/delete anything
         \item Deleting a resource with a future reservation shows a warning
+    \end{enumerate}
+    \item Resource Hierarchy
+    \begin{enumerate}
+        \item Delete resources
+        \item Delete parent child relationships
+        \item Drag and drop resources to create new parent child relationships
+        \item Users without view permissions will see mystery nodes
     \end{enumerate}
     \item New resource
     \begin{enumerate}
