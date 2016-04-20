@@ -25,7 +25,7 @@
 
 \newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
 
-\newcommand\mytitle{Evolution 3\\Compsci 458}
+\newcommand\mytitle{Evolution 4\\Compsci 458}
 \title{\horrule{5pt}\\\vspace{0.4cm}{\bf \mytitle}\\}
 \author{Jiawei Zhang, Davis Treybig, Michael Han, and Kevin Do}
 \date{\horrule{1pt}}
@@ -41,8 +41,9 @@
 \label{fig:design}
 \end{figure}
 
-Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 2. 
+Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 3. 
 
+TODO: UPDATE FOR EV 4
 The changes required for evolution 3 fit nicely into our existing frameworks. In the backend, resource manager permissions were handled with a few new API calls built on top of our evolution 2 permission API calls. Additionally, the email service was expanded to accomodate the new set of email requirements. Finally, the necesarry changes were made across existing reservation endpoints to support multiple resources within each reservation, and corresponding DB updates were made as well. The primary changes on the front-end are to add text boxes for the new reservation fields, a checkbox for restricted resources, and a new tab for approvable reservations.
 
 For retrospectives on our former backend choices and more detail about our backend additions, see the \hyperref[sec:Backend]{backend section}. For retrospectives on our former frontend choices and more detail about our frontend additions, see the \hyperref[sec:Frontend]{frontend section}. Finally, see \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for our updated backend test strategy,  \hyperref[appendix:frontendtest]{Appendix \ref{appendix:frontendtest}} for our updated frontend test strategy, \hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}} for our updated API specification, and \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}} for our updated database design. 
@@ -54,44 +55,45 @@ The backend consists of the parts of the software system that run on a VPS (Virt
 
 This architecture has not changed since evolution 1, and it has suited us well. 
 
-\subsection{Java}
-Java has continued to suit us well in evolution 3, and from a design perspective it did not significantly affect any of the evolution 3 requirements. Familiarity with Java has made development easy, and static typing has helped prevent bugs and improve code readability.
+\subsection{Java and Java Spring}
+Java and Java Spring have continued to suit us well in evolution 4. Java's clear syntax and static typing make it easy for us to work on each other's code, and Spring has continued to be very easy to add new REST endpoints to. 
 
-\subsection{Java Spring}
-Spring has also continued to suit us well in evolution 3. Adding a new set of endpoints to handle incomplete reservations was extremely easy. Furthermore, as our codebase has gotten more and more complex, we have appreciated the structure that Spring enforces. This structure (an MVC structure based around services, controllers, filters, and utilities) has in effect ensured that our overall package and class layout is understandable, maintainable, and very extensible. 
+Given that over all four evolutions, we have yet to encounter any major issues that another language or backend framework would have solved much more easily, we are overall quite happy with our choice of backend architecture. 
 
-We did run into an issue involving the Jackson JSON parser which is included with Java Spring. Jackson throws difficult-to-handle exceptions when the type of the JSON request values do not match with the expected types. Therefore, we had to circumvent the issue by performing type-checking on the front-end using ReactJS.
+TODO: Anything else?
 
-We also decided to stop pursuing the '@Transactional' features provided by Java Spring, which allow for SQL transactions because we felt that having concurrent users performing the same action at once is not within the scope of the project. 
+
 
 \subsection{PostgreSQL}
 \subsubsection{Retrospective}
-PostgreSQL served us well for evolution 3. While perhaps more planning and setup was required for us to alter our DB schema from evolution 2 to evolution 3 than for a team using a NoSQL DB, we ultimately felt that this was a small amount of work. Furthermore, the result of such planning was a very clearly defined DB schema that made it easy for everyone (particularly those working on the backend) to understand how we were going to store data and therefore how to structure new endpoint code. Thus, we ultimately felt that having a structured DB improved our coding efficiency. 
+PostgreSQL served us well for evolution 4. Notably, evolution 4 required very few DB changes, meaning that the primary downside of using a structured database (dealing with DB schema updates and modifications) was not apparent during evolution 4. Furthermore, we still feel that the clarity and structure imposed by a SQL database has helped our team understand how we intend to store and manipulate data in each evolution, making mis-communication less likely. 
 
-In regards to choosing PostgreSQL over some other SQL DB, we have not needed to interact with the DB in such a way that some other SQL DB would have provided us better tools than PostgreSQL. Thus, we are still totally happy with PostGreSQL as a DB. 
+Because evolution 4 did not require significant modifications to how the DB is accessed, we have still not had any need to use advanced SQL DB techniques, and thus it is unlikely that any other SQL database would have provided more useful tools for us than PostreSQL. 
+
 
 \subsubsection{Current Design}
-The following changes were made to our DB schema for evolution 2:
+The following changes were made to our DB schema for evolution 4:
 
 \begin{enumerate}
-    \item A title and description field were added to the 'reservations' table
-    \item The 'resource' column was removed from the reservations table, and instead we created a reservation\_resources table. This was done because now each reservation can have multiple resources. This table also stores a 'resource\_approved' field to indicate which resources are approved for each reservation. 
-    \item A 'complete' boolean was added to the reservations table, to indicate which reservations are incomplete and which are not
-    \item 'DEFAULT' values were introduced for fields that were previously nullable. This meant that there would be no database error when adding a partial record and simplified database insertions. 
+    \item A 'shared_count' (int) field and a 'parent_id' (int) field were added to the 'resources' table. 
+    \item TODO: Anything else?? 
 \end{enumerate}
 
 You can see a full diagram of this updated schema in  \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}}. 
 
 \subsection{Security}
 \subsubsection{Retrospective}
-All security elements remained intact from evolution 2. Our decision to use our own authorization tokens over Duke's OAuth tokens has led to no undesired consequences. 
+Previous security design decisions did not affect our work for evolution 4 very much. Our decision to use our own authorization tokens over Duke's OAuth tokens has led to no undesired consequences, and code related to authentication and login has not needed to be altered or extended at all. 
 
-\subsubsection{Current Design}
+Otherwise, in evolution 3 we made an additional effort to always validate data requests before any DB accesses are performed. This has not really altered our work for evolution 4, but it has helped us ensure that no unintended bugs can occur due to unexpected data being input on the frontend. 
 
-The only security addition introduced for evolution 3 is the validation of data requests before any database accesses are performed. This prevents Java Spring exceptions, though the database was always secure as our database queries were always sanitized. 
+TODO: Anything else? 
 
 
 \subsection{Testing}
+
+TODO: What to write for evolution 4? 
+
 \subsubsection{Retrospective}
 Our python testing suite has continued to suit us well for testing our REST API. That being said, as this project has become more and more complex, the number of tests required has grown somewhat exponentially. This has made it hard to keep up our testing suit with our actual code changes. However, this problem is more related to the project's complexity itself, rather than our testing design. The simple fact of the matter is that, no matter how we implemented testing, it would become harder and harder to maintain a full suite of tests on the REST API. 
 
@@ -100,7 +102,9 @@ Another small issue with our current testing plan relates to the fact that many 
 \subsubsection{Current Design}
 Despite the above challenges, on the whole, we are still happy with our current backend testing strategy. Python tests are easy to run, easy to modify, and easy to create. And, we still stand by our decision to focus our testing on the REST API, rather than on unit tests, since the REST API is the ultimate thing that the front-end cares about. Moving forward, we will need to make sure that we add enough tests to accomodate all of the evolution 4 features, even if that means adding an immense number of tests. 
 
+
 \subsection{Code Structure}
+TODO: What to write for evolution 4? 
 \subsubsection{Retrospective}
 Our code structure has essentially stayed the same for evolution 3. In evolution 2, we changed our overall code hierarchy to be divided into modules for each set of endpoints, and within each module we placed the different MVC pieces that related to that module. For instance, within the Reservation module, we placed our reservation controller, our reservation service, all reservation data structures, etc. We did this in order to ensure that our code was appropriately compartmentalized, such that someone who, for instance, needs to modify resource code, knows exactly where the relavent classes are. We are still very happy with this decision - it has made updating and modifying code in the backend much cleaner (for instance, instead of sifting through 20+ different custom data structures when making changes, you can go through the exact 3-4 relavent ones). 
 
@@ -110,6 +114,7 @@ Since many of the new requirements in evolution 3 were extensions of previous wo
 We have no plans to modify the aforementioned code structure, as it has suited us well and helped us maintain clean code at a high level in the backend. 
 
 \subsection{Reservations}
+TODO: What to write for evolution 4? 
 \subsubsection{Retrospective}
 Our existing reservations code went through a few changes to accommodate reservation titles, descriptions, and multiple resources. All the reservations code was also refactored to better accommodate future changes to reservations. 
 
@@ -119,6 +124,7 @@ Adding titles and descriptions to reservations was trivial, as there was a one-t
 Overall, the additions to reservations were very simply implemented. Reservations code was then completely refactored to stop using a deprecated JDBC class and start using the new JdbcTemplate class, which provides additional security features and is much simpler to use. 
 
 \subsection{Email}
+TODO: What to write for evolution 4? 
 \label{sec:EMAIL}
 \subsubsection{Retrospective}
 Our original design to handle emails sent at the start and end of reservations was as follows:
@@ -143,6 +149,7 @@ Essentially, none of our old code had to change, none of our scheduling algorith
 
 
 \subsection{Permissions}
+TODO: What to write for evolution 4? 
 \subsubsection{Retrospective And Current Design}
 The permissions design we implemented for evolution 2 had two key factors:
 \begin{enumerate}
@@ -159,17 +166,21 @@ In addition, new backend methods to retrieve resource managers (for the new inco
 As such, we feel that our argument in the evolution 2 doc that our permission design allowed the easy addition of new permissions has been shown as very true. Furthermore, we believe that if evolution 4 brings on even more permission variations, we should be able to easily accomodate those as well. 
 
 
+\subsection{Resource Sharing}
+TODO: Davis
+
+
+\subsection{Resource Hierarchy}
+TODO: Jiawei
+
 
 \subsubsection{Assumptions}
+TODO: What to write for evolution 4? 
+
 Given the ambiguity of some evolution requirements, here are some of the assumptions we made this evolution:
 \begin{enumerate}
-    \item We assume that any person or any group that is a resource manager of a given resource also has both view and reserve permission for that resource. We confirmed this was a reasonable assumption via both Peter and Professor Hilton. 
-    \item The evolution requirements state that an email must be sent warning a user that their upcoming incomplete reservation might get canceled if it is not approved in time. The time before the reservation that this email must be sent is unclear, however. We choose to send this email 10 minutes before the scheduled start time. 
-    \item It is somewhat unclear in the guidelines which types of emails should be toggle-able based on email settings. We chose to assume that ALL EMAILS will adhere to a user's email settings. This means that, unless you have both global email active as well as email active for your specific reservation, you will not receive any emails of any kind regarding that reservation. 
-    \item Changing a user's global email settings does not retroactively change the status of any emails that have already been queued up. 
-    \item We assume that someone with resource manager system permissions can approve ALL resources. We feel this is a reasonable assumption since someone with resource manager system permissions can set anyone to be a resource manager of any resource, and thus could easily set themself to be a resource manager on any resource they want to approve. 
+    \item W
 \end{enumerate}
-
 
 
 \section{REST API}
