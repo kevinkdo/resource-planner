@@ -197,6 +197,12 @@ public class ResourceService {
             resource.setCan_view(true);
         } else {
             resource.setCan_view(false);
+            resource.setName("Mystery");
+            resource.setDescription("Mystery");
+            resource.setResource_id(0);
+            resource.setRestricted(false);
+            resource.setShared_count(0);
+            resource.setTags(new ArrayList<String>());
         }
         if (allReservableResources.contains(resourceId) || userId == 1) {
             resource.setCan_reserve(true);
@@ -346,6 +352,10 @@ public class ResourceService {
                     r.setCan_view(false);
                     r.setName("Mystery");
                     r.setDescription("Mystery");
+                    r.setResource_id(0);
+                    r.setRestricted(false);
+                    r.setShared_count(0);
+                    r.setTags(new ArrayList<String>());
                 }
                 finalResponse.add(r);
             }
@@ -382,10 +392,7 @@ public class ResourceService {
         List<Resource> resources = new ArrayList<Resource>();
         for (int resourceId : noDupesChildren) {
             Resource r = getResourceByIdHelper(resourceId, userId);
-            if (r != null) {
-                // only add if you have viewing permissions
-                resources.add(r);
-            }
+            resources.add(r);
         }
 
         return new StandardResponse(false, "Successfully retrieved resource forest", new Resources(resources));
