@@ -56,6 +56,20 @@ public class ReservationService {
             }
         }
 
+        //Add children resources based off of the request
+        Set<Integer> childIds = new HashSet<Integer>();
+        for(int i : req.getResource_ids()){
+            Resource r = (Resource) resourceService.getResourceById(i, 1).getData();
+            resourceService.getAllDescendants(r, childIds);
+        }
+
+        for(Integer i : childIds){
+            if(!req.getResource_ids().contains(i)){
+                req.addChildResource(i);
+            }
+        }
+
+
         boolean complete = true;
         List<Resource> rList = new ArrayList<Resource>();
 

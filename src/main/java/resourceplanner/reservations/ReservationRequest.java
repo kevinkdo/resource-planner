@@ -37,6 +37,10 @@ public class ReservationRequest {
         return new ArrayList<Integer>(new LinkedHashSet<Integer>(resource_ids));
     }
 
+    public void addChildResource(int childId){
+        resource_ids.add(childId);
+    }
+
     public Timestamp getBegin_time() {
         if(begin_time == null){
             return null;

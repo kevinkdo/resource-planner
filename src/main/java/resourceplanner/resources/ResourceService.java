@@ -466,8 +466,8 @@ public class ResourceService {
         //find all reservations where not exists a resource that is not approved, set them approved
         jt.update("UPDATE reservations SET complete = true WHERE NOT EXISTS (SELECT * from reservationresources WHERE reservationresources.reservation_id = reservations.reservation_id AND resource_approved = false);");
     }
-
-    private void getAllDescendants(Resource r, Set<Integer> set) {
+    
+    public void getAllDescendants(Resource r, Set<Integer> set) {
         for (Resource child : r.getChildren()) {
             set.add(child.getResource_id());
             getAllDescendants(child, set);
