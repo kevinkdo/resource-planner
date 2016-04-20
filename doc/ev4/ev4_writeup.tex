@@ -106,7 +106,7 @@ Despite the above challenges, on the whole, we are still happy with our current 
 \subsection{Code Structure}
 Nothing substantial has changed in regards to our overall code architecture or structure. Backend changes for evolution 4 almost entirely involved modifying existing resource service methods and modifying existing reservation service methods, and as such virtually no higher level code layout changes were required. We are still appreciative of our MVC layout and how our packages are divided based on modules (like reservation module, resource module, etc) as it made it quite easy to know where to make changes for resource and reservation changes in evolution 4. 
 
-TODO: Anythinge else?
+TODO: Anything else Jiawei?
 
 
 \subsection{Reservations}
@@ -125,26 +125,24 @@ No specific email requirements changed for evolution 4, and as a result we did n
 
 In this sense, the changes we made in evolution 3 in regards to email were very beneficial. We decoupled email from other modules of code as much as possible, and the result was extreme ease in modifying code related to email, without having to worry that it would mess up our emailing system. 
 
+TODO: Anything else Jiawei?
+
 \subsection{Current Design}
 Since no explicit email changes were needed for evolution 4, there were no new email design decisions made. 
 
 
 \subsection{Permissions}
-TODO: What to write for evolution 4? 
-\subsubsection{Retrospective And Current Design}
-The permissions design we implemented for evolution 2 had two key factors:
-\begin{enumerate}
-    \item Storing resource-specific permissions as a single integer value (no access as 0, view access as 1, reserve access as 2), rather than as separate boolean values or values stored in separate DB tables. 
-    \item Having all permission modification and viewing being done through a single permission matrix. 
-\end{enumerate}
+\subsubsection{Retrospective}
+We continue to be extremely happy with our original permission implementation, done in evolution 2. We defined a single class which computed all permissions and handled all permission modifications. As a result, even as numerous new requirements have been added and numerous changes to reservations and resources have been required, we have continued to be able to use this single permission API as the source of all permission-related code. 
 
-These design choices have proven to be very helpful. First of all, as we argued in our evolution 2 document, the choice to have all permissions be in a single place (the permission matrix) has made using and testing our system exceptionally easy. As we add new features and need to manually test them, we can trivially edit the permissions in the system to create the test scenario that we want to create. Had we separated out user permissions and group permissions or resource permissions and system permissions, it would have substantially slowed our manual testing and general usage of our application. 
+For evolution 4, this is particularly relavent in regards to resource hierarchy. Note that making reservations becomes much more complex when there is a hierarchy of sub-resources which will also be reserved, and which also need to have their permissions checked. Similarly, showing a resource hierarchy becomes complex because permissions regularly need to be checked within hierarchies to ensure that the user can see a given resource. 
 
-Secondly, and more importantly, these design choices made it very easy to handle the new permission requirements for evolution 3. Evolution 3's major permission change is that there are now "resource managers". Our design enabled us to just define the standard that resource manager is represented by a value of 3 in our resource-specific permission tables. In other words, nothing in the backend had to change to handle resource managers being shown in the permission matrix or to handle resource managers being set via the permission matrix. 
+With a badly defined API, or with scattered permission code, handling these sorts of issues would have been very difficult. However, because of our nicely compartmentalized permission code, regardless of what new feature we are working on, we can handle permissions for users, groups, viewing resources, reserving resources, and being a resource manager with just 1-2 API calls on our permission class. 
 
-In addition, new backend methods to retrieve resource managers (for the new incomplete reservation endpoints) were able to re-use much of our previous permission code, since detecting of resource managers involves all the same DB calls, but is simply checking for a different integer. 
+TODO: Anything else Jiawei?
 
-As such, we feel that our argument in the evolution 2 doc that our permission design allowed the easy addition of new permissions has been shown as very true. Furthermore, we believe that if evolution 4 brings on even more permission variations, we should be able to easily accomodate those as well. 
+\subsubsection{Current Design}
+No new permission requirements were introduced in evolution 4, and thus no major new design decisions were made. 
 
 
 \subsection{Resource Sharing}
@@ -156,11 +154,13 @@ TODO: Jiawei
 
 
 \subsubsection{Assumptions}
-TODO: What to write for evolution 4? 
+TODO: Anything else Jiawei? 
 
 Given the ambiguity of some evolution requirements, here are some of the assumptions we made this evolution:
 \begin{enumerate}
-    \item W
+    \item If a node in a resource hierarchy is deleted, then all immediate children of that node have their 'parent node' attribute set to the parent of the deleted node. In other words, if A is a parent of B is a parent of C, and B is deleted, A becomes the direct parent of C. 
+    \item In the view of the resource hierarchy, any nodes which you do not have permission to see are hidden as 'mystery nodes'. We chose to do things this way, rather than totally hide the node, as you may, for instance, not have view access on node A, but have view access on its child B. If we simply hid A, then it would be unclear to the user where node B is in the resource hierarchy. So, instead, we simply inform the user there is a 'mystery node' that is a parent to B, but give no further information about that mystery node. 
+    \item To reserve a resource, you must have reserve or higher permission on EVERY resource in that resource's child tree. This is an extension of the requirements stating that reserving a parent resource should reserve all children. We feel it does not make sense for a child node to be reserved unless you also have appropriate permission for that node. 
 \end{enumerate}
 
 
