@@ -33,6 +33,7 @@ public class ResourceService {
     @Autowired
     PermissionService permissionService;
 
+
     @Autowired
     private JdbcTemplate jt;
 
@@ -193,7 +194,8 @@ public class ResourceService {
 
         Set<Integer> allViewableResources = getViewableResources(userId);
         Set<Integer> allReservableResources = getReservableResources(userId);
-        if(allViewableResources.contains(resourceId) || userId == 1){
+        boolean resource_p = hasSpecificPermission(userId, "resource_p");
+        if(allViewableResources.contains(resourceId) || userId == 1 || resource_p){
             resource.setCan_view(true);
         } else {
             resource.setCan_view(false);
@@ -204,7 +206,7 @@ public class ResourceService {
             resource.setShared_count(0);
             resource.setTags(new ArrayList<String>());
         }
-        if (allReservableResources.contains(resourceId) || userId == 1) {
+        if (allReservableResources.contains(resourceId) || userId == 1 || resource_p) {
             resource.setCan_reserve(true);
         }
         else{
@@ -604,5 +606,28 @@ public class ResourceService {
         boolean canDelete = reservations == 0;
 
         return new StandardResponse(false, "Successful retrieved canDelete status", new CanDelete(canDelete));
+    }
+
+    private boolean hasSpecificPermission(int userId, final String permissionType){
+        List<Boolean> individualPermission = jt.query(
+                "SELECT " + permissionType + " FROM users WHERE user_id = " + userId + 
+                " AND " + permissionType + " = true;",
+                new RowMapper<Boolean>() {
+                    public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getBoolean(permissionType);
+                    }
+                });
+
+
+        List<Boolean> groupPermission = jt.query(
+                "SELECT " + permissionType + " FROM groups, groupmembers WHERE user_id = " + userId + 
+                " AND groups.group_id = groupmembers.group_id AND " + permissionType +  " = true;",
+                new RowMapper<Boolean>() {
+                    public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getBoolean(permissionType);
+                    }
+                });
+
+        return individualPermission.size() > 0 || groupPermission.size() > 0;
     }
 }
