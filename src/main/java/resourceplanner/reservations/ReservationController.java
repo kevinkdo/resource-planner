@@ -84,7 +84,7 @@ public class ReservationController extends Controller {
             method = RequestMethod.GET)
     @ResponseBody
     public StandardResponse getApprovableReservations(final HttpServletRequest request) {
-        return reservationService.getApprovableReservations(getRequesterID(request), hasResourceP(request));
+        return reservationService.getApprovableReservations(getRequesterID(request), hasResourceP(request), hasReservationP(request));
     }
 
     @RequestMapping(value = "/canceledWithApproval/{reservationId}",
@@ -99,7 +99,7 @@ public class ReservationController extends Controller {
     @ResponseBody
     public StandardResponse approveReservation(@RequestBody final ReservationApproval req, @PathVariable final int reservationId, 
             final HttpServletRequest request) {
-        return reservationService.approveReservation(req, reservationId, getRequesterID(request), hasResourceP(request));
+        return reservationService.approveReservation(req, reservationId, getRequesterID(request), hasResourceP(request), hasReservationP(request));
     }
 
 

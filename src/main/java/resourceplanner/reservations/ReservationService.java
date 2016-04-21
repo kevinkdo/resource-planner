@@ -917,13 +917,13 @@ public class ReservationService {
     //The program then removes any reservations from the original list that have no resources the user can approve
     //Finally, it returns a final object that desginates, for each reservation, which resources the user can
     //approve, and which are already approved. 
-    public StandardResponse getApprovableReservations(int userId, boolean hasResourceP){
+    public StandardResponse getApprovableReservations(int userId, boolean hasResourceP, boolean hasReservationP){
         List<TempRes> incompleteReservations = getIncompleteReservations();
         List<TempRes> reservationsToRemove = new ArrayList<TempRes>();
        
         //If the user is admin or has system resource permission, he can approve anything
         //else, have to filter
-        if(userId != 1 && !hasResourceP){
+        if(userId != 1 && !hasResourceP && !hasReservationP){
             //This is a list of all resources the user can approve that are restricted
             List<Integer> resourceManagerResources = permissionService.getAllRestrictedResourceManagerResources(userId);
             List<ApprovableResources> approvableResourcesList = new ArrayList<ApprovableResources>();
@@ -982,13 +982,13 @@ public class ReservationService {
     }
 
     //Approves or denies the resources for a given reservation that the user is allowed to approve/deny. 
-    public StandardResponse approveReservation(ReservationApproval approval, int reservationId, int userId, boolean hasResourceP){
+    public StandardResponse approveReservation(ReservationApproval approval, int reservationId, int userId, boolean hasResourceP, boolean hasReservationP){
         if(approval.getApproved()){
             //for all resources in reservation that are not approved, if included in user permission, alter
             //then check if the reservation is 100% completed, if so update it. 
 
             //If admin or if has resource permission, automatically aprove entire reservation. 
-            if(userId == 1 || hasResourceP){
+            if(userId == 1 || hasResourceP || hasReservationP){
                 fullyApproveReservation(reservationId);
                 return new StandardResponse(false, "Reservation approved for resources you have permission on");
             }   

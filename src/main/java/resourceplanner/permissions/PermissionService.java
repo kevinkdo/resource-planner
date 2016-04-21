@@ -40,7 +40,7 @@ public class PermissionService {
     		groupResourcePermissions = getGroupResourcePermissions();
     	}
 
-    	filterResourcePermissions(userId, userResourcePermissions, groupResourcePermissions);
+    	filterResourcePermissions(userId, userResourcePermissions, groupResourcePermissions, resourcePermission);
 
         removeAdminRow(userSystemPermissions, userResourcePermissions);
 
@@ -203,8 +203,8 @@ public class PermissionService {
     }
 
     // Filters resource permissions to only include those that the user is allowed to see/reserve. 
-    private void filterResourcePermissions(int userId, List<UserResourcePermission> userResourcePermissions, List<GroupResourcePermission> groupResourcePermissions){
-        if(userId == 1){
+    private void filterResourcePermissions(int userId, List<UserResourcePermission> userResourcePermissions, List<GroupResourcePermission> groupResourcePermissions, boolean resourcePermission){
+        if(userId == 1 || resourcePermission){
             return;
         }
 
