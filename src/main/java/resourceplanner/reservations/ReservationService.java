@@ -397,7 +397,7 @@ public class ReservationService {
         return new StandardResponse(false, "Successfully retrieved reservations", reservationResponse);
     }
 
-    public StandardResponse updateReservation(ReservationRequest req, int reservationId, boolean isAdmin, int userId) {
+    public StandardResponse updateReservation(ReservationRequest req, int reservationId, boolean reservationP, int userId) {
         if (!req.isValid()) {
             return new StandardResponse(true, "Request is not valid");
         }
@@ -439,7 +439,7 @@ public class ReservationService {
                     }
                 }).get(0);
 
-        if (t.user_id != userId && !isAdmin) {
+        if (t.user_id != userId && !reservationP) {
             return new StandardResponse(true, "You don't have permissions to edit this reservation");
         }
 
@@ -461,7 +461,7 @@ public class ReservationService {
             }
         }
 
-        if (userId != 1) {
+        if (userId != 1 && !reservationP) {
             List<Integer> userReservable = permissionService.getUserReservableResources(userId);
             List<Integer> groupReservable = permissionService.getGroupReservableResources(userId);
 
