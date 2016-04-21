@@ -226,7 +226,7 @@ public class ReservationService {
 
         List<Resource> rList = getResources(reservationId);
 
-        if (userId != 1) {
+        if (userId != 1 && !resourceService.hasSpecificPermission(userId, "resource_p")) {
             List<Integer> userViewable = permissionService.getUserViewableResources(userId);
             List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
 
@@ -268,7 +268,7 @@ public class ReservationService {
 
         List<Resource> rList = getResources(reservationId);
 
-        if (userId != 1) {
+        if (userId != 1 && !resourceService.hasSpecificPermission(userId, "resource_p")) {
             List<Integer> userViewable = permissionService.getUserViewableResources(userId);
             List<Integer> groupViewable = permissionService.getGroupViewableResources(userId);
 

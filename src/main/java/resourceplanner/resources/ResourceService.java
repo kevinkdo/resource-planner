@@ -608,7 +608,7 @@ public class ResourceService {
         return new StandardResponse(false, "Successful retrieved canDelete status", new CanDelete(canDelete));
     }
 
-    private boolean hasSpecificPermission(int userId, final String permissionType){
+    public boolean hasSpecificPermission(int userId, final String permissionType){
         List<Boolean> individualPermission = jt.query(
                 "SELECT " + permissionType + " FROM users WHERE user_id = " + userId + 
                 " AND " + permissionType + " = true;",
