@@ -41,10 +41,12 @@
 \label{fig:design}
 \end{figure}
 
-Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack, as well as our overall code structure, have not changed since evolution 3. 
+Our resource management tool is a web application that uses the following technology stack: a React.js frontend, a Java Spring server, and a PostgreSQL database. In addition, we use Python scripts to automate the testing of our API. Our overall technology stack has not changed since evolution 3. 
 
-TODO: UPDATE FOR EV 4
-The changes required for evolution 3 fit nicely into our existing frameworks. In the backend, resource manager permissions were handled with a few new API calls built on top of our evolution 2 permission API calls. Additionally, the email service was expanded to accomodate the new set of email requirements. Finally, the necesarry changes were made across existing reservation endpoints to support multiple resources within each reservation, and corresponding DB updates were made as well. The primary changes on the front-end are to add text boxes for the new reservation fields, a checkbox for restricted resources, and a new tab for approvable reservations.
+
+TODO: Front-end write something
+
+As an overview of backend changes, there were two primary requirements. First, we rewrote a few methods used to identify whether resources were free at a given time in order to compensate for the addition of resources being allowed to have multiple reservations at once. These changes affected both our traditional reservation API endpoints as well as our pending reservation API endpoints. Second, we modified and added to much of the reservation and resource service classes, in order to accomodate for resource hierarchies. For the front end.... TODO!!!!!!
 
 For retrospectives on our former backend choices and more detail about our backend additions, see the \hyperref[sec:Backend]{backend section}. For retrospectives on our former frontend choices and more detail about our frontend additions, see the \hyperref[sec:Frontend]{frontend section}. Finally, see \hyperref[appendix:backendtest]{Appendix \ref{appendix:backendtest}} for our updated backend test strategy,  \hyperref[appendix:frontendtest]{Appendix \ref{appendix:frontendtest}} for our updated frontend test strategy, \hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}} for our updated API specification, and \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}} for our updated database design. 
 
@@ -60,7 +62,7 @@ Java and Java Spring have continued to suit us well in evolution 4. Java's clear
 
 Given that over all four evolutions, we have yet to encounter any major issues that another language or backend framework would have solved much more easily, we are overall quite happy with our choice of backend architecture. 
 
-TODO: Anything else?
+TODO: Anything else Jiawei?
 
 
 
@@ -76,7 +78,7 @@ The following changes were made to our DB schema for evolution 4:
 
 \begin{enumerate}
     \item A 'shared_count' (int) field and a 'parent_id' (int) field were added to the 'resources' table. 
-    \item TODO: Anything else?? 
+    \item TODO: Anything else Jiawei?? 
 \end{enumerate}
 
 You can see a full diagram of this updated schema in  \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}}. 
@@ -87,7 +89,7 @@ Previous security design decisions did not affect our work for evolution 4 very 
 
 Otherwise, in evolution 3 we made an additional effort to always validate data requests before any DB accesses are performed. This has not really altered our work for evolution 4, but it has helped us ensure that no unintended bugs can occur due to unexpected data being input on the frontend. 
 
-TODO: Anything else? 
+TODO: Anything else Jiawei? 
 
 
 \subsection{Testing}
@@ -95,12 +97,9 @@ TODO: Anything else?
 TODO: What to write for evolution 4? 
 
 \subsubsection{Retrospective}
-Our python testing suite has continued to suit us well for testing our REST API. That being said, as this project has become more and more complex, the number of tests required has grown somewhat exponentially. This has made it hard to keep up our testing suit with our actual code changes. However, this problem is more related to the project's complexity itself, rather than our testing design. The simple fact of the matter is that, no matter how we implemented testing, it would become harder and harder to maintain a full suite of tests on the REST API. 
 
-Another small issue with our current testing plan relates to the fact that many of the requirements on each new evolution force us to make changes to the way previous API endpoints were built, such as changing what data structures are returned, etc. The problem with this is that our current testing assertions are completely literal, and test for a precisely identical JSON response. This means that if a given test ran correctly, but then we add a single extra field to the JSON response of the API endpoint being tested, the test will now be broken. Perhaps some other testing frameworks would allow our tests to be a little more flexible with what they received. This would prevent so many of our tests from immediately breaking after a few basic changes are made for a new evolution. 
 
 \subsubsection{Current Design}
-Despite the above challenges, on the whole, we are still happy with our current backend testing strategy. Python tests are easy to run, easy to modify, and easy to create. And, we still stand by our decision to focus our testing on the REST API, rather than on unit tests, since the REST API is the ultimate thing that the front-end cares about. Moving forward, we will need to make sure that we add enough tests to accomodate all of the evolution 4 features, even if that means adding an immense number of tests. 
 
 
 \subsection{Code Structure}
@@ -110,14 +109,12 @@ TODO: Anything else Jiawei?
 
 
 \subsection{Reservations}
-TODO: Jiawei do we want to keep this for evolution 4? 
+TODO: Jiawei do we want to keep this for evolution 4?  Not sure if there is anything to say? 
 \subsubsection{Retrospective}
-Our existing reservations code went through a few changes to accommodate reservation titles, descriptions, and multiple resources. All the reservations code was also refactored to better accommodate future changes to reservations. 
+
 
 \subsubsection{Current Design}
-Adding titles and descriptions to reservations was trivial, as there was a one-to-one mapping from reservation\_id to title and description. Adding multiple resources to reservations was more difficult and involved checking permissions for each resource before associating the resource to a reservation. Finally, once the resource permissions are handled, if the resources are restricted, they are sent off to be approved by those with approval permission. There are edge cases such as reservations with no resources or reservations with all unrestricted resources (which would require no approval) which involve automatically setting the status of a reservation to complete. 
 
-Overall, the additions to reservations were very simply implemented. Reservations code was then completely refactored to stop using a deprecated JDBC class and start using the new JdbcTemplate class, which provides additional security features and is much simpler to use. 
 
 \subsection{Email}
 \subsection{Retrospective}
@@ -175,10 +172,13 @@ Given the ambiguity of some evolution requirements, here are some of the assumpt
 Communication between the frontend and the backend is done through a REST API with JSON (\hyperref[appendix:apispec]{Appendix \ref{appendix:apispec}}).
 
 \subsection{Retrospective}
-The JSON-based REST API served us well for Evolution 3. We identified several strengths that helped us implement the new set of requirements: the well-understood nature of JSON and the fairly rich state transfer afforded to us. Furthermore, the weaknesses we identified (that the client must initiate all data transfer and JSON's rigid tree-of-values structure) did not affect us much when we implemented Evolution 3.
+The JSON-based REST API has continued to serve us well in evolution 4. In particular, a very cleanly defined, easy to understand interface between the back-end and the front-end has allowed our front-end and back-end teams to work almost entirely separately without any issues or conflicts. In addition, while it would be nice to have 'push' data in some situations, this has overall not been a significant impediment, and there has not been any particular requirement that demands the use of pushing rather than polling. 
+
+The one other detriment to JSON we previously outlined was JSON's strict tree-of-values structure (in other words, JSON has trouble representing non-tree graphs). However, because there have not yet been any requirements that mandate a non-tree representation of data, this has not been an issue. Notably, the fact that resources are in tree hierarchies in this evolution made them easy to work with, from the standpoint of transmitting those hierarchies over JSON. Had some other relationship system among resources been required, this could have been much more difficult to implement. 
 
 \subsection{Current Design}
-We expanded the set of endpoints that were required to implement the requirements in Evolution 3. Adding the title and description fields to reservations was a trivial change to the API. From an API perspective, compound reservations involved changing the type of the field from an integer to a list of integers. (This is not to say that the backend changes to implement this feature were as simple). Restricted resources are handled with one extra Boolean field on resources. Resource managers were added as a higher level to the permissions endpoints.
+Evolution 4 required a minimal change in our REST API. First, endpoints involving resources were changed to account for resource's new attributes: shared_count and parent_id. Second, we had to add a new endpoint to retrieve the forest of nodes used to create the front-end's visual display of the resource hierarchy. Adding the endpoint itself was not very challenging (it just involves returning a tree of nodes), but the manipulations on the back-end to compute the hierarchy and on the front-end to display the hierarchy were more complex. 
+
 
 \section{Frontend}
 \label{sec:Frontend}
