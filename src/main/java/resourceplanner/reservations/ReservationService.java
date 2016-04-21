@@ -489,7 +489,7 @@ public class ReservationService {
 
         boolean notComplete = false;
         for (Resource r : rList) {
-            if (r.isRestricted() && !map.get(r.getResource_id())) {
+            if (r.isRestricted() && !map.get(r.getResource_id()) && req.getResource_ids().contains(r.getResource_id())) {
                 // if restricted and not approved
                 notComplete = true;
             }
@@ -507,11 +507,12 @@ public class ReservationService {
         for (Integer resourceId : req.getResource_ids()) {
             Object[] values = new Object[]{
                     resourceId,
-                    reservationId};
+                    reservationId,
+                    map.get(resourceId)};
             batch.add(values);
         }
         int[] updateCounts = jt.batchUpdate(
-                "INSERT INTO reservationresources (resource_id, reservation_id) VALUES (?, ?);",
+                "INSERT INTO reservationresources (resource_id, reservation_id, resource_approved) VALUES (?, ?, ?);",
                 batch);
 
         Reservation res = new Reservation(req.getTitle(), req.getDescription(), reservationId, u, rList, req.getBegin_time(), req.getEnd_time(), req.getShould_email(), t.complete);
