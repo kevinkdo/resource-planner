@@ -257,7 +257,7 @@ public class ResourceService {
         return allReservableResources;
     }
 
-    public StandardResponse getResource(String[] requiredTags, String[] excludedTags, int userId) {
+    public StandardResponse getResource(String[] requiredTags, String[] excludedTags, int userId, boolean resourceP) {
         if (requiredTags == null) {
             requiredTags = new String[0];
         }
@@ -336,7 +336,7 @@ public class ResourceService {
             response.add(processList.get(i));
         }
 
-        if(userId != 1){
+        if(userId != 1 && !resourceP){
             Set<Integer> allViewableResources = getViewableResources(userId);
             Set<Integer> allReservableResources = getReservableResources(userId);
             List<Resource> finalResponse = new ArrayList<Resource>();

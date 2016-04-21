@@ -46,7 +46,7 @@ public class ResourceController extends Controller {
             @RequestParam(value = "excluded_tags", required = false) String[] excludedTags,
             final HttpServletRequest request) {
         int userId = getRequesterID(request);
-        return resourceService.getResource(requiredTags, excludedTags, userId);
+        return resourceService.getResource(requiredTags, excludedTags, userId, hasResourceP(request));
     }
 
     @RequestMapping(value = "",
@@ -54,7 +54,7 @@ public class ResourceController extends Controller {
     @ResponseBody
     public StandardResponse getAllResources(final HttpServletRequest request) {
         int userId = getRequesterID(request);
-        return resourceService.getResource(new String[0], new String[0], userId);
+        return resourceService.getResource(new String[0], new String[0], userId, hasResourceP(request));
     }
 
     @RequestMapping(value = "/forest",
