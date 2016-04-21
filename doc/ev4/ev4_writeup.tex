@@ -146,8 +146,13 @@ No new permission requirements were introduced in evolution 4, and thus no major
 
 
 \subsection{Resource Sharing}
-TODO: Davis
+Implementing resource sharing was a fairly difficult process in this evolution. However, that being said, we feel that this difficulty was primarily related to the algorithmic complexity of calculating the number of resources being shared at a given time, and not due to our previous design choices. 
 
+To further explain, from a design perspective, implementing resource sharing was not difficult. We first added a single extra field to our 'resource' DB table that listed that maximum number of shared ocurrences each resource could have (with 0 representing unlimited sharing). We then just had to modify the method we used to figure out if a resource is free in a time span to incorporate shared counts (i.e. instead of checking whether that resource is reserved in a time span, we check if the resource's shared count is being reached in that time span). All other pieces of our reservation code (including incomplete reservation methods) use this method to determine when a reservation can be created or when incomplete reservations need to be deleted, and therefore in this sense, our previous design choices made implementing resource sharing easy. 
+
+However, the issue is that calculating whether a resource is free or a set of resources are below their shared count limit in a given time span is quite complex algorithmically. For instance, to create a new reservation, for each resource in that reservation, we must find the point in that reservation's time span where that resource is maximally reserved, and check whether that amount of reservations is equal to the maximum shared count. Getting this correct was difficult. 
+
+As such, on the whole, we feel that our previous design choices (particularly our re-use of a single method to handle the checking of whether a resource could be reserved) made implementing resource sharing as easy as it could be, but nevertheless the feature still took some time. 
 
 \subsection{Resource Hierarchy}
 TODO: Jiawei
@@ -161,6 +166,7 @@ Given the ambiguity of some evolution requirements, here are some of the assumpt
     \item If a node in a resource hierarchy is deleted, then all immediate children of that node have their 'parent node' attribute set to the parent of the deleted node. In other words, if A is a parent of B is a parent of C, and B is deleted, A becomes the direct parent of C. 
     \item In the view of the resource hierarchy, any nodes which you do not have permission to see are hidden as 'mystery nodes'. We chose to do things this way, rather than totally hide the node, as you may, for instance, not have view access on node A, but have view access on its child B. If we simply hid A, then it would be unclear to the user where node B is in the resource hierarchy. So, instead, we simply inform the user there is a 'mystery node' that is a parent to B, but give no further information about that mystery node. 
     \item To reserve a resource, you must have reserve or higher permission on EVERY resource in that resource's child tree. This is an extension of the requirements stating that reserving a parent resource should reserve all children. We feel it does not make sense for a child node to be reserved unless you also have appropriate permission for that node. 
+    \item We assume that someone who is a resource manager of a resource also has view and reserve permission on that resource, per our previous email correspondance with Peter. 
 \end{enumerate}
 
 
