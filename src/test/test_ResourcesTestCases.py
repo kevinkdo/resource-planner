@@ -67,7 +67,7 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.post(params.baseUrl + params.resourceUrl, data = json.dumps(resource), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
-      assert decoded['data'] == {u'name': u'test', u'tags': [], u'restricted': False, u'shared_count': 1, u'parent_id': 0, u'valid': True, u'description': u''}
+      assert decoded['data'] == {u'name': u'test', u'tags': [], u'restricted': False, u'shared_count': 1, u'parent_id': 0, u'valid': True, u'validPut': True, u'description': u''}
       assert decoded['error_msg'] == 'You are not authorized.'
 
   def test_CreateInvalidResourceNoNameWithResourceManagementPermissions(self):
@@ -82,14 +82,14 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.resourceUrl + "/1", headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 1, u'can_view': True, u'can_reserve': False, u'parent_id': 0, u'children': [], u'name': u'view'}
+      assert decoded['data'] == {u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 1, u'can_view': True, u'can_reserve': True, u'parent_id': 0, u'children': [], u'name': u'view'}
       assert decoded['error_msg'] == 'Successfully fetched resource'
 
   def test_GetResourceWithValidIDWithResourceManagementPermissionsWithoutViewAccess(self):
       r = requests.get(params.baseUrl + params.resourceUrl + "/2", headers = allHeaders, verify = False)
       decoded = r.json()   
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'', u'tags': [], u'resource_id': 2, u'restricted': False, u'shared_count': 1, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': [], u'name': u'no'}
+      assert decoded['data'] == {u'description': u'', u'tags': [], u'resource_id': 2, u'restricted': False, u'shared_count': 1, u'can_view': True, u'can_reserve': True, u'parent_id': 0, u'children': [], u'name': u'no'}
       assert decoded['error_msg'] == 'Successfully fetched resource'
 
   def test_GetResourceWithValidIDWithoutResourceManagementPermissionsWithViewAccess(self):
@@ -103,7 +103,7 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.get(params.baseUrl + params.resourceUrl + "/2", headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'description': u'', u'tags': [], u'resource_id': 2, u'restricted': False, u'shared_count': 1, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': [], u'name': u'no'}
+      assert decoded['data'] == {u'description': u'Mystery', u'tags': [], u'resource_id': 0, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': [], u'name': u'Mystery'}
       assert decoded['error_msg'] == 'Successfully fetched resource'
 
   def test_GetResourceWithInvalidIDWithResourceManagementPermissionsWithViewAccess(self):
@@ -162,7 +162,7 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.put(params.baseUrl + params.resourceUrl + '/1', data = json.dumps(update), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
-      assert decoded['data'] == {u'name': u'newname', u'tags': [u'tag3', u'tag4'], u'restricted': False, u'shared_count': 1, u'parent_id': 0, u'valid': True, u'description': u'new description'}
+      assert decoded['data'] == {u'name': u'newname', u'tags': [u'tag3', u'tag4'], u'restricted': False, u'shared_count': 1, u'parent_id': 0, u'valid': True, u'validPut': True, u'description': u'new description'}
       assert decoded['error_msg'] == 'You are not authorized'
 
   def test_PutResourceWithValidIDAllFieldsUpdatedWithoutResourceManagementPermissionsWithoutViewAccess(self):
@@ -170,7 +170,7 @@ class ResourceTestCases(unittest.TestCase):
       r = requests.put(params.baseUrl + params.resourceUrl + '/2', data = json.dumps(update), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == True
-      assert decoded['data'] == {u'name': u'newname', u'tags': [u'tag3', u'tag4'], u'restricted': False, u'shared_count': 1, u'parent_id': 0, u'valid': True, u'description': u'new description'}
+      assert decoded['data'] == {u'name': u'newname', u'tags': [u'tag3', u'tag4'], u'restricted': False, u'shared_count': 1, u'parent_id': 0, u'valid': True, u'validPut': True, u'description': u'new description'}
       assert decoded['error_msg'] == 'You are not authorized'
 
   def test_PutResourceWithInvalidIDWithResourceManagementPermissionsWithViewAccess(self):
@@ -252,6 +252,13 @@ class ResourceTestCases(unittest.TestCase):
       assert decoded['error_msg'] == 'Resource does not exist'
       #change the error message if you try to get candelete status of resource that doesn't exist
 
+  def test_GetResourceForest(self):
+      r = requests.get(params.baseUrl + params.resourceUrl + "/forest", headers = allHeaders, verify = False)
+      decoded = r.json()
+      assert decoded['is_error'] == False
+      assert decoded['data'] == {u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 1, u'can_view': True, u'can_reserve': True, u'parent_id': 0, u'children': [], u'name': u'view'}, {u'description': u'', u'tags': [], u'resource_id': 2, u'restricted': False, u'shared_count': 1, u'can_view': True, u'can_reserve': True, u'parent_id': 0, u'children': [], u'name': u'no'}]}
+      assert decoded['error_msg'] == 'Successfully retrieved resource forest'
+ 
 
 if __name__ == '__main__':
     unittest.main()

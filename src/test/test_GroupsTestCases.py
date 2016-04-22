@@ -156,7 +156,7 @@ class GroupsTestCases(unittest.TestCase):
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = noHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 1, u'can_view': True, u'can_reserve': True, u'parent_id': 0, u'children': [], u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
       assert decoded['error_msg'] == 'Reservation inserted successfully'
 
   def test_UserHasHigherReservationManagementPermissionsThanGroup(self):
@@ -164,7 +164,7 @@ class GroupsTestCases(unittest.TestCase):
       r = requests.post(params.baseUrl + params.reserveUrl, data = json.dumps(reservation), headers = allHeaders, verify = False)
       decoded = r.json()
       assert decoded['is_error'] == False
-      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 0, u'can_view': False, u'can_reserve': False, u'parent_id': 0, u'children': None, u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
+      assert decoded['data'] == {u'should_email': True, u'description': u'none', u'title': u'none', u'user': {u'username': u'all', u'should_email': False, u'user_id': 2, u'reservation_p': True, u'resource_p': True, u'user_p': True, u'email': u'all@a.com'}, u'complete': True, u'begin_time': u'2011-08-06T10:54:00.000Z', u'reservation_id': 1, u'resources': [{u'description': u'', u'tags': [], u'resource_id': 1, u'restricted': False, u'shared_count': 1, u'can_view': True, u'can_reserve': True, u'parent_id': 0, u'children': [], u'name': u'reserveaccess'}], u'end_time': u'2011-08-06T11:00:00.000Z'}
       assert decoded['error_msg'] == 'Reservation inserted successfully'
 
   def test_UserHasLowerResourceManagementPermissionsThanGroup(self):
