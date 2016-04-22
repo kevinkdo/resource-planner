@@ -62,7 +62,7 @@ Java and Java Spring have continued to suit us well in evolution 4. Java's clear
 
 Given that over all four evolutions, we have yet to encounter any major issues that another language or backend framework would have solved much more easily, we are overall quite happy with our choice of backend architecture. 
 
-TODO: Anything else Jiawei?
+Had we known what the evolution requirements were before we started the project, we would have most likely selected a more lightweight Java framework such as Java Spark. While Spring was completely adequate for our tasks, there were times when Spring's complexity introduced slight inefficiencies during coding. 
 
 
 
@@ -77,8 +77,8 @@ Because evolution 4 did not require significant modifications to how the DB is a
 The following changes were made to our DB schema for evolution 4:
 
 \begin{enumerate}
-    \item A 'shared_count' (int) field and a 'parent_id' (int) field were added to the 'resources' table. 
-    \item TODO: Anything else Jiawei?? 
+    \item A 'shared\_count' (int) field and a 'parent\_id' (int) field were added to the 'resources' table. 
+    \item Fields that are required to have non-null values have default values to handle scenarios where no value is inserted. 
 \end{enumerate}
 
 You can see a full diagram of this updated schema in  \hyperref[appendix:DBDesign]{Appendix \ref{appendix:DBDesign}}. 
@@ -89,42 +89,30 @@ Previous security design decisions did not affect our work for evolution 4 very 
 
 Otherwise, in evolution 3 we made an additional effort to always validate data requests before any DB accesses are performed. This has not really altered our work for evolution 4, but it has helped us ensure that no unintended bugs can occur due to unexpected data being input on the frontend. 
 
-TODO: Anything else Jiawei? 
 
 
 \subsection{Testing}
 
-TODO: What to write for evolution 4? 
 
-\subsubsection{Retrospective}
+Our backend testing approach has not changed in evolution 1. The backend coder would first manually test the web API, followed by a front-end coder testing the API following the agreed-on specifications. 
 
-
-\subsubsection{Current Design}
 
 
 \subsection{Code Structure}
 Nothing substantial has changed in regards to our overall code architecture or structure. Backend changes for evolution 4 almost entirely involved modifying existing resource service methods and modifying existing reservation service methods, and as such virtually no higher level code layout changes were required. We are still appreciative of our MVC layout and how our packages are divided based on modules (like reservation module, resource module, etc) as it made it quite easy to know where to make changes for resource and reservation changes in evolution 4. 
 
-TODO: Anything else Jiawei?
+For evolution 4, we increased cross-service calls, such as calling resource-service methods from reservation-service, which significantly reduced code duplication, as well as making our code easier to understand. The ability to perform these cross-service calls was first introduced when we switched to a modular MVC layout. 
 
-
-\subsection{Reservations}
-TODO: Jiawei do we want to keep this for evolution 4?  Not sure if there is anything to say? 
-\subsubsection{Retrospective}
-
-
-\subsubsection{Current Design}
 
 
 \subsection{Email}
-\subsection{Retrospective}
+\subsubsection{Retrospective}
 No specific email requirements changed for evolution 4, and as a result we did not have to make any modifications or updates to email-related classes or code. Notably, we feel that our email design frome evolution 3 was done well, as it created a very clean email API for specific events (reservation canceled, reservation starting, etc). The result of this was that, although evolution 4 required a number of changes to reservation code and pending reservation code, these changes could be totally separate from having to modify the email code, even though these features are closely related. 
 
 In this sense, the changes we made in evolution 3 in regards to email were very beneficial. We decoupled email from other modules of code as much as possible, and the result was extreme ease in modifying code related to email, without having to worry that it would mess up our emailing system. 
 
-TODO: Anything else Jiawei?
 
-\subsection{Current Design}
+\subsubsection{Current Design}
 Since no explicit email changes were needed for evolution 4, there were no new email design decisions made. 
 
 
@@ -136,7 +124,6 @@ For evolution 4, this is particularly relavent in regards to resource hierarchy.
 
 With a badly defined API, or with scattered permission code, handling these sorts of issues would have been very difficult. However, because of our nicely compartmentalized permission code, regardless of what new feature we are working on, we can handle permissions for users, groups, viewing resources, reserving resources, and being a resource manager with just 1-2 API calls on our permission class. 
 
-TODO: Anything else Jiawei?
 
 \subsubsection{Current Design}
 No new permission requirements were introduced in evolution 4, and thus no major new design decisions were made. 
@@ -152,19 +139,27 @@ However, the issue is that calculating whether a resource is free or a set of re
 As such, on the whole, we feel that our previous design choices (particularly our re-use of a single method to handle the checking of whether a resource could be reserved) made implementing resource sharing as easy as it could be, but nevertheless the feature still took some time. 
 
 \subsection{Resource Hierarchy}
-TODO: Jiawei
+
+Implementing the resource hierarchy only required a single modification to the database schema: the addition of the parent\_id field. For resource requests that request either a single request or a 'forest' (trees of all resources without parents), a depth-first-search is performed and children are systematically appended to the parents such that children can reference their single parent by the parent\_id and parents can reference their children using a 'children' array of resource IDs. 
+
+As a user potentially does not have access to all child resources of a parent, mystery resources containing no identifying information except parent\_id and children\_ids are used to fully traverse a tree. This way, a user wanting to reserve a child of a resource can still navigate to it even though the user lacks permissions to view the parent. 
+
+One difficulty encountered during implementation was the presence of cycles where a resource was both an ancestor and a descendant of another resource. To solve this problem, every time a resource is created or modified, the resource's set of ancestors and set of descendants are guaranteed to be mutually exclusive. A resource must also not be found in its set of ancestors or descendants. 
+
+Implementation of the resource hierarchy also affected reservations slightly, as a user would have to have reservation permission for all of a resource's descendants in order to reserve it. This was again accomplished by performing a depth first search and disallowing a reservation if the user lacks reservation permissions for one or more resources.
 
 
 \subsubsection{Assumptions}
-TODO: Anything else Jiawei? 
+
 
 Given the ambiguity of some evolution requirements, here are some of the assumptions we made this evolution:
 \begin{enumerate}
-    \item If a node in a resource hierarchy is deleted, then all immediate children of that node have their 'parent node' attribute set to the parent of the deleted node. In other words, if A is a parent of B is a parent of C, and B is deleted, A becomes the direct parent of C. 
+    \item If a node in a resource hierarchy is deleted, then all immediate children of that node have their 'parent node' attribute set to the parent of the deleted node. In other words, assume that A is the parent of B and B is the parent of C. If B is deleted, A becomes the direct parent of C.
     \item In the view of the resource hierarchy, any nodes which you do not have permission to see are hidden as 'mystery nodes'. We chose to do things this way, rather than totally hide the node, as you may, for instance, not have view access on node A, but have view access on its child B. If we simply hid A, then it would be unclear to the user where node B is in the resource hierarchy. So, instead, we simply inform the user there is a 'mystery node' that is a parent to B, but give no further information about that mystery node. 
     \item To reserve a resource, you must have reserve or higher permission on EVERY resource in that resource's child tree. This is an extension of the requirements stating that reserving a parent resource should reserve all children. We feel it does not make sense for a child node to be reserved unless you also have appropriate permission for that node. 
     \item We assume that someone who is a resource manager of a resource also has view and reserve permission on that resource, per our previous email correspondance with Peter. 
     \item Say you reserve a resource A, which is a parent of B. This automatically resources B as well, per the requirements. However, if you then edit this reservation and remove resource B, but keep A, then the reservation will just have resource A. In other words, we choose not to force you to have a child resource in a reservation if you specifically go in and edit that resource out. We feel this is a fair interpretation of the requirements as we, by default, always reserve child resources, and we leave it to the user to remove child resources if they so wish. 
+    \item Resources cannot form cycles. If A is the parent of B, A's parent cannot be B. This allows for resources to be displayed in an intuitive tree form. 
 \end{enumerate}
 
 
@@ -178,7 +173,7 @@ The JSON-based REST API has continued to serve us well in evolution 4. In partic
 The one other detriment to JSON we previously outlined was JSON's strict tree-of-values structure (in other words, JSON has trouble representing non-tree graphs). However, because there have not yet been any requirements that mandate a non-tree representation of data, this has not been an issue. Notably, the fact that resources are in tree hierarchies in this evolution made them easy to work with, from the standpoint of transmitting those hierarchies over JSON. Had some other relationship system among resources been required, this could have been much more difficult to implement. 
 
 \subsection{Current Design}
-Evolution 4 required a minimal change in our REST API. First, endpoints involving resources were changed to account for resource's new attributes: shared_count and parent_id. Second, we had to add a new endpoint to retrieve the forest of nodes used to create the front-end's visual display of the resource hierarchy. Adding the endpoint itself was not very challenging (it just involves returning a tree of nodes), but the manipulations on the back-end to compute the hierarchy and on the front-end to display the hierarchy were more complex. 
+Evolution 4 required a minimal change in our REST API. First, endpoints involving resources were changed to account for resource's new attributes: shared\_count and parent\_id. Second, we had to add a new endpoint to retrieve the forest of nodes used to create the front-end's visual display of the resource hierarchy. Adding the endpoint itself was not very challenging (it just involves returning a tree of nodes), but the manipulations on the back-end to compute the hierarchy and on the front-end to display the hierarchy were more complex. 
 
 
 \section{Frontend}
@@ -218,13 +213,25 @@ As a result of our success with the manual UI testing from evolution 1, the only
 
 \section{Member contributions}
 
-Kevin Do maintained the frontend and advocated for the frontend's needs in discussions with the backend team.
+\subsubsection{Evolution 4}
 
-Davis Treybig implemented much of the permission-related code, including new permission endpoints and permission-based checks for other API endpoints. 
+Kevin Do 
 
-Jiawei Zhang refactored the reservation service and updated it to new spec. Also simplified email service.
+Davis Treybig 
 
-Michael Han maintained the automated backend tests, helped with manual frontend testing, and helped with minor frontend features.
+Jiawei Zhang implemented the resource hierarchy. 
+
+Michael Han 
+
+\subsubsection{Full Project}
+
+Kevin Do
+
+Davis Treybig
+
+Jiawei Zhang set up back-end infrastructure (Java Spring, Postgres) and implemented users, initial resources, groups, resource hierarchy, OAuth2 authentication. Also refactored reservations. 
+
+Michael Han
 
 \clearpage
 \appendix
@@ -449,6 +456,7 @@ Michael Han maintained the automated backend tests, helped with manual frontend 
 \clearpage
 \section{API Specification}
 \label{appendix:apispec}
+
 \includegraphics[width=6in]{apispec_01.pdf}
 
 \includegraphics[width=6in]{apispec_02.pdf}
