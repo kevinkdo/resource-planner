@@ -101,7 +101,6 @@ Another small issue with our current testing plan relates to the fact that many 
 
 \subsubsection{Current Design}
 Despite the above challenges, on the whole, we are still happy with our current backend testing strategy. Python tests are easy to run, easy to modify, and easy to create. And, we still stand by our decision to focus our testing on the REST API, rather than on unit tests, since the REST API is the ultimate thing that the frontend cares about.
->>>>>>> 43e376e6e15c9539c38128ce717b35094c680626
 
 \subsection{Code Structure}
 Nothing substantial has changed in regards to our overall code architecture or structure. Backend changes for Evolution 4 almost entirely involved modifying existing resource service methods and modifying existing reservation service methods, and as such virtually no higher level code layout changes were required. We are still appreciative of our MVC layout and how our packages are divided based on modules (e.g. a reservation module, a resource module, etc.) as it made it quite easy to know where to make changes for resource and reservation changes in evolution 4. 
@@ -113,7 +112,7 @@ For evolution 4, we increased cross-service calls, such as calling resource-serv
 \subsection{Email}
 \subsubsection{Retrospective}
 
-No specific email requirements changed for Evolution 4, and as a result we did not have to make any modifications or updates to email-related classes or code. Notably, we feel that our email design frome Evolution 3 was done well, as it created a very clean email API for specific events (reservation canceled, reservation starting, etc.). The result of this was that, although Evolution 4 required a number of changes to reservation code and pending reservation code, these changes could be totally separate from having to modify the email code, even though these features are closely related. 
+No specific email requirements changed for Evolution 4, and as a result we did not have to make any modifications or updates to email-related classes or code. Notably, we feel that our email design from Evolution 3 was done well, as it created a very clean email API for specific events (reservation canceled, reservation starting, etc.). The result of this was that, although Evolution 4 required a number of changes to reservation code and pending reservation code, these changes could be totally separate from having to modify the email code, even though these features are closely related. 
 
 
 In this sense, the changes we made in Evolution 3 in regards to email were very beneficial. We decoupled email from other modules of code as much as possible, and the result was extreme ease in modifying code related to email, without having to worry that it would mess up our emailing system. 
