@@ -163,7 +163,7 @@ const ResourceList = React.createClass({
                 <td>{x.restricted ? "Yes" : "No"}</td>
                 <td>{x.tags.join(",")}</td>
                 <td>{x.parent_id > 0 ? x.parent_id : "None"}</td>
-                <td>{x.shared_count}</td>
+                <td>{x.shared_count == 0 ? "Unlimited" : x.shared_count}</td>
                 <td><a role="button" onClick={() => this.editResource(id)}>View/Edit</a></td>
                 <td><a role="button" onClick={() => this.deleteResource(id)}>Delete</a></td>
               </tr>
