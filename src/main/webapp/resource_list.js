@@ -114,18 +114,18 @@ const ResourceList = React.createClass({
     var leftpane =
       <div>
         <h3></h3>
-        <div className="panel panel-primary">
+        <div className={"panel panel-primary" + (me.state.subroute=='hierarchy' ? " grayout" : "")}>
           <div className="panel-heading">
             <h3 className="panel-title">Display settings</h3>
           </div>
           <div className="panel-body">
-            <button type="button" className="btn btn-primary" onClick={() => this.refresh("list")}>Load resources</button>
+            <button type="button" className={"btn btn-primary" + (me.state.subroute=='hierarchy' ? " disabled" : "")} onClick={() => this.refresh("list")}>Load resources</button>
             <h4>Tags</h4>
             {this.state.loading_tags ? <Loader /> :
               <div>
                 <ul className="list-group">
                   {Object.keys(this.state.tags).map(tag =>
-                    <a key={"resourcetag" + tag} className="list-group-item pointer" onClick={(evt) => {evt.preventDefault(); me.cycleState(tag)}}>{tag}<span className="badge">{this.state.tags[tag]}</span></a>
+                    <a key={"resourcetag" + tag} className={"list-group-item pointer" + (me.state.subroute=='hierarchy' ? " disabled" : "")} onClick={(evt) => {evt.preventDefault(); me.cycleState(tag)}}>{tag}<span className="badge">{this.state.tags[tag]}</span></a>
                   )}
                 </ul>
                 {Object.keys(me.state.tags).length > 0 ? null :
