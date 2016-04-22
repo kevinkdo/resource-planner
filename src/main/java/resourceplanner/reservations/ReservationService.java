@@ -976,7 +976,7 @@ public class ReservationService {
         }
         System.out.println("Checking to be canceled");
         List<TempRes> overlapping = getOverlappingIncompleteReservations(currentRes, 1);
-        System.out.println(overlapping.size() + " reservations to be canceled:");
+        System.out.println(" reservations to be canceled:" + overlapping.size() );
         List<Reservation> overlappingReservations = convertTempListToReservationList(overlapping);
         return new StandardResponse(false, "To-be-canceled reservations returned", overlappingReservations);
     }
@@ -1074,7 +1074,17 @@ public class ReservationService {
         List<TempRes> returnObject = new ArrayList<TempRes>();
         returnObject.addAll(finalOutput);
 
-        return returnObject;
+        // TODO fix - hacky solution
+        Set<Integer> alreadyHave = new HashSet<Integer>();
+        List<TempRes> finalReturnObject = new ArrayList<TempRes>();
+        for (TempRes tmp : returnObject) {
+            if (!alreadyHave.contains(tmp.reservation_id)) {
+                finalReturnObject.add(tmp);
+            }
+            alreadyHave.add(tmp.reservation_id);
+        }
+
+        return finalReturnObject;
     }
 
     private void fullyApproveReservation(int reservationId){

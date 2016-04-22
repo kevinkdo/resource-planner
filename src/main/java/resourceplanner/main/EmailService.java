@@ -64,6 +64,11 @@ public class EmailService {
 
     public void sendDeniedEmail(int reservationId){
         Reservation res = reservationService.getReservationByIdAdmin(reservationId);
+        System.out.println("id : "+reservationId);
+        System.out.println(res);
+        if (res == null) {
+            return;
+        }
         if(res.getShould_email() && res.getUser().isShould_email()){
             EmailScheduler denyEmailScheduler = new EmailScheduler(res, EmailScheduler.DENY_ALERT);
             denyEmailScheduler.run();
@@ -72,6 +77,11 @@ public class EmailService {
 
     public void sendCanceledEmail(int reservationId){
         Reservation res = reservationService.getReservationByIdAdmin(reservationId);
+        System.out.println("id : "+reservationId);
+        System.out.println(res);
+        if (res == null) {
+            return;
+        }
         if(res.getShould_email() && res.getUser().isShould_email()){
             EmailScheduler cancelEmailScheduler = new EmailScheduler(res, EmailScheduler.CANCEL_ALERT);
             cancelEmailScheduler.run();
@@ -81,6 +91,11 @@ public class EmailService {
 
 	public void scheduleEmails(int reservationId){
         Reservation res = reservationService.getReservationByIdAdmin(reservationId);
+        System.out.println("id : "+reservationId);
+        System.out.println(res);
+        if (res == null) {
+            return;
+        }
         if(res.getComplete()){
             scheduleEmail(res);
         }
