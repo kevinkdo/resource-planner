@@ -90,17 +90,10 @@ Previous security design decisions did not affect our work for Evolution 4 very 
 
 Otherwise, in Evolution 3 we made an additional effort to always validate data requests before any DB accesses are performed. This has not really altered our work for Evolution 4, but it has helped us ensure that no unintended bugs can occur due to unexpected data being input on the frontend. 
 
-
-{\huge TODO: Anything else Jiawei?}
-
 \subsection{Testing}
-<<<<<<< HEAD
-
 
 Our backend testing approach has not changed in evolution 1. The backend coder would first manually test the web API, followed by a front-end coder testing the API following the agreed-on specifications. 
 
-
-=======
 \subsubsection{Retrospective}
 Our Python testing suite has continued to suit us well for testing our REST API. That being said, as this project has become more and more complex, the number of tests required has grown somewhat exponentially. This has made it hard to keep up our testing suite with our actual code changes. However, this problem is more related to the project's complexity itself, rather than our testing design. The simple fact of the matter is that, no matter how we implemented testing, it would become harder and harder to maintain a full suite of tests on the REST API. 
 
