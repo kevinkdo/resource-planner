@@ -77,7 +77,7 @@ Because evolution 4 did not require significant modifications to how the DB is a
 The following changes were made to our DB schema for evolution 4:
 
 \begin{enumerate}
-    \item A 'shared_count' (int) field and a 'parent_id' (int) field were added to the 'resources' table. 
+    \item A 'shared\_count' (int) field and a 'parent\_id' (int) field were added to the 'resources' table. 
     \item TODO: Anything else Jiawei?? 
 \end{enumerate}
 
@@ -178,7 +178,7 @@ The JSON-based REST API has continued to serve us well in evolution 4. In partic
 The one other detriment to JSON we previously outlined was JSON's strict tree-of-values structure (in other words, JSON has trouble representing non-tree graphs). However, because there have not yet been any requirements that mandate a non-tree representation of data, this has not been an issue. Notably, the fact that resources are in tree hierarchies in this evolution made them easy to work with, from the standpoint of transmitting those hierarchies over JSON. Had some other relationship system among resources been required, this could have been much more difficult to implement. 
 
 \subsection{Current Design}
-Evolution 4 required a minimal change in our REST API. First, endpoints involving resources were changed to account for resource's new attributes: shared_count and parent_id. Second, we had to add a new endpoint to retrieve the forest of nodes used to create the front-end's visual display of the resource hierarchy. Adding the endpoint itself was not very challenging (it just involves returning a tree of nodes), but the manipulations on the back-end to compute the hierarchy and on the front-end to display the hierarchy were more complex. 
+Evolution 4 required a minimal change in our REST API. First, endpoints involving resources were changed to account for resource's new attributes: shared\_count and parent\_id. Second, we had to add a new endpoint to retrieve the forest of nodes used to create the front-end's visual display of the resource hierarchy. Adding the endpoint itself was not very challenging (it just involves returning a tree of nodes), but the manipulations on the back-end to compute the hierarchy and on the front-end to display the hierarchy were more complex. 
 
 
 \section{Frontend}
@@ -449,17 +449,17 @@ Michael Han maintained the automated backend tests, helped with manual frontend 
 \clearpage
 \section{API Specification}
 \label{appendix:apispec}
-\includegraphics[width=6in]{apispec_01.pdf}
+\includegraphics[width=6in]{../ev3/apispec_01.pdf}
 
-\includegraphics[width=6in]{apispec_02.pdf}
+\includegraphics[width=6in]{../ev3/apispec_02.pdf}
 
-\includegraphics[width=6in]{apispec_03.pdf}
+\includegraphics[width=6in]{../ev3/apispec_03.pdf}
 
-\includegraphics[width=6in]{apispec_04.pdf}
+\includegraphics[width=6in]{../ev3/apispec_04.pdf}
 
-\includegraphics[width=6in]{apispec_05.pdf}
+\includegraphics[width=6in]{../ev3/apispec_05.pdf}
 
-\includegraphics[width=6in]{apispec_06.pdf}
+\includegraphics[width=6in]{../ev3/apispec_06.pdf}
 
 \clearpage
 \section{DB Design}
